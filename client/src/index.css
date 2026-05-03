@@ -10,3 +10,49 @@ body {
     @apply bg-white/5 backdrop-blur-md border border-white/10 shadow-lg rounded-xl;
   }
 }
+
+/* Input field */
+.input-field {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
+  outline: none;
+  transition: all 0.25s ease;
+}
+
+.input-field::placeholder {
+  color: #64748b;
+}
+
+/* Focus glow ONLY on border */
+.input-field:focus {
+  border-color: #22d3ee;
+  box-shadow: 0 0 8px rgba(34, 211, 238, 0.4);
+}
+
+
+/* Neon Button (clean, not over-glowy) */
+.neon-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  background: #22d3ee;
+  color: #020617;
+  font-weight: 600;
+  transition: all 0.25s ease;
+  border: 1px solid rgba(34, 211, 238, 0.5);
+}
+
+/* Hover animation */
+.neon-btn:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 10px rgba(34, 211, 238, 0.6);
+}
+
+/* Click effect */
+.neon-btn:active {
+  transform: scale(0.97);
+}

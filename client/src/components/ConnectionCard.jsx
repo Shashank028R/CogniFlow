@@ -1,12 +1,14 @@
 import { io } from "socket.io-client";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const socket = io(import.meta.env.VITE_BACKEND_URL);
 
 import React from "react";
 
 const ConnectionCard = () => {
+  const navigate = useNavigate();
   const [clientStatus, setClientStatus] = useState(false);
   const [serverStatus, setServerStatus] = useState("Disconnected");
 
@@ -20,19 +22,21 @@ const ConnectionCard = () => {
   }, []);
 
   const handleConnect = () => {
-    toast.success("Testing toast!");
     setServerStatus("Sending Message");
     setClientStatus(true);
 
     socket.emit("message", {
       message: "This is the message from client side.",
     });
+    setTimeout(() => {
+      navigate("/auth");
+    }, 2000);
   };
 
   return (
     <>
       <p className="text-blue-400 flex items-center justify-center">
-        <span className="text-green-400 font-bold drop-shadow-[0_0_8px_rgba(102,252,241,0.8)] mr-2">
+        <span className="font-bold drop-shadow-[0_0_8px_rgba(102,252,241,0.8)] mr-2">
           client:
         </span>
         {!clientStatus ? (
