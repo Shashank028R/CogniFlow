@@ -5,7 +5,11 @@ import { createServer } from "http";
 import cors from "cors";
 import { Server } from "socket.io";
 import { handleSocket } from "./socket/socketHandler.js";
+import chatRouter from "./routes/chatRouter.js";
+import authRouter from "./routes/authRouter.js";
+import messageRouter from "./routes/messageRouter.js";
 import userRouter from "./routes/userRouter.js";
+
 dotenv.config();
 
 const app = express();
@@ -24,7 +28,11 @@ handleSocket(io);
 app.use(cors());
 app.use(express.json());
 connectDb();
-app.use("/api/auth", userRouter);
+
+app.use("/api/auth", authRouter);
+app.use("/api/chat", chatRouter);
+app.use("/api/message", messageRouter);
+app.use("/api/user", userRouter);
 
 app.get("/", (req, res) => {
   res.send("Welcome to CogniFlow API!");

@@ -20,8 +20,6 @@ const userLogin = async (req, res) => {
       return res.status(403).json({message: "User Not Verified!, Try Registering Again."});
     }
 
-    await User.deleteOne({_id: user._id});
-
     const passwordCheck = await bcrypt.compare(password, user.password);
 
     if (!passwordCheck) {

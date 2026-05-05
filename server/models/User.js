@@ -1,46 +1,50 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-const userSchema = new mongoose.Schema({
-    username:{
-        type: String,
-        required: true,
-        unique: true,
-        trim: true
+const userSchema = new mongoose.Schema(
+  {
+    username: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
     },
-    email:{
-        type: String,
-        required: true,
-        unique: true,
-        trim: true,
-        lowercase: true,
-        match: [/^\S+@\S+\.\S+$/, "Please use a valid email"]
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      lowercase: true,
+      match: [/^\S+@\S+\.\S+$/, "Please use a valid email"],
     },
-    password:{
-        type: String,
-        required: true,
-        minLength: 6
+    password: {
+      type: String,
+      required: true,
+      minLength: 6,
     },
-    isVerified:{
-        type: Boolean,
-        default: false
-    },
-    
-    
-    profilePic:{
-        type: String,
-        default: "https://default-avatar.png",
-    },
-    bio:{
-        type: String,
-        maxLength: 150,
-        default: "CogniFlow",
+    isVerified: {
+      type: Boolean,
+      default: false,
     },
 
-    friends: [{
+    profilePic: {
+      type: String,
+      default: "",
+    },
+    bio: {
+      type: String,
+      maxLength: 150,
+      default: "CogniFlow",
+    },
+
+    friends: [
+      {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
-    }]
-},{timestamps: true});
+        ref: "User",
+      },
+    ],
+  },
+  { timestamps: true },
+);
 
 const User = mongoose.model("User", userSchema);
 export default User;
