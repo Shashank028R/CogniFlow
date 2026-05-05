@@ -49,8 +49,8 @@ const AuthPage = () => {
 
       if (isLogin) {
         localStorage.setItem("token", data.token);
-        localStorage.setItem("userid", data.id);
-
+        localStorage.setItem("userid", data.user.id);
+        
         toast.success("Login Successful!", { id: toastId });
         navigate("/dashboard", { replace: true });
       } else {

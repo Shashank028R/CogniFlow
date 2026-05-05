@@ -31,7 +31,7 @@ connectDb();
 
 app.use("/api/auth", authRouter);
 app.use("/api/chat", chatRouter);
-app.use("/api/message", messageRouter);
+app.use("/api/messages", messageRouter);
 app.use("/api/user", userRouter);
 
 app.get("/", (req, res) => {

@@ -1,6 +1,6 @@
 import RoomCard from "./RoomCard";
 
-const RoomList = ({ isLoading, rooms, currentUserId }) => {
+const RoomList = ({ isLoading, rooms, currentUserId, selectedChat, setSelectedChat, }) => {
   if (isLoading) {
     return <p className="text-center text-gray-500">Loading chats...</p>;
   }
@@ -14,6 +14,8 @@ const RoomList = ({ isLoading, rooms, currentUserId }) => {
       key={room._id}
       room={room}
       currentUserId={currentUserId}
+      selectedChat={selectedChat}
+      setSelectedChat={setSelectedChat}
     />
   ));
 };

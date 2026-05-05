@@ -1,7 +1,8 @@
 import axios from "axios";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import io from "socket.io-client";
 
 import SidebarHeader from "./SidebarHeader";
 import SearchBar from "./SearchBar";
@@ -10,9 +11,11 @@ import RoomList from "./RoomList";
 import LogoutButton from "../ui/LogoutButton";
 import RoomModal from "./RoomModal";
 
-const Sidebar = () => {
+const Sidebar = ({ selectedChat, setSelectedChat }) => {
   const navigate = useNavigate();
   const BackendUrl = import.meta.env.VITE_BACKEND_URL;
+
+  const socketRef = useRef(null);
 
   const [rooms, setRooms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -22,8 +25,47 @@ const Sidebar = () => {
   const [loadingSearch, setLoadingSearch] = useState(false);
   const [isRoomModalOpen, setIsRoomModalOpen] = useState(false);
 
+  const [notifications, setNotifications] = useState([]);
+
   const currentUserId = localStorage.getItem("userid");
   const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    socketRef.current = io(BackendUrl);
+
+    socketRef.current.on("connect", () => {
+      console.log("Socket connected");
+    });
+
+    socketRef.current.on("message received", (newMessage) => {
+      const roomId = newMessage.room._id || newMessage.room;
+
+      if (!selectedChat || selectedChat._id !== roomId) {
+        setNotifications((prev) => {
+          if (prev.some((n) => n._id === newMessage._id)) return prev;
+          return [newMessage, ...prev];
+        });
+      }
+
+      setRooms((prevRooms) => {
+        const roomIndex = prevRooms.findIndex((r) => r._id === roomId);
+        
+        if (roomIndex > -1) {
+          const updatedRooms = [...prevRooms];
+          const updatedRoom = { ...updatedRooms[roomIndex], lastMessage: newMessage };
+          
+          updatedRooms.splice(roomIndex, 1);
+          updatedRooms.unshift(updatedRoom);
+          
+          return updatedRooms;
+        }
+        
+        return prevRooms;
+      });
+    });
+
+    return () => socketRef.current.disconnect();
+  }, [BackendUrl, selectedChat]);
 
   useEffect(() => {
     const fetchRooms = async () => {
@@ -42,6 +84,18 @@ const Sidebar = () => {
     fetchRooms();
   }, [BackendUrl, token]);
 
+  const getUnreadCount = (roomId) => {
+    return notifications.filter((n) => (n.room._id || n.room) === roomId).length;
+  };
+
+  const handleSelectChat = (room) => {
+    setSelectedChat(room);
+
+    setNotifications((prev) =>
+      prev.filter((n) => (n.room._id || n.room) !== room._id)
+    );
+  };
+
   const handleSearch = async (e) => {
     const query = e.target.value;
     setSearch(query);
@@ -52,7 +106,7 @@ const Sidebar = () => {
       setLoadingSearch(true);
       const { data } = await axios.get(
         `${BackendUrl}/api/user?search=${query}`,
-        { headers: { Authorization: `Bearer ${token}` } },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       setSearchResult(data);
     } catch {
@@ -67,7 +121,7 @@ const Sidebar = () => {
       const { data } = await axios.post(
         `${BackendUrl}/api/chat`,
         { isGroupChat: false, members: [userId] },
-        { headers: { Authorization: `Bearer ${token}` } },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (!rooms.find((r) => r._id === data._id)) {
@@ -87,10 +141,7 @@ const Sidebar = () => {
   };
 
   return (
-    <div
-      className="h-screen w-full md:w-[450px]
-      bg-[#f5f7fa] flex flex-col p-4"
-    >
+    <div className="h-screen w-full md:w-[450px] bg-[#f5f7fa] flex flex-col p-4">
       <SidebarHeader RoomModalOpen={() => setIsRoomModalOpen(true)} />
 
       <RoomModal
@@ -119,6 +170,9 @@ const Sidebar = () => {
             isLoading={isLoading}
             rooms={rooms}
             currentUserId={currentUserId}
+            selectedChat={selectedChat}
+            setSelectedChat={handleSelectChat}
+            getUnreadCount={getUnreadCount}
           />
         )}
       </div>
