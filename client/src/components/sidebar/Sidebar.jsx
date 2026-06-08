@@ -100,7 +100,6 @@ const Sidebar = ({ selectedChat, setSelectedChat }) => {
       prev.filter((n) => (n.room._id || n.room) !== room._id)
     );
 
-    // Reset unread count locally
     setRooms(prev => prev.map(r => {
       if (r._id === room._id) {
         return { ...r, unreadCounts: { ...r.unreadCounts, [currentUserId]: 0 } };
@@ -108,7 +107,6 @@ const Sidebar = ({ selectedChat, setSelectedChat }) => {
       return r;
     }));
 
-    // Reset unread count in database
     try {
       await axios.put(`${BackendUrl}/api/chat/${room._id}/read`, {}, {
         headers: { Authorization: `Bearer ${token}` }
@@ -163,7 +161,7 @@ const Sidebar = ({ selectedChat, setSelectedChat }) => {
   };
 
   return (
-    <div className="h-screen w-full md:w-[450px] bg-[var(--card)] flex flex-col p-4">
+    <div className="h-screen w-full md:w-[450px] bg-[var(--card)]/70 backdrop-blur-3xl flex flex-col p-4 border-r border-white/20 dark:border-white/5 shadow-[15px_0_30px_-10px_rgba(0,0,0,0.1)] dark:shadow-[15px_0_30px_-10px_rgba(0,0,0,0.3)] z-20">
       <SidebarHeader onSettingsClick={() => navigate("/profile")} />
 
       <RoomModal

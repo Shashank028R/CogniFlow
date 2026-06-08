@@ -4,7 +4,7 @@ const SidebarHeader = ({ onSettingsClick }) => {
   return (
     <div className="mb-6 flex justify-between items-center px-2 pt-2">
       <h2 className="text-2xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-gray-700 to-gray-900 dark:from-gray-200 dark:to-gray-400 drop-shadow-sm transition-all duration-500">
-        Cogni<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-500 dark:from-cyan-400 dark:to-blue-500 drop-shadow-[0_0_8px_rgba(37,99,235,0.4)] dark:drop-shadow-[0_0_12px_rgba(34,211,238,0.5)]">Flow</span>
+        Cogni<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-500 dark:from-cyan-400 dark:to-blue-500 drop-shadow-[0_0_8px_#2563eb66] dark:drop-shadow-[0_0_12px_#22d3ee80]">Flow</span>
       </h2>
 
       <button

@@ -31,9 +31,9 @@ const Dashboard = () => {
       >
         {!selectedChat ? (
           <div
-            className="p-10 rounded-2xl text-center bg-[var(--bg)]
+            className="p-10 rounded-2xl text-center bg-[var(--card)]/70 backdrop-blur-3xl
             shadow-[8px_8px_18px_var(--shadow-dark),-8px_-8px_18px_var(--shadow-light)]
-            animate-[fadeIn_0.5s_ease]"
+            animate-[fadeIn_0.5s_ease] border border-white/20 dark:border-white/5"
           >
             <h2 className="text-xl font-semibold text-[var(--text)]">
               Welcome to <span className="text-blue-600">CogniFlow</span>

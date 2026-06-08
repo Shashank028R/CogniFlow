@@ -251,8 +251,8 @@ const ChatContainer = ({ selectedChat, setSelectedChat }) => {
   };
 
   return (
-    <div className="flex flex-col w-full h-full max-w-5xl bg-[var(--card)] rounded-3xl shadow-[10px_10px_20px_var(--shadow-dark),-10px_-10px_20px_var(--shadow-light)] overflow-hidden animate-[fadeIn_0.3s_ease]">
-      <div className="flex items-center justify-between p-4 bg-[var(--card)] shadow-[0_4px_10px_rgba(0,0,0,0.05)] z-10">
+    <div className="flex flex-col w-full h-full max-w-5xl bg-[var(--card)]/70 backdrop-blur-3xl rounded-3xl shadow-[10px_10px_20px_var(--shadow-dark),-10px_-10px_20px_var(--shadow-light)] overflow-hidden animate-[fadeIn_0.3s_ease] border border-white/20 dark:border-white/5">
+      <div className="flex items-center justify-between p-4 bg-transparent border-b border-gray-200/30 dark:border-gray-700/30 shadow-[0_4px_10px_rgba(0,0,0,0.02)] z-10">
         <div className="flex items-center gap-3">
           <button
             className="md:hidden text-blue-600 font-bold hover:scale-110 transition-transform cursor-pointer"
@@ -315,7 +315,7 @@ const ChatContainer = ({ selectedChat, setSelectedChat }) => {
       />
 
       {/* MESSAGES */}
-      <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3" onClick={() => setShowMenu(false)}>
+      <div className="flex-1 overflow-y-auto scrollbar-hide p-4 flex flex-col gap-3" onClick={() => setShowMenu(false)}>
         {loadingMessages ? (
           <p className="text-center text-gray-400 mt-10 animate-pulse text-sm">
             Loading chat history...
@@ -375,7 +375,7 @@ const ChatContainer = ({ selectedChat, setSelectedChat }) => {
                         ? "bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-gray-400 italic rounded-2xl border border-gray-300 dark:border-slate-600"
                         : isMyMessage
                           ? "bg-blue-500 text-white rounded-2xl rounded-tr-none shadow-[4px_4px_10px_rgba(37,99,235,0.2)]"
-                          : "bg-[var(--card)] text-indigo-600 dark:text-indigo-300 rounded-2xl rounded-tl-none shadow-[4px_4px_8px_var(--shadow-dark),-4px_-4px_8px_var(--shadow-light)]"
+                          : "bg-[var(--card)] text-black dark:text-white rounded-2xl rounded-tl-none shadow-[6px_6px_14px_#00000066,-6px_-6px_14px_var(--shadow-light)] dark:shadow-[4px_4px_12px_#3b82f666,-4px_-4px_12px_var(--shadow-light)] transition-all"
                     }`}
                   >
                     {isDeleted ? (
@@ -427,7 +427,7 @@ const ChatContainer = ({ selectedChat, setSelectedChat }) => {
         </div>
       )}
       
-      <div className="p-4 bg-[var(--card)] flex items-end gap-3 z-10 border-t border-gray-200/50">
+      <div className="p-4 bg-transparent flex items-end gap-3 z-10 border-t border-gray-200/30 dark:border-gray-700/30">
         <input
           type="file"
           id="file-upload"

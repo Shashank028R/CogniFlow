@@ -22,7 +22,7 @@ const RoomCard = ({
         w-[calc(100%-12px)] mx-auto mb-3
         ${
           selectedChat?._id === room._id
-            ? "bg-[var(--bg)] shadow-[inset_5px_5px_10px_var(--shadow-dark),inset_-5px_-5px_10px_var(--shadow-light),0_0_15px_rgba(59,130,246,0.3)] scale-[0.98]" 
+            ? "bg-[var(--bg)] shadow-[inset_5px_5px_10px_var(--shadow-dark),inset_-5px_-5px_10px_var(--shadow-light),0_0_15px_#3b82f64d] scale-[0.98]" 
             : unreadCount > 0
             ? "bg-[var(--card)] shadow-[5px_5px_10px_var(--shadow-dark),-5px_-5px_10px_var(--shadow-light)] border-l-4 border-blue-500"
             : "bg-[var(--card)] shadow-[5px_5px_10px_var(--shadow-dark),-5px_-5px_10px_var(--shadow-light)]"
