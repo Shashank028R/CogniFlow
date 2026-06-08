@@ -5,10 +5,12 @@ import AuthPage from "./pages/AuthPage";
 import Dashboard from "./pages/Dashboard";
 import HomePage from "./pages/HomePage";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import ParticleBackground from "./components/ui/ParticleBackground";
 
 function App() {
   return (
-    <div className="bg-[#eef2f7] min-h-screen">
+    <div className="bg-[#eef2f7] min-h-screen relative z-0">
+      <ParticleBackground />
       
       <Toaster
         position="top-right"

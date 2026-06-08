@@ -18,6 +18,22 @@
   --shadow-light: #1e293b;
   --shadow-dark: #020617;
 }
+
+@keyframes breath {
+  0%, 100% {
+    box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 8px 8px 16px var(--shadow-dark), -8px -8px 16px var(--shadow-light);
+    transform: scale(1.01);
+  }
+}
+
+.animate-breath {
+  animation: breath 4s ease-in-out infinite;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;

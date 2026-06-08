@@ -27,15 +27,16 @@ const AuthPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const toastId = toast.loading("Processing...");
+
     try {
-      const toastId = toast.loading("Processing...");
       if (isVerifying) {
         await axios.post(`${BackendUrl}/api/auth/verify-email`, {
           email: form.email,
           otp: form.otp,
         });
 
-        toast.success("Email Verified!");
+        toast.success("Email Verified!", { id: toastId });
         setIsVerifying(false);
         setIsLogin(true);
         return;
@@ -50,7 +51,7 @@ const AuthPage = () => {
       if (isLogin) {
         localStorage.setItem("token", data.token);
         localStorage.setItem("userid", data.user.id);
-        
+
         toast.success("Login Successful!", { id: toastId });
         navigate("/dashboard", { replace: true });
       } else {
@@ -58,7 +59,9 @@ const AuthPage = () => {
         toast.success("OTP Sent!", { id: toastId });
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || "Error");
+      toast.error(err.response?.data?.message || "An error occurred", {
+        id: toastId,
+      });
     }
   };
 

@@ -3,11 +3,16 @@ const LogoutButton = ({ onClick }) => {
     <button
       onClick={onClick}
       className="w-full py-2 rounded-xl font-semibold text-red-500
-      bg-[#f5f7fa]
+      bg-[#eef2f7]
       shadow-[5px_5px_10px_#d1d9e6,-5px_-5px_10px_#ffffff]
-      transition-all duration-200
-      hover:scale-102
-      hover:shadow-[3px_3px_8px_#d1d9e6,-3px_-3px_8px_#ffffff,0_0_6px_rgba(239,68,68,0.3)] cursor-pointer"
+      transition-all duration-300 ease-in-out
+      hover:shadow-[7px_7px_14px_#d1d9e6,-7px_-7px_14px_#ffffff]
+      hover:-translate-y-0.5
+      active:translate-y-0
+      active:scale-95
+      active:shadow-[inset_3px_3px_6px_#d1d9e6,inset_-3px_-3px_6px_#ffffff]
+      focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 focus:ring-offset-[#eef2f7]
+      cursor-pointer"
     >
       Logout
     </button>
