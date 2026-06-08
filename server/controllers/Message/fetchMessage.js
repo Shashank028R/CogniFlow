@@ -10,7 +10,7 @@ const fetchMessages = async (req, res) => {
       return res.status(404).json({ message: "Room not found" });
     }
 
-    const historyRecord = room.clearedHistory.find(
+    const historyRecord = (room.clearedHistory || []).find(
       (h) => h.user.toString() === req.user._id.toString()
     );
 
