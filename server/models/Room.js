@@ -15,6 +15,11 @@ const roomSchema = new mongoose.Schema(
       default: false,
     },
 
+    profilePic: {
+      type: String,
+      default: "",
+    },
+
     admin: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -54,6 +59,17 @@ const roomSchema = new mongoose.Schema(
         },
       },
     ],
+    clearedHistory: [
+      {
+        user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        timestamp: { type: Date, default: Date.now },
+      },
+    ],
+    unreadCounts: {
+      type: Map,
+      of: Number,
+      default: {},
+    },
   },
   { timestamps: true },
 );

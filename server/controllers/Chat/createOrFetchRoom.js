@@ -2,7 +2,7 @@ import Room from "../../models/Room.js";
 
 const createOrFetchRoom = async (req, res) => {
   try {
-    const { isGroupChat, name, members = [] } = req.body;
+    const { isGroupChat, name, members = [], profilePic = "" } = req.body;
     const currentUserId = req.user._id.toString();
 
     const updatedMembers = [
@@ -37,7 +37,7 @@ const createOrFetchRoom = async (req, res) => {
     const roomData = {
       isGroupChat,
       members: updatedMembers,
-      ...(isGroupChat && { name, admin: currentUserId }),
+      ...(isGroupChat && { name, admin: currentUserId, profilePic }),
     };
 
     const room = await Room.create(roomData);

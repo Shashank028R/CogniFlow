@@ -6,7 +6,7 @@ const Dashboard = () => {
   const [selectedChat, setSelectedChat] = useState(null);
 
   return (
-    <div className="flex h-screen bg-[#eef2f7] overflow-hidden">
+    <div className="flex h-screen bg-transparent overflow-hidden">
       {/* SIDEBAR */}
       <div
         className={`
@@ -31,11 +31,11 @@ const Dashboard = () => {
       >
         {!selectedChat ? (
           <div
-            className="p-10 rounded-2xl text-center bg-[#eef2f7]
-            shadow-[8px_8px_18px_#d1d9e6,-8px_-8px_18px_#ffffff]
+            className="p-10 rounded-2xl text-center bg-[var(--bg)]
+            shadow-[8px_8px_18px_var(--shadow-dark),-8px_-8px_18px_var(--shadow-light)]
             animate-[fadeIn_0.5s_ease]"
           >
-            <h2 className="text-xl font-semibold text-gray-900">
+            <h2 className="text-xl font-semibold text-[var(--text)]">
               Welcome to <span className="text-blue-600">CogniFlow</span>
             </h2>
 

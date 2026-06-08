@@ -9,6 +9,7 @@ import chatRouter from "./routes/chatRouter.js";
 import authRouter from "./routes/authRouter.js";
 import messageRouter from "./routes/messageRouter.js";
 import userRouter from "./routes/userRouter.js";
+import uploadRouter from "./routes/uploadRouter.js";
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/chat", chatRouter);
 app.use("/api/messages", messageRouter);
 app.use("/api/user", userRouter);
+app.use("/api/upload", uploadRouter);
 
 app.get("/", (req, res) => {
   res.send("Welcome to CogniFlow API!");

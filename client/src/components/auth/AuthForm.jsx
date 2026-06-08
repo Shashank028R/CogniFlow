@@ -12,7 +12,7 @@ const AuthForm = ({
 }) => {
   return (
     <>
-      <h2 className="text-center text-xl font-semibold text-slate-900 mb-1">
+      <h2 className="text-center text-xl font-semibold text-[var(--text)] mb-1">
         Welcome to{" "}
         <span className="text-blue-600 drop-shadow-[0_0_6px_rgba(37,99,235,0.5)]">
           Cogni

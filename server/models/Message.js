@@ -25,10 +25,27 @@ const messageSchema = new mongoose.Schema(
     fileUrl: {
       type: String,
     },
+    filePublicId: {
+      type: String,
+    },
     isAiResponse: {
       type: Boolean,
       default: false,
     },
+    isEdited: {
+      type: Boolean,
+      default: false,
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+    deletedFor: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   { timestamps: true },
 );

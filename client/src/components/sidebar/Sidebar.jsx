@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import io from "socket.io-client";
+import { Settings, Sun, Moon } from "lucide-react";
 
 import SidebarHeader from "./SidebarHeader";
 import SearchBar from "./SearchBar";
@@ -35,6 +36,7 @@ const Sidebar = ({ selectedChat, setSelectedChat }) => {
 
     socketRef.current.on("connect", () => {
       console.log("Socket connected");
+      socketRef.current.emit("setup", currentUserId);
     });
 
     socketRef.current.on("message received", (newMessage) => {
@@ -85,15 +87,35 @@ const Sidebar = ({ selectedChat, setSelectedChat }) => {
   }, [BackendUrl, token]);
 
   const getUnreadCount = (roomId) => {
-    return notifications.filter((n) => (n.room._id || n.room) === roomId).length;
+    const room = rooms.find(r => r._id === roomId);
+    const dbCount = room?.unreadCounts?.[currentUserId] || 0;
+    const socketCount = notifications.filter((n) => (n.room._id || n.room) === roomId).length;
+    return dbCount + socketCount;
   };
 
-  const handleSelectChat = (room) => {
+  const handleSelectChat = async (room) => {
     setSelectedChat(room);
 
     setNotifications((prev) =>
       prev.filter((n) => (n.room._id || n.room) !== room._id)
     );
+
+    // Reset unread count locally
+    setRooms(prev => prev.map(r => {
+      if (r._id === room._id) {
+        return { ...r, unreadCounts: { ...r.unreadCounts, [currentUserId]: 0 } };
+      }
+      return r;
+    }));
+
+    // Reset unread count in database
+    try {
+      await axios.put(`${BackendUrl}/api/chat/${room._id}/read`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+    } catch (error) {
+      console.error("Failed to mark chat as read");
+    }
   };
 
   const handleSearch = async (e) => {
@@ -141,8 +163,8 @@ const Sidebar = ({ selectedChat, setSelectedChat }) => {
   };
 
   return (
-    <div className="h-screen w-full md:w-[450px] bg-[#f5f7fa] flex flex-col p-4">
-      <SidebarHeader RoomModalOpen={() => setIsRoomModalOpen(true)} />
+    <div className="h-screen w-full md:w-[450px] bg-[var(--card)] flex flex-col p-4">
+      <SidebarHeader onSettingsClick={() => navigate("/profile")} />
 
       <RoomModal
         isOpen={isRoomModalOpen}
@@ -177,8 +199,47 @@ const Sidebar = ({ selectedChat, setSelectedChat }) => {
         )}
       </div>
 
-      <div className="mt-3">
-        <LogoutButton onClick={handleLogout} />
+      {/* ACTIONS */}
+      <div className="mt-3 flex items-center justify-between gap-3">
+        <div className="flex-1">
+          <LogoutButton onClick={handleLogout} />
+        </div>
+        <button
+          onClick={() => {
+            const root = document.documentElement;
+            const isDark = root.classList.contains("dark");
+            if (isDark) {
+              root.classList.remove("dark");
+              localStorage.setItem("theme", "light");
+            } else {
+              root.classList.add("dark");
+              localStorage.setItem("theme", "dark");
+            }
+            // Force re-render of this icon
+            setSearch(search);
+          }}
+          title="Toggle Theme"
+          className="w-12 h-12 flex-shrink-0 rounded-full font-bold text-gray-500 hover:text-blue-500
+          bg-[var(--bg)] flex items-center justify-center text-xl
+          shadow-[4px_4px_8px_var(--shadow-dark),-4px_-4px_8px_var(--shadow-light)]
+          transition-all duration-300 ease-in-out
+          hover:shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)]
+          active:scale-95 cursor-pointer"
+        >
+          {document.documentElement.classList.contains("dark") ? <Sun size={20} className="text-amber-500" /> : <Moon size={20} className="text-indigo-500" />}
+        </button>
+        <button
+          onClick={() => setIsRoomModalOpen(true)}
+          title="Create Group"
+          className="w-12 h-12 flex-shrink-0 rounded-full font-bold text-blue-600
+          bg-[var(--bg)] flex items-center justify-center text-2xl
+          shadow-[4px_4px_8px_var(--shadow-dark),-4px_-4px_8px_var(--shadow-light)]
+          transition-all duration-300 ease-in-out
+          hover:shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)]
+          active:scale-95 cursor-pointer"
+        >
+          +
+        </button>
       </div>
     </div>
   );

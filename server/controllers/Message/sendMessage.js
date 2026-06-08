@@ -3,7 +3,7 @@ import Room from "../../models/Room.js";
 
 const sendMessage = async (req, res) => {
   try {
-    const { content, roomId, messageType, fileUrl } = req.body;
+    const { content, roomId, messageType, fileUrl, filePublicId } = req.body;
 
     if (!roomId || (!content && !fileUrl)) {
       return res.status(400).json({
@@ -27,6 +27,7 @@ const sendMessage = async (req, res) => {
       content: content || "",
       messageType: messageType || "text",
       fileUrl: fileUrl || "",
+      filePublicId: filePublicId || "",
     });
 
     const populatedMessage = await message.populate([
@@ -41,9 +42,16 @@ const sendMessage = async (req, res) => {
       },
     ]);
 
-    await Room.findByIdAndUpdate(roomId, {
-      lastMessage: message._id,
+    // Increment unread counts for all members except the sender
+    room.members.forEach((memberId) => {
+      if (memberId.toString() !== req.user._id.toString()) {
+        const currentCount = room.unreadCounts.get(memberId.toString()) || 0;
+        room.unreadCounts.set(memberId.toString(), currentCount + 1);
+      }
     });
+
+    room.lastMessage = message._id;
+    await room.save();
 
     res.status(201).json(populatedMessage);
   } catch (error) {

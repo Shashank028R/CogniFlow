@@ -17,21 +17,21 @@ const RoomCard = ({
     <div
       onClick={() => setSelectedChat(room)}
       className={`
-        flex items-center justify-between gap-3 p-3 rounded-xl cursor-pointer
-        transition-all duration-300 ease-out hover:-translate-y-[1px]
-        w-[calc(100%-4px)] mx-auto
+        flex items-center justify-between gap-3 p-3 rounded-2xl cursor-pointer
+        transition-all duration-300 ease-out hover:-translate-y-[2px]
+        w-[calc(100%-12px)] mx-auto mb-3
         ${
           selectedChat?._id === room._id
-            ? "bg-blue-50 shadow-[4px_4px_10px_#d1d9e6,-4px_-4px_10px_#ffffff]" 
+            ? "bg-[var(--bg)] shadow-[inset_5px_5px_10px_var(--shadow-dark),inset_-5px_-5px_10px_var(--shadow-light),0_0_15px_rgba(59,130,246,0.3)] scale-[0.98]" 
             : unreadCount > 0
-            ? "bg-blue-50 border-l-4 border-blue-500 shadow-[4px_4px_10px_#d1d9e6,-4px_-4px_10px_#ffffff]"
-            : "bg-[#f5f7fa] shadow-[4px_4px_10px_#d1d9e6,-4px_-4px_10px_#ffffff]"
+            ? "bg-[var(--card)] shadow-[5px_5px_10px_var(--shadow-dark),-5px_-5px_10px_var(--shadow-light)] border-l-4 border-blue-500"
+            : "bg-[var(--card)] shadow-[5px_5px_10px_var(--shadow-dark),-5px_-5px_10px_var(--shadow-light)]"
         }
       `}
     >
       <div className="flex items-center gap-3 overflow-hidden">
         <Avatar
-          src={room.isGroupChat ? "/RoomChat.png" : null}
+          src={room.isGroupChat ? (room.profilePic || "/RoomChat.png") : otherUser?.profilePic}
           text={
             !room.isGroupChat
               ? otherUser?.username?.charAt(0).toUpperCase()
@@ -40,7 +40,7 @@ const RoomCard = ({
         />
 
         <div className="flex flex-col overflow-hidden">
-          <p className={`truncate ${unreadCount > 0 ? "font-bold text-gray-900" : "font-medium text-gray-800"}`}>
+          <p className={`truncate ${unreadCount > 0 ? "font-bold text-[var(--text)]" : "font-medium text-[var(--text)]"}`}>
             {room.isGroupChat ? room.name : otherUser?.username}
           </p>
 
@@ -57,7 +57,7 @@ const RoomCard = ({
       </div>
 
       {unreadCount > 0 && (
-        <div className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full min-w-[20px] text-center shadow-sm animate-pulse">
+        <div className="bg-gradient-to-tr from-blue-600 to-blue-400 text-white text-xs px-2.5 py-1 rounded-full min-w-[24px] text-center shadow-[0_0_10px_rgba(59,130,246,0.5)] animate-pulse font-bold border border-blue-300/30">
           {unreadCount}
         </div>
       )}
