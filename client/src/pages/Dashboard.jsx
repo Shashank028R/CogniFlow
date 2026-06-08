@@ -10,8 +10,9 @@ const Dashboard = () => {
       {/* SIDEBAR */}
       <div
         className={`
-          ${selectedChat ? "hidden md:block" : "block"}
-          w-full md:w-[450px]
+          ${selectedChat ? "hidden md:flex" : "flex"}
+          w-full md:w-[450px] h-full
+          p-3 md:p-5 md:pr-0
           transition-all duration-300
         `}
       >

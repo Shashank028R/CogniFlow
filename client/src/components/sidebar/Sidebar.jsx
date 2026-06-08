@@ -161,7 +161,7 @@ const Sidebar = ({ selectedChat, setSelectedChat }) => {
   };
 
   return (
-    <div className="h-screen w-full md:w-[450px] bg-[var(--card)]/70 backdrop-blur-3xl flex flex-col p-4 border-r border-white/20 dark:border-white/5 shadow-[15px_0_30px_-10px_rgba(0,0,0,0.1)] dark:shadow-[15px_0_30px_-10px_rgba(0,0,0,0.3)] z-20">
+    <div className="h-full w-full bg-[var(--card)]/70 backdrop-blur-3xl flex flex-col p-4 rounded-3xl shadow-[10px_10px_20px_var(--shadow-dark),-10px_-10px_20px_var(--shadow-light)] border border-white/20 dark:border-white/5 z-20">
       <SidebarHeader onSettingsClick={() => navigate("/profile")} />
 
       <RoomModal

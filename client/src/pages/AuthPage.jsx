@@ -66,7 +66,7 @@ const AuthPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--bg)] p-4">
+    <div className="min-h-screen flex items-center justify-center bg-transparent p-4 z-10 relative">
       <div className="w-full max-w-md">
         <Card>
           <AuthForm

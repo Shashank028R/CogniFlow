@@ -1,14 +1,38 @@
-import { useCallback } from "react";
+import { useCallback, useState, useEffect } from "react";
 import Particles from "react-tsparticles";
 import { loadSlim } from "tsparticles-slim";
+import { useLocation } from "react-router-dom";
 
 const ParticleBackground = () => {
+  const location = useLocation();
+  const isDashboard = location.pathname === "/dashboard";
+  
+  const [isDark, setIsDark] = useState(
+    () => document.documentElement.classList.contains("dark")
+  );
+
+  useEffect(() => {
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === "class") {
+          setIsDark(document.documentElement.classList.contains("dark"));
+        }
+      });
+    });
+    observer.observe(document.documentElement, { attributes: true });
+    return () => observer.disconnect();
+  }, []);
+
+  const particleColor = isDashboard && !isDark ? "#64748b" : "#94a3b8";
+  const linkColor = isDashboard && !isDark ? "#94a3b8" : "#cbd5e1";
+
   const particlesInit = useCallback(async (engine) => {
     await loadSlim(engine);
   }, []);
 
   return (
     <Particles
+      key={particleColor}
       id="tsparticles"
       init={particlesInit}
       options={{
@@ -45,10 +69,10 @@ const ParticleBackground = () => {
         },
         particles: {
           color: {
-            value: "#94a3b8", // subtle slate color for neomorphism light background
+            value: particleColor, // Dynamic color based on route and theme
           },
           links: {
-            color: "#cbd5e1",
+            color: linkColor,
             distance: 120,
             enable: true,
             opacity: 0.4,
