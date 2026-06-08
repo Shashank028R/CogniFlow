@@ -65,6 +65,22 @@ const AuthPage = () => {
     }
   };
 
+  const handleResendOTP = async () => {
+    const toastId = toast.loading("Resending OTP...");
+    try {
+      await axios.post(`${BackendUrl}/api/auth/register`, {
+        username: form.username,
+        email: form.email,
+        password: form.password,
+      });
+      toast.success("A new OTP has been sent!", { id: toastId });
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to resend OTP", {
+        id: toastId,
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-transparent p-4 z-10 relative">
       <div className="w-full max-w-md">
@@ -77,6 +93,7 @@ const AuthPage = () => {
             handleSubmit={handleSubmit}
             setIsLogin={setIsLogin}
             setIsVerifying={setIsVerifying}
+            handleResendOTP={handleResendOTP}
           />
         </Card>
       </div>

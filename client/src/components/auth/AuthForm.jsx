@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import Input from "../ui/Input";
 import Button from "../ui/Button";
 
@@ -9,7 +10,30 @@ const AuthForm = ({
   handleSubmit,
   setIsLogin,
   setIsVerifying,
+  handleResendOTP,
 }) => {
+  const [timeLeft, setTimeLeft] = useState(30);
+
+  useEffect(() => {
+    if (!isVerifying) {
+      setTimeLeft(30);
+      return;
+    }
+    if (timeLeft === 0) return;
+
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isVerifying, timeLeft]);
+
+  const onResendClick = () => {
+    if (timeLeft > 0) return;
+    handleResendOTP();
+    setTimeLeft(30);
+  };
+
   return (
     <>
       <h2 className="text-center text-xl font-semibold text-[var(--text)] mb-1">
@@ -63,13 +87,27 @@ const AuthForm = ({
         )}
 
         {isVerifying && (
-          <Input
-            type="text"
-            name="otp"
-            placeholder="Enter OTP"
-            value={form.otp}
-            onChange={handleChange}
-          />
+          <div className="flex flex-col gap-2">
+            <Input
+              type="text"
+              name="otp"
+              placeholder="Enter 6-digit OTP"
+              value={form.otp}
+              onChange={handleChange}
+            />
+            <div className="text-right">
+              <span
+                onClick={onResendClick}
+                className={`text-xs font-medium transition-colors ${
+                  timeLeft > 0
+                    ? "text-gray-400 cursor-not-allowed"
+                    : "text-blue-600 cursor-pointer hover:text-blue-500"
+                }`}
+              >
+                {timeLeft > 0 ? `Resend OTP in ${timeLeft}s` : "Resend OTP?"}
+              </span>
+            </div>
+          </div>
         )}
 
         <Button>
