@@ -404,7 +404,7 @@ const ChatContainer = ({ selectedChat, setSelectedChat }) => {
                       </div>
                     ) : m.messageType === "file" && m.fileUrl ? (
                       <div className="flex flex-col gap-2">
-                        <a href={m.fileUrl} target="_blank" rel="noopener noreferrer" className={`flex items-center gap-3 p-3 rounded-xl transition-all ${isMyMessage ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[var(--bg)] hover:bg-gray-200 shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)]'}`}>
+                        <a href={m.fileUrl.replace('/upload/', '/upload/fl_attachment/')} target="_blank" rel="noopener noreferrer" className={`flex items-center gap-3 p-3 rounded-xl transition-all ${isMyMessage ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[var(--bg)] hover:bg-gray-200 dark:hover:bg-slate-800 shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)] dark:hover:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.5),inset_-4px_-4px_8px_rgba(255,255,255,0.02)]'}`}>
                           <FileText size={24} className={isMyMessage ? "text-white" : "text-blue-500"} />
                           <span className="truncate max-w-[150px] font-medium">{m.content}</span>
                           <Download size={18} className={`ml-2 ${isMyMessage ? "text-blue-200" : "text-gray-400"}`} />

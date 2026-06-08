@@ -15,21 +15,20 @@ const storage = new CloudinaryStorage({
   params: async (req, file) => {
     // Determine resource type based on mime type
     const isImage = file.mimetype.startsWith("image/");
-    
-    // Cloudinary natively supports PDFs inside the "image" resource type! 
-    // This bypasses strict security restrictions on the "raw" resource type.
-    const resourceType = "image";
 
     // Sanitize the original filename to avoid URL issues
     const ext = file.originalname.split(".").pop();
     const baseName = file.originalname.split(".")[0].replace(/[^a-zA-Z0-9]/g, "_");
-    const publicId = `${baseName}_${Date.now()}`;
 
-    // Return the config
+    // For free Cloudinary accounts, "raw" resource delivery is strictly blocked by ACL.
+    // We MUST upload PDFs as "image" to bypass this. Cloudinary natively supports storing PDFs as images.
+    // However, we MUST append the actual extension (e.g., .pdf) to the public_id so Cloudinary serves the original vector PDF.
+    const publicId = `${baseName}_${Date.now()}.${ext}`;
+
     return {
       folder: "cogniflow",
-      resource_type: "image", // Treat everything as an image to bypass 'raw' security
-      public_id: publicId,    // Cloudinary will automatically append the correct extension (e.g. .pdf or .png)
+      resource_type: "image",
+      public_id: publicId,
     };
   },
 });
