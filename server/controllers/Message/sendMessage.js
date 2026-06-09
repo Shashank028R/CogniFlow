@@ -79,7 +79,15 @@ const sendMessage = async (req, res) => {
             content: `[${msg.sender.username}]: ${msg.content}`
           }));
 
-          const aiResponseText = await generateAIResponse(prompt, history);
+          if (global.io) {
+            global.io.in(roomId).emit("typing", roomId);
+          }
+
+          const aiResponseText = await generateAIResponse(prompt, history, fileUrl);
+
+          if (global.io) {
+            global.io.in(roomId).emit("stop typing", roomId);
+          }
 
           const aiMessage = await Message.create({
             sender: global.cogniBotId,

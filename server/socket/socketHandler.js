@@ -1,3 +1,5 @@
+import Message from "../models/Message.js";
+
 const onlineUsers = {};
 
 export const handleSocket = (io) => {
@@ -55,6 +57,33 @@ export const handleSocket = (io) => {
       // We will emit "chat cleared" back to their own room so other devices sync.
       socket.in(data.userId).emit("chat cleared", data.roomId);
     });
+
+    socket.on("mark delivered", async ({ messageIds, userId, roomId }) => {
+      try {
+        await Message.updateMany(
+          { _id: { $in: messageIds }, deliveredTo: { $ne: userId } },
+          { $addToSet: { deliveredTo: userId } }
+        );
+        socket.in(roomId).emit("messages delivered", { messageIds, userId, roomId });
+      } catch (err) {
+        console.error("Error marking messages delivered:", err);
+      }
+    });
+
+    socket.on("mark read", async ({ messageIds, userId, roomId }) => {
+      try {
+        await Message.updateMany(
+          { _id: { $in: messageIds }, readBy: { $ne: userId } },
+          { $addToSet: { readBy: userId } }
+        );
+        socket.in(roomId).emit("messages read", { messageIds, userId, roomId });
+      } catch (err) {
+        console.error("Error marking messages read:", err);
+      }
+    });
+
+    socket.on("typing", (room) => socket.in(room).emit("typing"));
+    socket.on("stop typing", (room) => socket.in(room).emit("stop typing"));
 
     socket.on("disconnect", () => {
       console.log("Client Disconnected", socket.id);

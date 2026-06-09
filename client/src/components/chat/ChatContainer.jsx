@@ -3,9 +3,11 @@ import Avatar from "../ui/Avatar";
 import toast from "react-hot-toast";
 import axios from "axios";
 import io from "socket.io-client";
-import { Pencil, Trash2, X, Paperclip, FileText, Download, MoreVertical } from "lucide-react";
+import { Pencil, Trash2, X, Paperclip, FileText, Download, MoreVertical, Check, CheckCheck } from "lucide-react";
 import DeleteMessageModal from "./DeleteMessageModal";
 import GroupSettingsModal from "./GroupSettingsModal";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 const EndPoint = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
 
@@ -22,9 +24,14 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
   const [editingMessageId, setEditingMessageId] = useState(null);
   const [showMenu, setShowMenu] = useState(false);
   const [isGroupSettingsOpen, setIsGroupSettingsOpen] = useState(false);
+  const [isTypingIndicatorVisible, setIsTypingIndicatorVisible] = useState(false);
+  const typingTimeoutRef = useRef(null);
 
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [messageToDelete, setMessageToDelete] = useState(null);
+
+  const [attachedFile, setAttachedFile] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
@@ -65,8 +72,56 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
       }
     });
 
+    socketRef.current.on("messages delivered", ({ messageIds, userId }) => {
+      setMessages((prev) => prev.map((m) => {
+        if (messageIds.includes(m._id) && !m.deliveredTo?.includes(userId)) {
+          return { ...m, deliveredTo: [...(m.deliveredTo || []), userId] };
+        }
+        return m;
+      }));
+    });
+
+    socketRef.current.on("messages read", ({ messageIds, userId }) => {
+      setMessages((prev) => prev.map((m) => {
+        if (messageIds.includes(m._id) && !m.readBy?.includes(userId)) {
+          return { ...m, readBy: [...(m.readBy || []), userId] };
+        }
+        return m;
+      }));
+    });
+
+    socketRef.current.on("typing", () => setIsTypingIndicatorVisible(true));
+    socketRef.current.on("stop typing", () => setIsTypingIndicatorVisible(false));
+
     return () => socketRef.current.disconnect();
   }, [selectedChat]);
+
+  useEffect(() => {
+    if (!messages.length || !selectedChat) return;
+
+    const undeliveredIds = [];
+    const unreadIds = [];
+
+    messages.forEach((m) => {
+      const senderId = m.sender?._id || m.sender?.id || m.sender;
+      if (String(senderId) !== String(currentUserId)) {
+        if (!m.deliveredTo?.includes(currentUserId)) {
+          undeliveredIds.push(m._id);
+        }
+        if (!m.readBy?.includes(currentUserId)) {
+          unreadIds.push(m._id);
+        }
+      }
+    });
+
+    if (undeliveredIds.length > 0) {
+      socketRef.current?.emit("mark delivered", { messageIds: undeliveredIds, userId: currentUserId, roomId: selectedChat._id });
+    }
+    
+    if (unreadIds.length > 0) {
+      socketRef.current?.emit("mark read", { messageIds: unreadIds, userId: currentUserId, roomId: selectedChat._id });
+    }
+  }, [messages, selectedChat, currentUserId]);
 
   useEffect(() => {
     if (!selectedChat) return;
@@ -101,49 +156,24 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, isTypingIndicatorVisible]);
 
-  const handleFileUpload = async (e) => {
+  const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const toastId = toast.loading("Uploading file...");
-
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const { data: uploadData } = await axios.post(`${BackendUrl}/api/upload`, formData, {
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
-      });
-
-      // Now send the message with the file URL
-      const { data: messageData } = await axios.post(
-        `${BackendUrl}/api/messages`,
-        {
-          content: uploadData.originalName || "Attachment",
-          roomId: selectedChat._id,
-          messageType: uploadData.resourceType === "image" ? "image" : "file",
-          fileUrl: uploadData.fileUrl,
-          filePublicId: uploadData.publicId,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      setMessages((prev) => [...prev, messageData]);
-      socketRef.current?.emit("new message", messageData);
-      
-      toast.success("File sent!", { id: toastId });
-    } catch (error) {
-      console.log("File upload error:", error);
-      toast.error("Failed to upload file", { id: toastId });
-    }
+    const previewUrl = URL.createObjectURL(file);
+    setAttachedFile({ 
+      file, 
+      previewUrl, 
+      type: file.type.startsWith('image/') ? 'image' : 'file' 
+    });
+    
+    e.target.value = null; // Reset input so same file can be selected again
   };
 
   const handleSubmit = async () => {
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() && !attachedFile) return;
 
     if (editingMessageId) {
       try {
@@ -166,18 +196,52 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
     }
 
     try {
+      let uploadData = null;
+      
+      if (attachedFile) {
+        setIsUploading(true);
+        const toastId = toast.loading("Uploading attachment...");
+        try {
+          const formData = new FormData();
+          formData.append("file", attachedFile.file);
+
+          const response = await axios.post(`${BackendUrl}/api/upload`, formData, {
+            headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
+          });
+          uploadData = response.data;
+          toast.success("Attachment uploaded!", { id: toastId });
+        } catch (error) {
+          toast.error("Failed to upload attachment", { id: toastId });
+          setIsUploading(false);
+          return;
+        }
+        setIsUploading(false);
+      }
+
+      const messagePayload = {
+        content: newMessage || (uploadData ? uploadData.originalName : ""),
+        roomId: selectedChat._id,
+      };
+
+      if (uploadData) {
+        messagePayload.messageType = uploadData.resourceType === "image" ? "image" : "file";
+        messagePayload.fileUrl = uploadData.fileUrl;
+        messagePayload.filePublicId = uploadData.publicId;
+      }
+
       const { data } = await axios.post(
         `${BackendUrl}/api/messages`,
-        {
-          content: newMessage,
-          roomId: selectedChat._id,
-        },
+        messagePayload,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
       );
 
       setNewMessage("");
+      setAttachedFile(null);
+      if (attachedFile) {
+        URL.revokeObjectURL(attachedFile.previewUrl);
+      }
 
       const textarea = document.getElementById("chat-textarea");
       if (textarea) textarea.style.height = "auto";
@@ -187,6 +251,7 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
     } catch (error) {
       console.log(error);
       toast.error("Failed to send message");
+      setIsUploading(false);
     }
   };
 
@@ -445,16 +510,31 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
                           <a href={m.fileUrl.replace('/upload/', '/upload/fl_attachment/')} target="_blank" rel="noopener noreferrer" className={`flex items-center gap-3 p-3 rounded-xl transition-all ${isMyMessage ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[var(--bg)] hover:bg-gray-200 dark:hover:bg-slate-800 shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)] dark:hover:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.5),inset_-4px_-4px_8px_rgba(255,255,255,0.02)]'}`}>
                             <FileText size={24} className={isMyMessage ? "text-white" : "text-blue-500"} />
                             <span className="truncate max-w-[150px] font-medium">{m.content}</span>
-                            <Download size={18} className={`ml-2 ${isMyMessage ? "text-blue-200" : "text-gray-400"}`} />
+                            <Download size={18} className={`ml-2 flex-shrink-0 ${isMyMessage ? "text-blue-200" : "text-gray-400"}`} />
                           </a>
                         </div>
                       ) : (
-                        <span>{m.content}</span>
+                        <div className="markdown-body text-sm [&>p]:mb-2 last:[&>p]:mb-0 [&>ul]:list-disc [&>ul]:ml-4 [&>ul]:mb-2 [&>ol]:list-decimal [&>ol]:ml-4 [&>ol]:mb-2 [&>h1]:text-lg [&>h1]:font-bold [&>h1]:mb-2 [&>h2]:text-base [&>h2]:font-bold [&>h2]:mb-2 [&>strong]:font-bold [&_a]:text-blue-300 [&_a]:underline break-words">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {m.content}
+                          </ReactMarkdown>
+                        </div>
                       )}
                       
                       <div className={`flex items-center justify-end gap-1 mt-1 ${isMyMessage ? "text-blue-100" : "text-gray-400"} text-[10px]`}>
                         {m.isEdited && !isDeleted && <span>(edited)</span>}
                         <span>{timeString}</span>
+                        {isMyMessage && !isDeleted && (
+                          <span className="ml-1 flex items-center">
+                            {m.readBy?.length > 0 ? (
+                              <CheckCheck size={14} className="text-cyan-300 drop-shadow-[0_0_2px_rgba(0,255,255,0.8)]" />
+                            ) : m.deliveredTo?.length > 0 ? (
+                              <CheckCheck size={14} className="text-blue-200/80" />
+                            ) : (
+                              <Check size={14} className="text-blue-200/80" />
+                            )}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -462,6 +542,15 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
               </React.Fragment>
             );
           })
+        )}
+        {isTypingIndicatorVisible && (
+          <div className="flex justify-start w-full mt-2 mb-2 animate-[fadeIn_0.3s_ease]">
+            <div className="bg-[var(--card)] px-4 py-3 rounded-2xl rounded-tl-none shadow-sm border border-gray-200/50 dark:border-gray-800/50 flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-blue-400 animate-bounce [animation-delay:-0.3s]"></div>
+              <div className="w-2 h-2 rounded-full bg-blue-400 animate-bounce [animation-delay:-0.15s]"></div>
+              <div className="w-2 h-2 rounded-full bg-blue-400 animate-bounce"></div>
+            </div>
+          </div>
         )}
         <div ref={messagesEndRef} />
       </div>
@@ -481,7 +570,40 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
           </button>
         </div>
       )}
-      
+      {/* File Preview Container */}
+      {attachedFile && (
+        <div className="mx-4 mb-2 p-3 bg-[var(--bg)] rounded-xl border border-blue-500/30 flex items-center justify-between shadow-[4px_4px_8px_var(--shadow-dark),-4px_-4px_8px_var(--shadow-light)] relative animate-[fadeIn_0.2s_ease]">
+          <div className="flex items-center gap-3 overflow-hidden">
+            {attachedFile.type === 'image' ? (
+              <img src={attachedFile.previewUrl} alt="Preview" className="w-12 h-12 object-cover rounded-md" />
+            ) : (
+              <div className="w-12 h-12 bg-[var(--card)] text-blue-500 rounded-md flex items-center justify-center shadow-inner">
+                <FileText size={24} />
+              </div>
+            )}
+            <div className="flex flex-col overflow-hidden">
+              <span className="text-sm font-semibold text-[var(--text)] truncate">{attachedFile.file.name}</span>
+              <span className="text-xs text-gray-500">{(attachedFile.file.size / 1024).toFixed(1)} KB</span>
+            </div>
+          </div>
+          <button 
+            onClick={() => {
+              setAttachedFile(null);
+              URL.revokeObjectURL(attachedFile.previewUrl);
+            }}
+            className="p-1 text-gray-400 hover:text-red-500 transition-colors cursor-pointer"
+          >
+            <X size={20} />
+          </button>
+          
+          {isUploading && (
+            <div className="absolute inset-0 bg-[var(--bg)]/80 backdrop-blur-sm flex items-center justify-center rounded-xl z-10">
+              <span className="text-sm font-bold text-blue-500 animate-pulse">Uploading...</span>
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="p-4 bg-transparent flex items-end gap-3 z-10 border-t border-gray-200/30 dark:border-gray-700/30">
         <input
           type="file"
@@ -518,7 +640,16 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
             id="chat-textarea"
             rows={1}
             value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
+            onChange={(e) => {
+              setNewMessage(e.target.value);
+              if (selectedChat) {
+                socketRef.current.emit("typing", selectedChat._id);
+                if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+                typingTimeoutRef.current = setTimeout(() => {
+                  socketRef.current.emit("stop typing", selectedChat._id);
+                }, 3000);
+              }
+            }}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
