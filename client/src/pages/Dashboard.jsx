@@ -4,6 +4,7 @@ import ChatContainer from "../components/chat/ChatContainer";
 
 const Dashboard = () => {
   const [selectedChat, setSelectedChat] = useState(null);
+  const [onlineUsers, setOnlineUsers] = useState([]);
 
   return (
     <div className="flex h-screen bg-transparent overflow-hidden">
@@ -19,6 +20,8 @@ const Dashboard = () => {
         <RoomSideBar
           selectedChat={selectedChat}
           setSelectedChat={setSelectedChat}
+          setOnlineUsers={setOnlineUsers}
+          onlineUsers={onlineUsers}
         />
       </div>
 
@@ -52,6 +55,7 @@ const Dashboard = () => {
             <ChatContainer
               selectedChat={selectedChat}
               setSelectedChat={setSelectedChat}
+              onlineUsers={onlineUsers}
             />
           </div>
         )}

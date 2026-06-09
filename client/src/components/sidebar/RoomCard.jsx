@@ -6,12 +6,15 @@ const RoomCard = ({
   selectedChat,
   setSelectedChat,
   getUnreadCount,
+  onlineUsers = []
 }) => {
   const getOtherUser = (members) =>
     members.find((m) => m._id !== currentUserId);
 
   const otherUser = !room.isGroupChat ? getOtherUser(room.members) : null;
   const unreadCount = getUnreadCount ? getUnreadCount(room._id) : 0;
+  
+  const isOnline = !room.isGroupChat && otherUser && onlineUsers.includes(otherUser._id);
 
   return (
     <div
@@ -30,14 +33,19 @@ const RoomCard = ({
       `}
     >
       <div className="flex items-center gap-3 overflow-hidden">
-        <Avatar
-          src={room.isGroupChat ? (room.profilePic || "/RoomChat.png") : otherUser?.profilePic}
-          text={
-            !room.isGroupChat
-              ? otherUser?.username?.charAt(0).toUpperCase()
-              : ""
-          }
-        />
+        <div className="relative">
+          <Avatar
+            src={room.isGroupChat ? (room.profilePic || "/RoomChat.png") : otherUser?.profilePic}
+            text={
+              !room.isGroupChat
+                ? otherUser?.username?.charAt(0).toUpperCase()
+                : ""
+            }
+          />
+          {isOnline && (
+            <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-[var(--card)] rounded-full"></div>
+          )}
+        </div>
 
         <div className="flex flex-col overflow-hidden">
           <p className={`truncate ${unreadCount > 0 ? "font-bold text-[var(--text)]" : "font-medium text-[var(--text)]"}`}>

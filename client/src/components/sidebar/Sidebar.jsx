@@ -12,7 +12,7 @@ import RoomList from "./RoomList";
 import LogoutButton from "../ui/LogoutButton";
 import RoomModal from "./RoomModal";
 
-const Sidebar = ({ selectedChat, setSelectedChat }) => {
+const Sidebar = ({ selectedChat, setSelectedChat, onlineUsers, setOnlineUsers }) => {
   const navigate = useNavigate();
   const BackendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -37,6 +37,10 @@ const Sidebar = ({ selectedChat, setSelectedChat }) => {
     socketRef.current.on("connect", () => {
       console.log("Socket connected");
       socketRef.current.emit("setup", currentUserId);
+    });
+
+    socketRef.current.on("get online users", (users) => {
+      setOnlineUsers(users);
     });
 
     socketRef.current.on("message received", (newMessage) => {
@@ -193,6 +197,7 @@ const Sidebar = ({ selectedChat, setSelectedChat }) => {
             selectedChat={selectedChat}
             setSelectedChat={handleSelectChat}
             getUnreadCount={getUnreadCount}
+            onlineUsers={onlineUsers}
           />
         )}
       </div>

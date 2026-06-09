@@ -1,9 +1,13 @@
+const onlineUsers = {};
+
 export const handleSocket = (io) => {
   io.on("connection", (socket) => {
     console.log("Client Connected ", socket.id);
 
     socket.on("setup", (userData) => {
       socket.join(userData);
+      onlineUsers[socket.id] = userData;
+      io.emit("get online users", Array.from(new Set(Object.values(onlineUsers))));
       socket.emit("connected");
     });
 
@@ -54,6 +58,8 @@ export const handleSocket = (io) => {
 
     socket.on("disconnect", () => {
       console.log("Client Disconnected", socket.id);
+      delete onlineUsers[socket.id];
+      io.emit("get online users", Array.from(new Set(Object.values(onlineUsers))));
     });
   });
 };
