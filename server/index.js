@@ -24,11 +24,17 @@ const io = new Server(httpServer, {
   },
 });
 
+global.io = io;
+
 handleSocket(io);
+
+import { initCogniBot } from "./utils/initCogniBot.js";
 
 app.use(cors());
 app.use(express.json());
-connectDb();
+connectDb().then(() => {
+  initCogniBot();
+});
 
 app.use("/api/auth", authRouter);
 app.use("/api/chat", chatRouter);

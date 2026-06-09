@@ -496,30 +496,46 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
           title="Attach File"
         >
           <Paperclip size={18} />
-        </button>
-
-        <textarea
-          id="chat-textarea"
-          rows={1}
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              handleSubmit();
-            } else if (e.key === "Escape" && editingMessageId) {
-              e.preventDefault();
-              cancelEdit();
-            }
-          }}
-          onInput={(e) => {
-            e.target.style.height = "auto";
-            e.target.style.height = Math.min(e.target.scrollHeight, 120) + "px";
-          }}
-          placeholder="Type a message..."
-          className="flex-1 p-3 rounded-xl border-none outline-none bg-[var(--card)] text-[var(--text)] shadow-[inset_4px_4px_8px_var(--shadow-dark),inset_-4px_-4px_8px_var(--shadow-light)] focus:shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)] transition-all resize-none overflow-hidden"
-          style={{ minHeight: "48px" }}
-        />
+        </button>        <div className="relative flex-1 rounded-xl shadow-[inset_4px_4px_8px_var(--shadow-dark),inset_-4px_-4px_8px_var(--shadow-light)] focus-within:shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)] transition-all bg-[var(--card)] overflow-hidden">
+          <div 
+            className="absolute inset-0 p-3 pointer-events-none whitespace-pre-wrap break-words text-[var(--text)]"
+            style={{ 
+              fontFamily: "inherit", 
+              fontSize: "inherit", 
+              lineHeight: "inherit",
+              zIndex: 5
+            }}
+          >
+            {!newMessage ? (
+              <span className="text-gray-400">Type a message...</span>
+            ) : (
+              newMessage.split(/(@cogni)/i).map((part, i) => 
+                part.toLowerCase() === '@cogni' ? <span key={i} className="text-blue-500 drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]">{part}</span> : part
+              )
+            )}
+          </div>
+          <textarea
+            id="chat-textarea"
+            rows={1}
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSubmit();
+              } else if (e.key === "Escape" && editingMessageId) {
+                e.preventDefault();
+                cancelEdit();
+              }
+            }}
+            onInput={(e) => {
+              e.target.style.height = "auto";
+              e.target.style.height = Math.min(e.target.scrollHeight, 120) + "px";
+            }}
+            className="w-full h-full p-3 bg-transparent border-none outline-none resize-none overflow-hidden text-transparent caret-[var(--text)] relative z-10"
+            spellCheck="false"
+          />
+        </div>
 
         <button
           onClick={handleSubmit}

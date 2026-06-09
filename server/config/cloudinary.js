@@ -4,9 +4,9 @@ import multer from "multer";
 
 // Configure Cloudinary with user's keys
 cloudinary.config({
-  cloud_name: "dojrorkrb",
-  api_key: "978759491433125",
-  api_secret: "r3bUQfjS4KWBSuZv4WQNE79kEv0",
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 // Configure Multer storage for Cloudinary

@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import io from "socket.io-client";
-import { Settings, Sun, Moon } from "lucide-react";
+import { Settings, Sun, Moon, Sparkles } from "lucide-react";
 
 import SidebarHeader from "./SidebarHeader";
 import SearchBar from "./SearchBar";
@@ -231,18 +231,46 @@ const Sidebar = ({ selectedChat, setSelectedChat, onlineUsers, setOnlineUsers })
         >
           {document.documentElement.classList.contains("dark") ? <Sun size={20} className="text-amber-500" /> : <Moon size={20} className="text-indigo-500" />}
         </button>
-        <button
-          onClick={() => setIsRoomModalOpen(true)}
-          title="Create Group"
-          className="w-12 h-12 flex-shrink-0 rounded-full font-bold text-blue-600
-          bg-[var(--bg)] flex items-center justify-center text-2xl
-          shadow-[4px_4px_8px_var(--shadow-dark),-4px_-4px_8px_var(--shadow-light)]
-          transition-all duration-300 ease-in-out
-          hover:shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)]
-          active:scale-95 cursor-pointer"
-        >
-          +
-        </button>
+        <div className="relative">
+          <button
+            onClick={async () => {
+              try {
+                // Search for CogniBot to get its ID, then access chat
+                const { data } = await axios.get(
+                  `${BackendUrl}/api/user?search=CogniBot`,
+                  { headers: { Authorization: `Bearer ${token}` } }
+                );
+                if (data && data.length > 0) {
+                  accessChat(data[0]._id);
+                } else {
+                  toast.error("CogniBot not found. Is the server running?");
+                }
+              } catch (err) {
+                toast.error("Could not reach CogniBot");
+              }
+            }}
+            title="Chat with CogniAi"
+            className="group absolute -top-16 right-0 h-12 flex items-center justify-start rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_4px_15px_rgba(37,99,235,0.4)] transition-all duration-300 w-12 hover:w-32 overflow-hidden cursor-pointer z-50 px-3"
+          >
+            <Sparkles size={20} className="flex-shrink-0" />
+            <span className="whitespace-nowrap opacity-0 group-hover:opacity-100 font-bold transition-opacity duration-300 ml-2 overflow-hidden">
+              CogniAi
+            </span>
+          </button>
+          
+          <button
+            onClick={() => setIsRoomModalOpen(true)}
+            title="Create Group"
+            className="w-12 h-12 flex-shrink-0 rounded-full font-bold text-blue-600
+            bg-[var(--bg)] flex items-center justify-center text-2xl
+            shadow-[4px_4px_8px_var(--shadow-dark),-4px_-4px_8px_var(--shadow-light)]
+            transition-all duration-300 ease-in-out
+            hover:shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)]
+            active:scale-95 cursor-pointer relative z-40"
+          >
+            +
+          </button>
+        </div>
       </div>
     </div>
   );
