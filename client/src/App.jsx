@@ -5,6 +5,7 @@ import { Route, Routes } from "react-router-dom";
 import AuthPage from "./pages/AuthPage";
 import Dashboard from "./pages/Dashboard";
 import HomePage from "./pages/HomePage";
+import AboutPage from "./pages/AboutPage";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import ParticleBackground from "./components/ui/ParticleBackground";
 import ProfilePage from "./pages/ProfilePage";
@@ -57,6 +58,7 @@ function App() {
 
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/about" element={<AboutPage />} />
         <Route path="/auth" element={<AuthPage />} />
 
         <Route
