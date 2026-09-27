@@ -6,6 +6,8 @@ CogniFlow is a production-ready, full-stack real-time chat application built wit
 This repository contains a React + Vite frontend and a Node.js + Express backend with features for real-time group and individual messaging (Socket.IO), native multimodal AI integration, Cloudinary file uploads, read receipts, and typing indicators.
 
 Quick links
+- **Project Report & Architectural Audit:** [files/REPORT.md](files/REPORT.md)
+- **Implementation Plan & Roadmap:** [files/IMPLEMENTATION_PLAN.md](files/IMPLEMENTATION_PLAN.md)
 - Backend server: [server/index.js](server/index.js)
 - AI Client Configuration: [server/utils/aiClient.js](server/utils/aiClient.js)
 - Message Controller (AI Trigger): [server/controllers/Message/sendMessage.js](server/controllers/Message/sendMessage.js)
