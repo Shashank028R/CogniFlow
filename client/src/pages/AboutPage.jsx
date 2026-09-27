@@ -1,103 +1,103 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Code, Terminal, Mail, MessageSquare } from "lucide-react";
-import { FaGithub, FaLinkedin } from "react-icons/fa";
+import { ArrowLeft, Code, Terminal, Sparkles } from "lucide-react";
+import { FaGithub, FaLinkedin, FaInstagram, FaEnvelope } from "react-icons/fa";
 import Card from "../components/ui/Card";
 
 const AboutPage = () => {
   return (
-    <div className="min-h-screen text-slate-900 dark:text-slate-100 flex flex-col">
-      {/* Top Navbar */}
-      <nav className="container mx-auto px-6 py-6 border-b border-slate-200/80 dark:border-slate-800/80">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-2 text-xs sm:text-sm font-medium text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
-        >
-          <ArrowLeft size={16} />
-          <span>Back to Home</span>
+    <div className="min-h-screen font-sans text-[var(--text)] relative z-10 overflow-hidden bg-[var(--bg)] flex flex-col">
+      
+      {/* Decorative background elements */}
+      <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-500/20 rounded-full blur-[120px] pointer-events-none"></div>
+      <div className="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-500/20 rounded-full blur-[120px] pointer-events-none"></div>
+
+      {/* Navbar */}
+      <nav className="container mx-auto px-6 py-6 relative z-20">
+        <Link to="/" className="inline-flex items-center gap-2 text-slate-500 hover:text-blue-600 transition-colors">
+          <ArrowLeft size={20} />
+          <span className="font-medium">Back to Home</span>
         </Link>
       </nav>
 
-      <main className="container mx-auto px-6 flex-1 flex flex-col justify-center items-center py-12">
-        <div className="text-center mb-10 max-w-xl">
-          <div className="w-12 h-12 mx-auto rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-4">
-            <Code size={24} />
+      <main className="container mx-auto px-6 flex-1 flex flex-col justify-center items-center py-12 relative z-20">
+        
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-[var(--bg)] shadow-[10px_10px_20px_var(--shadow-dark),-10px_-10px_20px_var(--shadow-light)] text-blue-600 mb-6">
+            <Code size={40} />
           </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3">
-            About the Developer
+          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
+            Meet the <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-500">Developer</span>
           </h1>
-          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 leading-relaxed">
-            Hi, I'm Shashank Kumar. I built CogniFlow as an exploration of high-performance real-time WebSockets and native multimodal AI assistant integration.
+          <p className="text-slate-500 dark:text-slate-400 max-w-xl mx-auto text-lg">
+            Hi, I'm Shashank Kumar. I built CogniFlow to explore the intersection of real-time communication and native artificial intelligence.
           </p>
         </div>
 
-        <Card className="w-full max-w-2xl border-slate-200 dark:border-slate-800 shadow-sm">
-          <div className="flex items-center gap-3 mb-6 pb-5 border-b border-slate-100 dark:border-slate-800">
-            <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-300">
-              <Terminal size={20} />
+        <Card className="w-full max-w-2xl p-8 md:p-12">
+          <div className="flex items-center gap-3 mb-8 pb-6 border-b border-slate-200 dark:border-slate-800">
+            <div className="w-12 h-12 rounded-xl bg-[var(--bg)] shadow-[inset_3px_3px_6px_var(--shadow-dark),inset_-3px_-3px_6px_var(--shadow-light)] flex items-center justify-center text-indigo-500">
+              <Terminal size={24} />
             </div>
             <div>
-              <h2 className="text-base font-semibold">Contact & Links</h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Feel free to reach out for questions, feedback, or collaboration.</p>
+              <h2 className="text-2xl font-bold">Connect with me</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400">Feel free to reach out for queries, feedback, or collaboration!</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <a
-              href="mailto:shashankmuz3@gmail.com"
-              className="flex items-center gap-3 p-3.5 rounded-lg border border-slate-200 dark:border-slate-700/80 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-            >
-              <div className="w-9 h-9 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center flex-shrink-0">
-                <Mail size={18} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <a href="mailto:shashankmuz3@gmail.com" className="flex items-center gap-4 p-4 rounded-2xl bg-[var(--bg)] shadow-[4px_4px_10px_var(--shadow-dark),-4px_-4px_10px_var(--shadow-light)] hover:shadow-[inset_4px_4px_10px_var(--shadow-dark),inset_-4px_-4px_10px_var(--shadow-light)] transition-all group">
+              <div className="w-12 h-12 rounded-full bg-[var(--bg)] flex items-center justify-center text-rose-500 shadow-[inset_2px_2px_5px_var(--shadow-dark),inset_-2px_-2px_5px_var(--shadow-light)]">
+                <FaEnvelope size={20} className="group-hover:scale-110 transition-transform" />
               </div>
-              <div className="flex flex-col overflow-hidden">
-                <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Email</span>
-                <span className="text-xs font-medium text-slate-900 dark:text-slate-100 truncate">shashankmuz3@gmail.com</span>
+              <div className="flex flex-col">
+                <span className="font-semibold text-sm text-slate-500 uppercase tracking-wider">Email</span>
+                <span className="font-medium text-[var(--text)]">shashankmuz3@gmail.com</span>
               </div>
             </a>
 
-            <a
-              href="https://github.com/Shashank028R/CogniFlow"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-3 p-3.5 rounded-lg border border-slate-200 dark:border-slate-700/80 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-            >
-              <div className="w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 flex items-center justify-center flex-shrink-0">
-                <FaGithub size={18} />
+            <a href="https://github.com/Shashank028R/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 p-4 rounded-2xl bg-[var(--bg)] shadow-[4px_4px_10px_var(--shadow-dark),-4px_-4px_10px_var(--shadow-light)] hover:shadow-[inset_4px_4px_10px_var(--shadow-dark),inset_-4px_-4px_10px_var(--shadow-light)] transition-all group">
+              <div className="w-12 h-12 rounded-full bg-[var(--bg)] flex items-center justify-center text-slate-700 dark:text-white shadow-[inset_2px_2px_5px_var(--shadow-dark),inset_-2px_-2px_5px_var(--shadow-light)]">
+                <FaGithub size={20} className="group-hover:scale-110 transition-transform" />
               </div>
-              <div className="flex flex-col overflow-hidden">
-                <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">GitHub</span>
-                <span className="text-xs font-medium text-slate-900 dark:text-slate-100 truncate">Shashank028R/CogniFlow</span>
+              <div className="flex flex-col">
+                <span className="font-semibold text-sm text-slate-500 uppercase tracking-wider">GitHub</span>
+                <span className="font-medium text-[var(--text)]">Shashank028R</span>
               </div>
             </a>
 
-            <a
-              href="https://www.linkedin.com/in/shashank-kumar-70742b292/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-3 p-3.5 rounded-lg border border-slate-200 dark:border-slate-700/80 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-            >
-              <div className="w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 flex items-center justify-center flex-shrink-0">
-                <FaLinkedin size={18} />
+            <a href="https://www.linkedin.com/in/shashank-kumar-70742b292/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 p-4 rounded-2xl bg-[var(--bg)] shadow-[4px_4px_10px_var(--shadow-dark),-4px_-4px_10px_var(--shadow-light)] hover:shadow-[inset_4px_4px_10px_var(--shadow-dark),inset_-4px_-4px_10px_var(--shadow-light)] transition-all group">
+              <div className="w-12 h-12 rounded-full bg-[var(--bg)] flex items-center justify-center text-blue-600 shadow-[inset_2px_2px_5px_var(--shadow-dark),inset_-2px_-2px_5px_var(--shadow-light)]">
+                <FaLinkedin size={20} className="group-hover:scale-110 transition-transform" />
               </div>
-              <div className="flex flex-col overflow-hidden">
-                <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">LinkedIn</span>
-                <span className="text-xs font-medium text-slate-900 dark:text-slate-100 truncate">Shashank Kumar</span>
+              <div className="flex flex-col">
+                <span className="font-semibold text-sm text-slate-500 uppercase tracking-wider">LinkedIn</span>
+                <span className="font-medium text-[var(--text)]">Shashank Kumar</span>
               </div>
             </a>
 
-            <div className="flex items-center gap-3 p-3.5 rounded-lg border border-slate-200 dark:border-slate-700/80 bg-slate-50/50 dark:bg-slate-800/40">
-              <div className="w-9 h-9 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0">
-                <MessageSquare size={18} />
+            <a href="https://www.instagram.com/shashank__.kumar/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 p-4 rounded-2xl bg-[var(--bg)] shadow-[4px_4px_10px_var(--shadow-dark),-4px_-4px_10px_var(--shadow-light)] hover:shadow-[inset_4px_4px_10px_var(--shadow-dark),inset_-4px_-4px_10px_var(--shadow-light)] transition-all group">
+              <div className="w-12 h-12 rounded-full bg-[var(--bg)] flex items-center justify-center text-pink-500 shadow-[inset_2px_2px_5px_var(--shadow-dark),inset_-2px_-2px_5px_var(--shadow-light)]">
+                <FaInstagram size={20} className="group-hover:scale-110 transition-transform" />
               </div>
-              <div className="flex flex-col overflow-hidden">
-                <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Project</span>
-                <span className="text-xs font-medium text-slate-900 dark:text-slate-100 truncate">CogniFlow v1.0 Production</span>
+              <div className="flex flex-col">
+                <span className="font-semibold text-sm text-slate-500 uppercase tracking-wider">Instagram</span>
+                <span className="font-medium text-[var(--text)]">@shashank__.kumar</span>
               </div>
-            </div>
+            </a>
+
           </div>
         </Card>
+
       </main>
+
+      {/* Footer */}
+      <footer className="py-6 text-center text-slate-500 text-sm relative z-20">
+        <p className="flex items-center justify-center gap-1">
+          Built with <Sparkles size={14} className="text-yellow-500" /> by Shashank Kumar
+        </p>
+      </footer>
     </div>
   );
 };

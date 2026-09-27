@@ -3,7 +3,7 @@ import Avatar from "../ui/Avatar";
 import toast from "react-hot-toast";
 import axios from "axios";
 import io from "socket.io-client";
-import { Pencil, Trash2, X, Paperclip, FileText, Download, Check, CheckCheck, Send, MoreVertical } from "lucide-react";
+import { Pencil, Trash2, X, Paperclip, FileText, Download, MoreVertical, Check, CheckCheck } from "lucide-react";
 import DeleteMessageModal from "./DeleteMessageModal";
 import GroupSettingsModal from "./GroupSettingsModal";
 import ReactMarkdown from "react-markdown";
@@ -40,6 +40,7 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
     socketRef.current = io(EndPoint);
 
     socketRef.current.on("connect", () => {
+      console.log("Socket connected");
       socketRef.current.emit("setup", currentUserId);
       if (selectedChat) {
         socketRef.current.emit("join chat", selectedChat._id);
@@ -93,7 +94,7 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
     socketRef.current.on("stop typing", () => setIsTypingIndicatorVisible(false));
 
     return () => socketRef.current.disconnect();
-  }, [selectedChat, currentUserId]);
+  }, [selectedChat]);
 
   useEffect(() => {
     if (!messages.length || !selectedChat) return;
@@ -138,6 +139,7 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
 
         setMessages(data);
       } catch (error) {
+        console.log(error);
         if (error.response?.status === 401) {
           localStorage.clear();
           window.location.href = "/";
@@ -167,7 +169,7 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
       type: file.type.startsWith('image/') ? 'image' : 'file' 
     });
     
-    e.target.value = null;
+    e.target.value = null; // Reset input so same file can be selected again
   };
 
   const handleSubmit = async () => {
@@ -187,7 +189,7 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
         setNewMessage("");
         const textarea = document.getElementById("chat-textarea");
         if (textarea) textarea.style.height = "auto";
-      } catch {
+      } catch (error) {
         toast.error("Failed to edit message");
       }
       return;
@@ -208,7 +210,7 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
           });
           uploadData = response.data;
           toast.success("Attachment uploaded!", { id: toastId });
-        } catch {
+        } catch (error) {
           toast.error("Failed to upload attachment", { id: toastId });
           setIsUploading(false);
           return;
@@ -246,7 +248,8 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
 
       setMessages((prev) => [...prev, data]);
       socketRef.current?.emit("new message", data);
-    } catch {
+    } catch (error) {
+      console.log(error);
       toast.error("Failed to send message");
       setIsUploading(false);
     }
@@ -289,7 +292,7 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
       } else {
         setMessages((prev) => prev.filter((m) => m._id !== msgId));
       }
-    } catch {
+    } catch (error) {
       toast.error("Failed to delete message");
     } finally {
       setDeleteModalOpen(false);
@@ -298,16 +301,15 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
   };
 
   const handleClearChat = async () => {
-    if (!window.confirm("Are you sure you want to clear your chat history for this conversation?")) return;
+    if (!window.confirm("Are you sure you want to clear this chat for yourself?")) return;
     try {
       await axios.delete(`${BackendUrl}/api/messages/room/${selectedChat._id}`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}` }
       });
       setMessages([]);
       socketRef.current?.emit("chat cleared", { roomId: selectedChat._id, userId: currentUserId });
       setShowMenu(false);
-      toast.success("Chat history cleared!");
-    } catch {
+    } catch (error) {
       toast.error("Failed to clear chat");
     }
   };
@@ -319,13 +321,11 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
   };
 
   return (
-    <div className="flex flex-col w-full h-full max-w-5xl bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden animate-[fadeIn_0.2s_ease]">
-      
-      {/* HEADER */}
-      <div className="flex items-center justify-between px-5 py-3.5 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 z-10">
+    <div className="flex flex-col w-full h-full max-w-5xl bg-[var(--card)]/70 backdrop-blur-3xl rounded-3xl shadow-[10px_10px_20px_var(--shadow-dark),-10px_-10px_20px_var(--shadow-light)] overflow-hidden animate-[fadeIn_0.3s_ease] border border-white/20 dark:border-white/5">
+      <div className="flex items-center justify-between p-4 bg-transparent border-b border-gray-200/30 dark:border-gray-700/30 shadow-[0_4px_10px_rgba(0,0,0,0.02)] z-10">
         <div className="flex items-center gap-3">
           <button
-            className="md:hidden text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors cursor-pointer mr-1"
+            className="md:hidden text-blue-600 font-bold hover:scale-110 transition-transform cursor-pointer"
             onClick={() => setSelectedChat(null)}
           >
             ←
@@ -338,51 +338,47 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
                 ? getChatName().charAt(0).toUpperCase()
                 : ""
             }
-            size="w-9 h-9"
           />
 
           <div className="flex flex-col">
-            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100 leading-tight">
+            <h2 className="text-lg font-semibold text-[var(--text)] leading-tight">
               {getChatName()}
             </h2>
             {!selectedChat.isGroupChat && (() => {
               const otherUser = selectedChat.members.find((m) => m._id !== currentUserId);
               const isOnline = otherUser && onlineUsers.includes(otherUser._id);
               if (isOnline) {
-                return <span className="text-[11px] text-emerald-500 font-medium">Online</span>;
+                return <span className="text-xs text-green-500 font-medium">Online</span>;
               }
-              return <span className="text-[11px] text-slate-400">Offline</span>;
+              return null;
             })()}
-            {selectedChat.isGroupChat && (
-              <span className="text-[11px] text-slate-400">{selectedChat.members?.length} members</span>
-            )}
           </div>
         </div>
 
         <div className="relative">
           <button 
             onClick={() => setShowMenu(!showMenu)}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            className="text-gray-500 hover:text-blue-600 font-bold px-3 py-1 rounded-xl shadow-[4px_4px_8px_var(--shadow-dark),-4px_-4px_8px_var(--shadow-light)] transition-all cursor-pointer"
           >
-            <MoreVertical size={16} />
+            ⋮
           </button>
           
           {showMenu && (
-            <div className="absolute right-0 mt-1.5 w-44 bg-white dark:bg-slate-900 rounded-xl shadow-lg z-50 overflow-hidden border border-slate-200 dark:border-slate-800 py-1">
+            <div className="absolute right-0 mt-2 w-48 bg-[var(--card)] rounded-xl shadow-[8px_8px_16px_var(--shadow-dark),-8px_-8px_16px_var(--shadow-light)] z-50 overflow-hidden border border-gray-200">
               {selectedChat.isGroupChat && (
                 <button
                   onClick={() => {
                     setIsGroupSettingsOpen(true);
                     setShowMenu(false);
                   }}
-                  className="w-full text-left px-3.5 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors border-b border-gray-200"
                 >
                   Group Settings
                 </button>
               )}
               <button
                 onClick={handleClearChat}
-                className="w-full text-left px-3.5 py-2 text-xs font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+                className="w-full text-left px-4 py-3 text-sm text-red-500 hover:bg-gray-100 transition-colors"
               >
                 Clear Chat
               </button>
@@ -398,21 +394,22 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
         setSelectedChat={setSelectedChat}
       />
 
-      {/* MESSAGES VIEWPORT */}
-      <div className="flex-1 overflow-y-auto scrollbar-hide p-4 flex flex-col gap-2.5" onClick={() => setShowMenu(false)}>
+      {/* MESSAGES */}
+      <div className="flex-1 overflow-y-auto scrollbar-hide p-4 flex flex-col gap-3" onClick={() => setShowMenu(false)}>
         {loadingMessages ? (
-          <div className="flex flex-col items-center justify-center h-full gap-2">
-            <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-            <p className="text-xs text-slate-400">Loading conversation...</p>
-          </div>
+          <p className="text-center text-gray-400 mt-10 animate-pulse text-sm">
+            Loading chat history...
+          </p>
         ) : messages.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center text-center py-16">
-            <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 mb-2">
-              <Paperclip size={20} />
+          <div className="flex-1 flex flex-col items-center justify-center text-center opacity-70">
+            <div className="w-20 h-20 mb-4 rounded-full bg-[var(--card)] shadow-[inset_4px_4px_8px_var(--shadow-dark),inset_-4px_-4px_8px_var(--shadow-light)] flex items-center justify-center">
+              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+              </svg>
             </div>
-            <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-200">No messages yet</h3>
-            <p className="text-xs text-slate-400 max-w-[220px] mt-0.5">
-              Send a message or mention @cogni to start.
+            <h3 className="text-[var(--text)] font-semibold text-lg">No messages yet</h3>
+            <p className="text-gray-500 text-sm max-w-[250px] mt-1">
+              Send a message to start the conversation!
             </p>
           </div>
         ) : (
@@ -421,6 +418,7 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
             const isMyMessage = String(senderId) === String(currentUserId);
             const isDeleted = m.isDeleted;
 
+            // Date Divider Logic
             const messageDate = new Date(m.createdAt);
             const isToday = messageDate.toDateString() === new Date().toDateString();
             const isYesterday = messageDate.toDateString() === new Date(Date.now() - 86400000).toDateString();
@@ -444,108 +442,96 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
             return (
               <React.Fragment key={m._id}>
                 {showDateDivider && (
-                  <div className="flex justify-center my-3">
-                    <div className="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 px-3 py-0.5 rounded-full text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
+                  <div className="flex justify-center my-4">
+                    <div className="bg-[var(--card)]/50 backdrop-blur-md px-4 py-1 rounded-full text-xs font-semibold text-[var(--text)] shadow-[2px_2px_4px_var(--shadow-dark),-2px_-2px_4px_var(--shadow-light)] border border-white/10">
                       {dateLabel}
                     </div>
                   </div>
                 )}
-                <div className={`flex w-full group ${isMyMessage ? "justify-end" : "justify-start"}`}>
+                <div
+                  className={`flex w-full group ${isMyMessage ? "justify-end" : "justify-start"}`}
+                >
                   <div className="max-w-[75%] flex flex-col relative">
                     {!isMyMessage && selectedChat.isGroupChat && (
-                      <span className="text-[11px] font-medium text-slate-500 ml-1 mb-0.5">
+                      <span className="text-xs text-gray-500 ml-2 mb-1">
                         {m.sender.username}
                       </span>
                     )}
 
                     {isMyMessage && !isDeleted && (
-                      <div className="absolute -left-14 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                      <div className="absolute -left-16 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
                         <button 
                           onClick={() => initiateEdit(m)}
-                          className="p-1 text-slate-400 hover:text-blue-600 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md shadow-sm transition-colors cursor-pointer"
+                          className="p-1.5 text-gray-400 hover:text-blue-500 bg-white rounded-full shadow-sm hover:shadow-md transition-all cursor-pointer"
                           title="Edit Message"
                         >
-                          <Pencil size={13} />
+                          <Pencil size={14} />
                         </button>
                         <button 
                           onClick={() => openDeleteModal(m._id, senderId)}
-                          className="p-1 text-slate-400 hover:text-rose-600 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md shadow-sm transition-colors cursor-pointer"
+                          className="p-1.5 text-gray-400 hover:text-red-500 bg-white rounded-full shadow-sm hover:shadow-md transition-all cursor-pointer"
                           title="Delete Message"
                         >
-                          <Trash2 size={13} />
+                          <Trash2 size={14} />
                         </button>
                       </div>
                     )}
 
                     {!isMyMessage && !isDeleted && (
-                      <div className="absolute -right-8 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                      <div className="absolute -right-8 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
                         <button 
                           onClick={() => openDeleteModal(m._id, senderId)}
-                          className="p-1 text-slate-400 hover:text-rose-600 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md shadow-sm transition-colors cursor-pointer"
+                          className="p-1.5 text-gray-400 hover:text-red-500 bg-white rounded-full shadow-sm hover:shadow-md transition-all cursor-pointer"
                           title="Delete Message"
                         >
-                          <Trash2 size={13} />
+                          <Trash2 size={14} />
                         </button>
                       </div>
                     )}
 
                     <div
-                      className={`p-3 text-sm flex flex-col ${
+                      className={`p-3 text-sm shadow-sm flex flex-col ${
                         isDeleted 
-                          ? "bg-slate-50 dark:bg-slate-800/40 text-slate-400 italic rounded-2xl border border-slate-200 dark:border-slate-800"
+                          ? "bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-gray-400 italic rounded-2xl border border-gray-300 dark:border-slate-600"
                           : isMyMessage
-                            ? "bg-blue-600 text-white rounded-2xl rounded-tr-sm shadow-sm"
-                            : "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200/80 dark:border-slate-700/60 rounded-2xl rounded-tl-sm shadow-sm"
+                            ? "bg-blue-500 text-white rounded-2xl rounded-tr-none shadow-[4px_4px_10px_rgba(37,99,235,0.2)]"
+                            : "bg-[var(--card)] text-black dark:text-white rounded-2xl rounded-tl-none shadow-[6px_6px_14px_#00000066,-6px_-6px_14px_var(--shadow-light)] dark:shadow-[4px_4px_12px_#3b82f666,-4px_-4px_12px_var(--shadow-light)] transition-all"
                       }`}
                     >
                       {isDeleted ? (
-                        <span className="text-xs">This message was deleted</span>
+                        "This message was deleted"
                       ) : m.messageType === "image" && m.fileUrl ? (
                         <div className="flex flex-col gap-2">
-                          <img
-                            src={m.fileUrl}
-                            alt="attachment"
-                            className="max-w-[240px] max-h-[240px] rounded-lg object-cover cursor-pointer hover:opacity-95 transition-opacity"
-                            onClick={() => window.open(m.fileUrl, '_blank')}
-                          />
-                          {m.content && m.content !== "Attachment" && <span>{m.content}</span>}
+                          <img src={m.fileUrl} alt="attachment" className="max-w-[250px] max-h-[250px] rounded-xl object-cover cursor-pointer hover:opacity-90 transition-opacity" onClick={() => window.open(m.fileUrl, '_blank')} />
+                          {m.content !== "Attachment" && <span>{m.content}</span>}
                         </div>
                       ) : m.messageType === "file" && m.fileUrl ? (
                         <div className="flex flex-col gap-2">
-                          <a
-                            href={m.fileUrl.replace('/upload/', '/upload/fl_attachment/')}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={`flex items-center gap-2.5 p-2.5 rounded-lg transition-colors ${
-                              isMyMessage
-                                ? 'bg-blue-700 text-white hover:bg-blue-800'
-                                : 'bg-white dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700'
-                            }`}
-                          >
-                            <FileText size={20} className={isMyMessage ? "text-white" : "text-blue-500"} />
-                            <span className="truncate max-w-[140px] font-medium text-xs">{m.content}</span>
-                            <Download size={15} className={`ml-1 flex-shrink-0 ${isMyMessage ? "text-blue-200" : "text-slate-400"}`} />
+                          <a href={m.fileUrl.replace('/upload/', '/upload/fl_attachment/')} target="_blank" rel="noopener noreferrer" className={`flex items-center gap-3 p-3 rounded-xl transition-all ${isMyMessage ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[var(--bg)] hover:bg-gray-200 dark:hover:bg-slate-800 shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)] dark:hover:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.5),inset_-4px_-4px_8px_rgba(255,255,255,0.02)]'}`}>
+                            <FileText size={24} className={isMyMessage ? "text-white" : "text-blue-500"} />
+                            <span className="truncate max-w-[150px] font-medium">{m.content}</span>
+                            <Download size={18} className={`ml-2 flex-shrink-0 ${isMyMessage ? "text-blue-200" : "text-gray-400"}`} />
                           </a>
                         </div>
                       ) : (
-                        <div className="markdown-body text-sm [&>p]:mb-1.5 last:[&>p]:mb-0 [&>ul]:list-disc [&>ul]:ml-4 [&>ul]:mb-1.5 [&>ol]:list-decimal [&>ol]:ml-4 [&>ol]:mb-1.5 [&>h1]:text-base [&>h1]:font-bold [&>h1]:mb-1.5 [&>h2]:text-sm [&>h2]:font-bold [&>h2]:mb-1.5 [&>strong]:font-semibold [&_a]:underline break-words">
+                        <div className="markdown-body text-sm [&>p]:mb-2 last:[&>p]:mb-0 [&>ul]:list-disc [&>ul]:ml-4 [&>ul]:mb-2 [&>ol]:list-decimal [&>ol]:ml-4 [&>ol]:mb-2 [&>h1]:text-lg [&>h1]:font-bold [&>h1]:mb-2 [&>h2]:text-base [&>h2]:font-bold [&>h2]:mb-2 [&>strong]:font-bold [&_a]:text-blue-300 [&_a]:underline break-words">
                           <ReactMarkdown remarkPlugins={[remarkGfm]}>
                             {m.content}
                           </ReactMarkdown>
                         </div>
                       )}
                       
-                      <div className={`flex items-center justify-end gap-1 mt-1 text-[10px] ${isMyMessage ? "text-blue-200" : "text-slate-400"}`}>
+                      <div className={`flex items-center justify-end gap-1 mt-1 ${isMyMessage ? "text-blue-100" : "text-gray-400"} text-[10px]`}>
                         {m.isEdited && !isDeleted && <span>(edited)</span>}
                         <span>{timeString}</span>
                         {isMyMessage && !isDeleted && (
-                          <span className="ml-0.5 flex items-center">
+                          <span className="ml-1 flex items-center">
                             {m.readBy?.length > 0 ? (
-                              <CheckCheck size={13} className="text-white font-bold" title="Read" />
+                              <CheckCheck size={14} className="text-cyan-300 drop-shadow-[0_0_2px_rgba(0,255,255,0.8)]" />
                             ) : m.deliveredTo?.length > 0 ? (
-                              <CheckCheck size={13} className="text-blue-200/80" title="Delivered" />
+                              <CheckCheck size={14} className="text-blue-200/80" />
                             ) : (
-                              <Check size={13} className="text-blue-200/80" title="Sent" />
+                              <Check size={14} className="text-blue-200/80" />
                             )}
                           </span>
                         )}
@@ -558,11 +544,11 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
           })
         )}
         {isTypingIndicatorVisible && (
-          <div className="flex justify-start w-full mt-1 mb-1 animate-[fadeIn_0.2s_ease]">
-            <div className="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 px-3 py-2 rounded-2xl rounded-tl-sm flex items-center gap-1.5">
-              <div className="w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-500 animate-bounce [animation-delay:-0.3s]" />
-              <div className="w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-500 animate-bounce [animation-delay:-0.15s]" />
-              <div className="w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-500 animate-bounce" />
+          <div className="flex justify-start w-full mt-2 mb-2 animate-[fadeIn_0.3s_ease]">
+            <div className="bg-[var(--card)] px-4 py-3 rounded-2xl rounded-tl-none shadow-sm border border-gray-200/50 dark:border-gray-800/50 flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-blue-400 animate-bounce [animation-delay:-0.3s]"></div>
+              <div className="w-2 h-2 rounded-full bg-blue-400 animate-bounce [animation-delay:-0.15s]"></div>
+              <div className="w-2 h-2 rounded-full bg-blue-400 animate-bounce"></div>
             </div>
           </div>
         )}
@@ -571,34 +557,33 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
 
       {/* INPUT AREA */}
       {editingMessageId && (
-        <div className="bg-blue-50 dark:bg-blue-950/40 px-4 py-2 border-t border-blue-200 dark:border-blue-900/40 flex justify-between items-center z-10">
+        <div className="bg-blue-50 px-4 py-2 border-t border-blue-100 flex justify-between items-center z-10 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]">
           <div className="flex flex-col">
-            <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">Editing Message</span>
-            <span className="text-[11px] text-slate-500">Press Escape to cancel</span>
+            <span className="text-xs font-semibold text-blue-600">Editing Message</span>
+            <span className="text-xs text-gray-500 truncate max-w-sm">Esc to cancel</span>
           </div>
           <button 
             onClick={cancelEdit}
-            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer p-1 rounded-full"
+            className="text-gray-400 hover:text-gray-600 cursor-pointer p-1 rounded-full hover:bg-blue-100 transition-colors"
           >
-            <X size={15} />
+            <X size={16} />
           </button>
         </div>
       )}
-
-      {/* File Preview */}
+      {/* File Preview Container */}
       {attachedFile && (
-        <div className="mx-4 mb-2 p-2.5 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-between relative animate-[fadeIn_0.15s_ease]">
-          <div className="flex items-center gap-2.5 overflow-hidden">
+        <div className="mx-4 mb-2 p-3 bg-[var(--bg)] rounded-xl border border-blue-500/30 flex items-center justify-between shadow-[4px_4px_8px_var(--shadow-dark),-4px_-4px_8px_var(--shadow-light)] relative animate-[fadeIn_0.2s_ease]">
+          <div className="flex items-center gap-3 overflow-hidden">
             {attachedFile.type === 'image' ? (
-              <img src={attachedFile.previewUrl} alt="Preview" className="w-10 h-10 object-cover rounded-md" />
+              <img src={attachedFile.previewUrl} alt="Preview" className="w-12 h-12 object-cover rounded-md" />
             ) : (
-              <div className="w-10 h-10 bg-slate-200 dark:bg-slate-700 text-blue-600 rounded-md flex items-center justify-center">
-                <FileText size={20} />
+              <div className="w-12 h-12 bg-[var(--card)] text-blue-500 rounded-md flex items-center justify-center shadow-inner">
+                <FileText size={24} />
               </div>
             )}
             <div className="flex flex-col overflow-hidden">
-              <span className="text-xs font-semibold text-slate-900 dark:text-slate-100 truncate">{attachedFile.file.name}</span>
-              <span className="text-[10px] text-slate-400">{(attachedFile.file.size / 1024).toFixed(1)} KB</span>
+              <span className="text-sm font-semibold text-[var(--text)] truncate">{attachedFile.file.name}</span>
+              <span className="text-xs text-gray-500">{(attachedFile.file.size / 1024).toFixed(1)} KB</span>
             </div>
           </div>
           <button 
@@ -606,20 +591,20 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
               setAttachedFile(null);
               URL.revokeObjectURL(attachedFile.previewUrl);
             }}
-            className="p-1 text-slate-400 hover:text-rose-600 transition-colors cursor-pointer"
+            className="p-1 text-gray-400 hover:text-red-500 transition-colors cursor-pointer"
           >
-            <X size={16} />
+            <X size={20} />
           </button>
           
           {isUploading && (
-            <div className="absolute inset-0 bg-white/80 dark:bg-slate-900/80 flex items-center justify-center rounded-xl z-10">
-              <span className="text-xs font-semibold text-blue-600 animate-pulse">Uploading...</span>
+            <div className="absolute inset-0 bg-[var(--bg)]/80 backdrop-blur-sm flex items-center justify-center rounded-xl z-10">
+              <span className="text-sm font-bold text-blue-500 animate-pulse">Uploading...</span>
             </div>
           )}
         </div>
       )}
 
-      <div className="p-3 bg-white dark:bg-slate-900 flex items-end gap-2 z-10 border-t border-slate-200 dark:border-slate-800">
+      <div className="p-4 bg-transparent flex items-end gap-3 z-10 border-t border-gray-200/30 dark:border-gray-700/30">
         <input
           type="file"
           id="file-upload"
@@ -629,15 +614,13 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
         />
         <button 
           onClick={() => document.getElementById("file-upload").click()}
-          className="w-9 h-9 mb-0.5 flex-shrink-0 flex items-center justify-center rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer"
+          className="w-10 h-10 mb-1 flex-shrink-0 flex items-center justify-center rounded-full text-gray-500 hover:text-blue-600 bg-[var(--bg)] font-bold shadow-[4px_4px_8px_var(--shadow-dark),-4px_-4px_8px_var(--shadow-light)] hover:shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)] transition-all cursor-pointer"
           title="Attach File"
         >
-          <Paperclip size={16} />
-        </button>
-
-        <div className="relative flex-1 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all overflow-hidden">
+          <Paperclip size={18} />
+        </button>        <div className="relative flex-1 rounded-xl shadow-[inset_4px_4px_8px_var(--shadow-dark),inset_-4px_-4px_8px_var(--shadow-light)] focus-within:shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)] transition-all bg-[var(--card)] overflow-hidden">
           <div 
-            className="absolute inset-0 p-2.5 pointer-events-none whitespace-pre-wrap break-words text-slate-900 dark:text-slate-100 text-sm"
+            className="absolute inset-0 p-3 pointer-events-none whitespace-pre-wrap break-words text-[var(--text)]"
             style={{ 
               fontFamily: "inherit", 
               fontSize: "inherit", 
@@ -646,14 +629,10 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
             }}
           >
             {!newMessage ? (
-              <span className="text-slate-400">Type a message... (tag @cogni for AI)</span>
+              <span className="text-gray-400">Type a message...</span>
             ) : (
               newMessage.split(/(@cogni)/i).map((part, i) => 
-                part.toLowerCase() === '@cogni' ? (
-                  <span key={i} className="text-blue-600 dark:text-blue-400 font-semibold bg-blue-100/60 dark:bg-blue-900/30 px-1 py-0.5 rounded">
-                    {part}
-                  </span>
-                ) : part
+                part.toLowerCase() === '@cogni' ? <span key={i} className="text-blue-500 drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]">{part}</span> : part
               )
             )}
           </div>
@@ -684,17 +663,16 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
               e.target.style.height = "auto";
               e.target.style.height = Math.min(e.target.scrollHeight, 120) + "px";
             }}
-            className="w-full h-full p-2.5 bg-transparent border-none outline-none resize-none overflow-hidden text-transparent caret-slate-900 dark:caret-slate-100 relative z-10 text-sm"
+            className="w-full h-full p-3 bg-transparent border-none outline-none resize-none overflow-hidden text-transparent caret-[var(--text)] relative z-10"
             spellCheck="false"
           />
         </div>
 
         <button
           onClick={handleSubmit}
-          className="w-9 h-9 mb-0.5 flex-shrink-0 flex items-center justify-center rounded-lg bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white shadow-sm transition-colors cursor-pointer"
-          title="Send"
+          className="w-10 h-10 mb-1 flex-shrink-0 flex items-center justify-center rounded-full bg-blue-500 text-white font-bold shadow-[4px_4px_8px_var(--shadow-dark),-4px_-4px_8px_var(--shadow-light)] hover:bg-blue-600 hover:scale-105 transition-all cursor-pointer"
         >
-          <Send size={15} />
+          ➤
         </button>
       </div>
 

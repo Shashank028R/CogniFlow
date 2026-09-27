@@ -21,7 +21,7 @@
 |---|---|---|---|
 | **Frontend Framework** | React | `^19.2.5` | Component reuse, modern hooks for declarative state, latest React 19 concurrent features. |
 | **Build Tool** | Vite | `^8.0.10` | ESM-native dev server with instant HMR and optimized production bundling. |
-| **Styling** | TailwindCSS | `^4.2.4` | Utility-first design tokens with seamless dark/light mode, clean enterprise SaaS typography, and crisp border elevation. |
+| **Styling** | TailwindCSS | `^4.2.4` | Utility-first design tokens with seamless dark/light mode and glassmorphism support. |
 | **Real-Time Transport**| Socket.IO | `^4.8.3` | Handles WebSocket fallback (long-polling), built-in room clustering (`socket.join`), and auto-reconnection. |
 | **Backend Framework** | Express | `^5.2.1` | Minimal, robust, middleware pipeline; native support for modern asynchronous routing. |
 | **Database & ODM** | MongoDB + Mongoose | `^9.6.1` | Chat data is naturally document-shaped (messages, rooms with embedded members & receipts); avoids heavy multi-table SQL joins. |
@@ -278,7 +278,7 @@ The implementation plan is maintained in [files/IMPLEMENTATION_PLAN.md](IMPLEMEN
 | **Phase 3** | CogniBot Upgrades | ⏳ Planned | Rolling conversation memory, slash commands (`/summarize`, `/imagine`), streaming responses. |
 | **Phase 4** | Presence & Push | ⏳ Planned | Last-seen timestamps, Web Push notifications, group invite tokens. |
 | **Phase 5** | CI/CD & Deployment | ⏳ Planned | Docker containerization, Jest/Supertest suite, GitHub Actions CI. |
-| **Phase 6** | Frontend Polish & UI Redesign | ✅ In Progress | Modern professional SaaS UI overhaul completed (eliminated neumorphism, removed neon glows and glassmorphism, refined subtle ambient particle mesh, added skeleton states). |
+| **Phase 6** | Frontend Polish | ⏳ Planned | Error boundaries, loading skeletons, progressive UI enhancement. |
 
 ---
 

@@ -1,4 +1,3 @@
-import React from "react";
 import Avatar from "../ui/Avatar";
 
 const RoomCard = ({
@@ -16,49 +15,48 @@ const RoomCard = ({
   const unreadCount = getUnreadCount ? getUnreadCount(room._id) : 0;
   
   const isOnline = !room.isGroupChat && otherUser && onlineUsers.includes(otherUser._id);
-  const isSelected = selectedChat?._id === room._id;
 
   return (
     <div
       onClick={() => setSelectedChat(room)}
       className={`
-        flex items-center justify-between gap-3 p-2.5 rounded-xl cursor-pointer
-        transition-colors duration-150 w-full mb-1
+        flex items-center justify-between gap-3 p-3 rounded-2xl cursor-pointer
+        transition-all duration-300 ease-out hover:-translate-y-[2px]
+        w-[calc(100%-12px)] mx-auto mb-3
         ${
-          isSelected
-            ? "bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-100 border border-blue-200 dark:border-blue-800/60"
+          selectedChat?._id === room._id
+            ? "bg-[var(--bg)] shadow-[inset_5px_5px_10px_var(--shadow-dark),inset_-5px_-5px_10px_var(--shadow-light),0_0_15px_#3b82f64d] scale-[0.98]" 
             : unreadCount > 0
-            ? "bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80"
-            : "hover:bg-slate-100 dark:hover:bg-slate-800/50 border border-transparent"
+            ? "bg-[var(--card)] shadow-[5px_5px_10px_var(--shadow-dark),-5px_-5px_10px_var(--shadow-light)] border-l-4 border-blue-500"
+            : "bg-[var(--card)] shadow-[5px_5px_10px_var(--shadow-dark),-5px_-5px_10px_var(--shadow-light)]"
         }
       `}
     >
       <div className="flex items-center gap-3 overflow-hidden">
-        <div className="relative flex-shrink-0">
+        <div className="relative">
           <Avatar
             src={room.isGroupChat ? (room.profilePic || "/RoomChat.png") : otherUser?.profilePic}
             text={
               !room.isGroupChat
                 ? otherUser?.username?.charAt(0).toUpperCase()
-                : room.name?.charAt(0).toUpperCase()
+                : ""
             }
-            size="w-10 h-10"
           />
           {isOnline && (
-            <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full" />
+            <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-[var(--card)] rounded-full"></div>
           )}
         </div>
 
         <div className="flex flex-col overflow-hidden">
-          <p className={`text-sm truncate ${unreadCount > 0 || isSelected ? "font-semibold text-slate-900 dark:text-slate-100" : "font-medium text-slate-700 dark:text-slate-300"}`}>
+          <p className={`truncate ${unreadCount > 0 ? "font-bold text-[var(--text)]" : "font-medium text-[var(--text)]"}`}>
             {room.isGroupChat ? room.name : otherUser?.username}
           </p>
 
           <p
             className={`text-xs truncate ${
               unreadCount > 0
-                ? "text-blue-600 dark:text-blue-400 font-medium"
-                : "text-slate-400 dark:text-slate-500"
+                ? "text-blue-600 font-semibold"
+                : "text-gray-500"
             }`}
           >
             {room.lastMessage?.content || "No messages yet"}
@@ -67,7 +65,7 @@ const RoomCard = ({
       </div>
 
       {unreadCount > 0 && (
-        <div className="bg-blue-600 text-white text-[11px] px-2 py-0.5 rounded-full min-w-[20px] text-center font-semibold flex-shrink-0">
+        <div className="bg-gradient-to-tr from-blue-600 to-blue-400 text-white text-xs px-2.5 py-1 rounded-full min-w-[24px] text-center shadow-[0_0_10px_rgba(59,130,246,0.5)] animate-pulse font-bold border border-blue-300/30">
           {unreadCount}
         </div>
       )}

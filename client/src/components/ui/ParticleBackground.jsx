@@ -1,8 +1,12 @@
 import { useCallback, useState, useEffect } from "react";
 import Particles from "react-tsparticles";
 import { loadSlim } from "tsparticles-slim";
+import { useLocation } from "react-router-dom";
 
 const ParticleBackground = () => {
+  const location = useLocation();
+  const isDashboard = location.pathname === "/dashboard";
+  
   const [isDark, setIsDark] = useState(
     () => document.documentElement.classList.contains("dark")
   );
@@ -19,9 +23,8 @@ const ParticleBackground = () => {
     return () => observer.disconnect();
   }, []);
 
-  // Professional subtle neutral tones
-  const particleColor = isDark ? "#475569" : "#94a3b8";
-  const linkColor = isDark ? "#334155" : "#cbd5e1";
+  const particleColor = isDashboard && !isDark ? "#64748b" : "#94a3b8";
+  const linkColor = isDashboard && !isDark ? "#94a3b8" : "#cbd5e1";
 
   const particlesInit = useCallback(async (engine) => {
     await loadSlim(engine);
@@ -29,7 +32,7 @@ const ParticleBackground = () => {
 
   return (
     <Particles
-      key={isDark ? "dark-particles" : "light-particles"}
+      key={particleColor}
       id="tsparticles"
       init={particlesInit}
       options={{
@@ -42,7 +45,8 @@ const ParticleBackground = () => {
         interactivity: {
           events: {
             onClick: {
-              enable: false,
+              enable: true,
+              mode: "push",
             },
             onHover: {
               enable: true,
@@ -51,56 +55,59 @@ const ParticleBackground = () => {
             resize: true,
           },
           modes: {
+            push: {
+              quantity: 3,
+            },
             grab: {
-              distance: 140,
+              distance: 150,
               links: {
-                opacity: 0.35,
-                color: particleColor,
+                opacity: 0.5,
+                color: "#64748b",
               },
             },
           },
         },
         particles: {
           color: {
-            value: particleColor,
+            value: particleColor, // Dynamic color based on route and theme
           },
           links: {
             color: linkColor,
-            distance: 130,
+            distance: 120,
             enable: true,
-            opacity: 0.25,
+            opacity: 0.4,
             width: 1,
           },
           move: {
             direction: "none",
             enable: true,
             outModes: {
-              default: "out",
+              default: "bounce",
             },
-            random: false,
-            speed: 0.6,
+            random: true,
+            speed: 0.8,
             straight: false,
           },
           number: {
             density: {
               enable: true,
-              area: 900,
+              area: 800,
             },
-            value: 45,
+            value: 60,
           },
           opacity: {
-            value: 0.35,
+            value: 0.5,
           },
           shape: {
             type: "circle",
           },
           size: {
-            value: { min: 1, max: 2.5 },
+            value: { min: 1, max: 3 },
           },
         },
         detectRetina: true,
       }}
-      className="fixed inset-0 -z-10 pointer-events-none"
+      className="absolute inset-0 -z-10"
     />
   );
 };

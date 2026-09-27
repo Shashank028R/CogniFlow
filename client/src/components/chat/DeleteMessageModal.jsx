@@ -1,33 +1,29 @@
 import React from "react";
-import { X, Trash2 } from "lucide-react";
+import { X } from "lucide-react";
 
 const DeleteMessageModal = ({ isOpen, onClose, onConfirm, canDeleteForEveryone }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 p-4 animate-[fadeIn_0.15s_ease]">
-      <div className="bg-white dark:bg-slate-900 w-full max-w-sm p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl flex flex-col items-center relative animate-[slideIn_0.2s_ease]">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm animate-[fadeIn_0.2s_ease]">
+      <div className="bg-[var(--bg)] w-full max-w-sm p-6 rounded-3xl shadow-[10px_10px_20px_var(--shadow-dark),-10px_-10px_20px_var(--shadow-light)] flex flex-col items-center animate-[slideIn_0.3s_ease] relative">
         <button 
           onClick={onClose}
-          className="absolute top-4 right-4 w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition-colors cursor-pointer"
         >
-          <X size={18} />
+          <X size={20} />
         </button>
 
-        <div className="w-12 h-12 rounded-full bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-3">
-          <Trash2 size={22} />
-        </div>
-
-        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Delete Message</h3>
-        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mb-5 text-center">
+        <h3 className="text-xl font-semibold text-[var(--text)] mb-2">Delete Message</h3>
+        <p className="text-sm text-gray-500 mb-6 text-center">
           Are you sure you want to delete this message?
         </p>
 
-        <div className="flex flex-col gap-2 w-full">
+        <div className="flex flex-col gap-3 w-full">
           {canDeleteForEveryone && (
             <button
               onClick={() => onConfirm("everyone")}
-              className="w-full py-2.5 rounded-lg bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white font-medium text-sm shadow-sm transition-colors cursor-pointer"
+              className="w-full py-3 rounded-xl bg-red-500 text-white font-bold shadow-[4px_4px_10px_rgba(239,68,68,0.3)] hover:bg-red-600 transition-all cursor-pointer"
             >
               Delete for everyone
             </button>
@@ -35,14 +31,14 @@ const DeleteMessageModal = ({ isOpen, onClose, onConfirm, canDeleteForEveryone }
           
           <button
             onClick={() => onConfirm("me")}
-            className="w-full py-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-medium text-sm border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer"
+            className="w-full py-3 rounded-xl bg-[var(--bg)] text-gray-700 font-bold shadow-[4px_4px_8px_var(--shadow-dark),-4px_-4px_8px_var(--shadow-light)] hover:shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)] transition-all cursor-pointer"
           >
             Delete for me
           </button>
           
           <button
             onClick={onClose}
-            className="w-full py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium text-sm transition-colors cursor-pointer"
+            className="w-full py-3 rounded-xl bg-gray-200 text-gray-600 font-bold shadow-sm hover:bg-gray-300 transition-all cursor-pointer"
           >
             Cancel
           </button>

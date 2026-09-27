@@ -26,26 +26,31 @@ function App() {
     }
   }, [isDarkMode]);
 
+  const toggleTheme = () => setIsDarkMode(!isDarkMode);
+
   return (
-    <div className="bg-[var(--bg)] min-h-screen relative z-0 text-[var(--text)] transition-colors duration-200">
+    <div className="bg-[var(--bg)] min-h-screen relative z-0 transition-colors duration-500">
       <ParticleBackground />
       
       <Toaster
         position="top-right"
         toastOptions={{
           className:
-            "rounded-lg px-4 py-3 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 shadow-md border border-slate-200 dark:border-slate-800 text-sm font-medium",
-          duration: 3500,
+            "rounded-xl px-4 py-3 bg-[var(--bg)] text-[var(--text)] shadow-[6px_6px_12px_var(--shadow-dark),-6px_-6px_12px_var(--shadow-light)] border border-black/5",
+
           success: {
+            className:
+              "shadow-[6px_6px_12px_var(--shadow-dark),-6px_-6px_12px_var(--shadow-light),0_0_6px_rgba(37,99,235,0.3)]",
             iconTheme: {
               primary: "#2563eb",
-              secondary: "#ffffff",
+              secondary: "#eef2f7",
             },
           },
+
           error: {
             iconTheme: {
               primary: "#ef4444",
-              secondary: "#ffffff",
+              secondary: "#eef2f7",
             },
           },
         }}
