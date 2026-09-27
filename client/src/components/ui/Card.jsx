@@ -1,13 +1,14 @@
-const Card = ({ children }) => {
+import React from "react";
+
+const Card = ({ children, className = "" }) => {
   return (
     <div
-      className="
-          p-8 rounded-2xl bg-[var(--card)]/70 backdrop-blur-3xl border border-white/20 dark:border-white/5
-          shadow-[10px_10px_20px_var(--shadow-dark),-10px_-10px_20px_var(--shadow-light)]
-          transition-all duration-500
-          hover:shadow-[12px_12px_24px_var(--shadow-dark),-12px_-12px_24px_var(--shadow-light)]
-          hover:-translate-y-1
-        "
+      className={`
+        p-6 sm:p-8 rounded-xl bg-white dark:bg-slate-900
+        border border-slate-200 dark:border-slate-800
+        shadow-sm hover:shadow transition-shadow duration-200
+        ${className}
+      `}
     >
       {children}
     </div>

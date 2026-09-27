@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 
 import Card from "../components/ui/Card";
 import AuthForm from "../components/auth/AuthForm";
@@ -82,9 +83,18 @@ const AuthPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-transparent p-4 z-10 relative">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 z-10 relative">
+      <div className="w-full max-w-md mb-4">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
+        >
+          <ArrowLeft size={14} /> Back to home
+        </Link>
+      </div>
+
       <div className="w-full max-w-md">
-        <Card>
+        <Card className="shadow-lg border-slate-200 dark:border-slate-800">
           <AuthForm
             isLogin={isLogin}
             isVerifying={isVerifying}

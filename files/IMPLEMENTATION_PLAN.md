@@ -219,16 +219,22 @@ Aim for at least 20-30 tests. Use `mongodb-memory-server` so tests don't hit you
 
 ---
 
-## Phase 6 — Frontend Polish
+## Phase 6 — Frontend Polish & UI Redesign
+
+### Step 6.0 — Professional UI Redesign (No Neumorphism, No Neon Glows, No Glassmorphism) [COMPLETED]
+**Files:** `client/src/index.css`, `client/src/components/ui/*`, `client/src/components/sidebar/*`, `client/src/components/chat/*`, `client/src/pages/*`
+**Task:** Strip out all neumorphic double shadows (`shadow-[6px_6px_12px...]`, `shadow-[inset_4px_4px_8px...]`), eliminate frosted glass `backdrop-blur`, remove neon drop-shadows (`drop-shadow-[0_0_8px...]`) and neon cyan accents. Replace with clean enterprise SaaS design (solid crisp surfaces, 1px subtle borders, refined corporate blue `#2563eb`, subtle ambient particle mesh background).
+**Status:** ✅ Completed.
 
 ### Step 6.1 — Error boundaries
 **Files:** new `client/src/components/ui/ErrorBoundary.jsx`, `client/src/App.jsx`
 **Task:** Standard React class-based error boundary wrapping the main route outlet, showing a friendly "Something went wrong" screen with a reload button instead of a white screen.
 **Done when:** Throwing an intentional error in a child component shows the fallback UI, not a blank page.
 
-### Step 6.2 — Loading & skeleton states
-**Files:** `client/src/components/sidebar/RoomList.jsx`, `client/src/components/chat/ChatContainer.jsx`, `client/src/pages/Dashboard.jsx`
-**Task:** Replace any "blank until data arrives" states with skeleton placeholders (simple animated gray boxes matching the final layout shape) while rooms/messages are fetching.
+### Step 6.2 — Loading & skeleton states [COMPLETED]
+**Files:** `client/src/components/sidebar/RoomList.jsx`, `client/src/components/sidebar/SearchResults.jsx`, `client/src/components/chat/ChatContainer.jsx`
+**Task:** Replace any "blank until data arrives" states with skeleton placeholders (animated slate boxes matching layout shape) while rooms/messages are fetching.
+**Status:** ✅ Completed (added animated room and search result skeletons).
 **Done when:** Initial dashboard load shows skeletons instead of a flash of empty content.
 
 ---

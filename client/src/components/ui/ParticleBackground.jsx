@@ -1,12 +1,8 @@
 import { useCallback, useState, useEffect } from "react";
 import Particles from "react-tsparticles";
 import { loadSlim } from "tsparticles-slim";
-import { useLocation } from "react-router-dom";
 
 const ParticleBackground = () => {
-  const location = useLocation();
-  const isDashboard = location.pathname === "/dashboard";
-  
   const [isDark, setIsDark] = useState(
     () => document.documentElement.classList.contains("dark")
   );
@@ -23,8 +19,9 @@ const ParticleBackground = () => {
     return () => observer.disconnect();
   }, []);
 
-  const particleColor = isDashboard && !isDark ? "#64748b" : "#94a3b8";
-  const linkColor = isDashboard && !isDark ? "#94a3b8" : "#cbd5e1";
+  // Professional subtle neutral tones
+  const particleColor = isDark ? "#475569" : "#94a3b8";
+  const linkColor = isDark ? "#334155" : "#cbd5e1";
 
   const particlesInit = useCallback(async (engine) => {
     await loadSlim(engine);
@@ -32,7 +29,7 @@ const ParticleBackground = () => {
 
   return (
     <Particles
-      key={particleColor}
+      key={isDark ? "dark-particles" : "light-particles"}
       id="tsparticles"
       init={particlesInit}
       options={{
@@ -45,8 +42,7 @@ const ParticleBackground = () => {
         interactivity: {
           events: {
             onClick: {
-              enable: true,
-              mode: "push",
+              enable: false,
             },
             onHover: {
               enable: true,
@@ -55,59 +51,56 @@ const ParticleBackground = () => {
             resize: true,
           },
           modes: {
-            push: {
-              quantity: 3,
-            },
             grab: {
-              distance: 150,
+              distance: 140,
               links: {
-                opacity: 0.5,
-                color: "#64748b",
+                opacity: 0.35,
+                color: particleColor,
               },
             },
           },
         },
         particles: {
           color: {
-            value: particleColor, // Dynamic color based on route and theme
+            value: particleColor,
           },
           links: {
             color: linkColor,
-            distance: 120,
+            distance: 130,
             enable: true,
-            opacity: 0.4,
+            opacity: 0.25,
             width: 1,
           },
           move: {
             direction: "none",
             enable: true,
             outModes: {
-              default: "bounce",
+              default: "out",
             },
-            random: true,
-            speed: 0.8,
+            random: false,
+            speed: 0.6,
             straight: false,
           },
           number: {
             density: {
               enable: true,
-              area: 800,
+              area: 900,
             },
-            value: 60,
+            value: 45,
           },
           opacity: {
-            value: 0.5,
+            value: 0.35,
           },
           shape: {
             type: "circle",
           },
           size: {
-            value: { min: 1, max: 3 },
+            value: { min: 1, max: 2.5 },
           },
         },
         detectRetina: true,
       }}
-      className="absolute inset-0 -z-10"
+      className="fixed inset-0 -z-10 pointer-events-none"
     />
   );
 };
