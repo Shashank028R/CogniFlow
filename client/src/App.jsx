@@ -7,7 +7,6 @@ import Dashboard from "./pages/Dashboard";
 import HomePage from "./pages/HomePage";
 import AboutPage from "./pages/AboutPage";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
-import ParticleBackground from "./components/ui/ParticleBackground";
 import ProfilePage from "./pages/ProfilePage";
 
 function App() {
@@ -30,7 +29,6 @@ function App() {
 
   return (
     <div className="bg-[var(--bg)] min-h-screen relative z-0 transition-colors duration-500">
-      <ParticleBackground />
       
       <Toaster
         position="top-right"
