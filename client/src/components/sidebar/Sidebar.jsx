@@ -11,6 +11,7 @@ import SearchResults from "./SearchResults";
 import RoomList from "./RoomList";
 import LogoutButton from "../ui/LogoutButton";
 import RoomModal from "./RoomModal";
+import CogniAiModal from "../rag/CogniAiModal";
 
 const Sidebar = ({ selectedChat, setSelectedChat, onlineUsers, setOnlineUsers }) => {
   const navigate = useNavigate();
@@ -27,6 +28,9 @@ const Sidebar = ({ selectedChat, setSelectedChat, onlineUsers, setOnlineUsers })
   const [isRoomModalOpen, setIsRoomModalOpen] = useState(false);
 
   const [notifications, setNotifications] = useState([]);
+  const [isCogniModalOpen, setIsCogniModalOpen] = useState(false);
+  const [cogniRoom, setCogniRoom] = useState(null);
+  const [cogniModalTab, setCogniModalTab] = useState("quiz");
 
   const currentUserId = localStorage.getItem("userid");
   const token = localStorage.getItem("token");
@@ -154,8 +158,10 @@ const Sidebar = ({ selectedChat, setSelectedChat, onlineUsers, setOnlineUsers })
 
       setSearch("");
       setSearchResult([]);
+      return data;
     } catch {
       toast.error("Error creating chat");
+      return null;
     }
   };
 
@@ -238,7 +244,11 @@ const Sidebar = ({ selectedChat, setSelectedChat, onlineUsers, setOnlineUsers })
                   { headers: { Authorization: `Bearer ${token}` } }
                 );
                 if (data && data.length > 0) {
-                  accessChat(data[0]._id);
+                  const room = await accessChat(data[0]._id);
+                  if (room) {
+                    setCogniRoom(room);
+                    setIsCogniModalOpen(true);
+                  }
                 } else {
                   toast.error("CogniBot not found. Is the server running?");
                 }
@@ -246,7 +256,7 @@ const Sidebar = ({ selectedChat, setSelectedChat, onlineUsers, setOnlineUsers })
                 toast.error("Could not reach CogniBot");
               }
             }}
-            title="Chat with CogniAi"
+            title="CogniAi Study & Knowledge Hub"
             className="group absolute -top-16 right-0 h-12 flex items-center justify-start rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_4px_15px_rgba(37,99,235,0.4)] transition-all duration-300 w-12 hover:w-32 overflow-hidden cursor-pointer z-50 p-2"
           >
             <img src="/ai-button-logo.png" alt="CogniAi" className="w-8 h-8 object-contain flex-shrink-0 rounded-full" />
@@ -269,6 +279,19 @@ const Sidebar = ({ selectedChat, setSelectedChat, onlineUsers, setOnlineUsers })
           </button>
         </div>
       </div>
+      {cogniRoom && (
+        <CogniAiModal
+          isOpen={isCogniModalOpen}
+          onClose={() => setIsCogniModalOpen(false)}
+          cogniRoom={cogniRoom}
+          socket={socketRef.current}
+          initialTab={cogniModalTab}
+          onOpenFullChat={() => {
+            setSelectedChat(cogniRoom);
+            setIsCogniModalOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 };

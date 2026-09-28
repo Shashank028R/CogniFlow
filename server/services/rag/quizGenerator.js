@@ -91,29 +91,25 @@ DOCUMENT EXCERPTS:
 ${documentContext}`;
 
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  const modelsToTry = ["gemini-2.5-flash", "gemini-1.5-flash"];
   let result = null;
   let lastErr = null;
 
-  for (const modelName of modelsToTry) {
-    for (let attempt = 1; attempt <= 2; attempt++) {
-      try {
-        const model = genAI.getGenerativeModel({
-          model: modelName,
-          generationConfig: {
-            temperature: 0.3,
-            responseMimeType: "application/json",
-          },
-        });
-        result = await model.generateContent(prompt);
-        if (result) break;
-      } catch (err) {
-        lastErr = err;
-        console.warn(`[quizGenerator] Attempt ${attempt} with ${modelName} failed (${err.message}). Retrying...`);
-        await new Promise((r) => setTimeout(r, 1000 * attempt));
-      }
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const model = genAI.getGenerativeModel({
+        model: "gemini-2.5-flash",
+        generationConfig: {
+          temperature: 0.3,
+          responseMimeType: "application/json",
+        },
+      });
+      result = await model.generateContent(prompt);
+      if (result) break;
+    } catch (err) {
+      lastErr = err;
+      console.warn(`[quizGenerator] Attempt ${attempt} failed (${err.message}). Retrying in ${attempt * 1.5}s...`);
+      await new Promise((r) => setTimeout(r, 1500 * attempt));
     }
-    if (result) break;
   }
 
   if (!result) {
