@@ -2,12 +2,42 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import dotenv from "dotenv";
 dotenv.config();
 
-const getAiModel = () => {
+const CANDIDATE_MODELS = [
+  "gemini-3-flash-preview",
+  "gemini-flash-lite-latest",
+  "gemini-3.1-flash-lite-preview",
+  "gemini-2.5-flash",
+  "gemini-flash-latest",
+];
+
+export const callGeminiWithFallback = async ({ systemInstruction, contents, generationConfig }) => {
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-  return genAI.getGenerativeModel({ 
-    model: "gemini-2.5-flash",
-    systemInstruction: "You are CogniBot, a helpful, intelligent AI assistant in the CogniFlow chat app. NEVER output your internal thoughts, reasoning, or scratchpad notes. ONLY output the final conversational reply directly to the user."
-  });
+  let lastError = null;
+
+  for (const modelName of CANDIDATE_MODELS) {
+    try {
+      const modelOptions = { model: modelName };
+      if (systemInstruction) {
+        modelOptions.systemInstruction = systemInstruction;
+      }
+      if (generationConfig) {
+        modelOptions.generationConfig = generationConfig;
+      }
+
+      const model = genAI.getGenerativeModel(modelOptions);
+      const result = await model.generateContent(contents);
+      return result;
+    } catch (err) {
+      lastError = err;
+      console.warn(`[callGeminiWithFallback] Model ${modelName} failed (${err.status || err.message}). Trying fallback...`);
+      if (err.status === 429 || err.status === 404 || err.status === 503) {
+        continue;
+      }
+      continue;
+    }
+  }
+
+  throw lastError || new Error("All Gemini model candidates failed");
 };
 
 export const generateAIResponse = async (prompt, history = [], fileUrl = null) => {
@@ -64,8 +94,10 @@ export const generateAIResponse = async (prompt, history = [], fileUrl = null) =
       }
     }
 
-    const model = getAiModel();
-    const result = await model.generateContent(parts);
+    const result = await callGeminiWithFallback({
+      systemInstruction: "You are CogniBot, a helpful, intelligent AI assistant in the CogniFlow chat app. NEVER output your internal thoughts, reasoning, or scratchpad notes. ONLY output the final conversational reply directly to the user.",
+      contents: parts,
+    });
     const text = result.response.text();
 
     let match = text.match(/<response>([\s\S]*?)(?:<\/response>|$)/i);

@@ -1,4 +1,3 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import KnowledgeSource from "../../models/KnowledgeSource.js";
 import Message from "../../models/Message.js";
 import RAG_CONFIG from "./config.js";
@@ -12,6 +11,7 @@ import { chunkPages } from "./chunker.js";
 import { embedDocuments } from "./embeddings.js";
 import vectorStore from "./vectorStore.js";
 import { emitKnowledgeStatus } from "./ingestQueue.js";
+import { callGeminiWithFallback } from "../../utils/aiClient.js";
 
 /**
  * Generate answer from general knowledge using Gemini
@@ -20,12 +20,6 @@ export const generateGeneralAnswer = async ({ question, history = [] }) => {
   if (!process.env.GEMINI_API_KEY) {
     throw new Error("GEMINI_API_KEY is not defined");
   }
-
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.5-flash",
-    systemInstruction: GENERAL_ANSWER_SYSTEM_PROMPT,
-  });
 
   let historyContext = "";
   if (history && history.length > 0) {
@@ -37,7 +31,10 @@ export const generateGeneralAnswer = async ({ question, history = [] }) => {
   }
 
   const prompt = `${historyContext}User question: ${question}`;
-  const result = await model.generateContent(prompt);
+  const result = await callGeminiWithFallback({
+    systemInstruction: GENERAL_ANSWER_SYSTEM_PROMPT,
+    contents: prompt,
+  });
   return result.response.text().trim();
 };
 
@@ -45,26 +42,23 @@ export const generateGeneralAnswer = async ({ question, history = [] }) => {
  * Handles outcomes when documents do not contain the answer
  */
 const handleNoContext = async ({ mode, standaloneQuestion, history }) => {
-  if (mode === "hybrid") {
-    try {
-      const generalText = await generateGeneralAnswer({
-        question: standaloneQuestion,
-        history,
-      });
+  try {
+    const generalText = await generateGeneralAnswer({
+      question: standaloneQuestion,
+      history,
+    });
 
-      return {
-        content: generalText,
-        answerMode: "general",
-        ragSources: [],
-        replyToQuestion: standaloneQuestion,
-        actions: ["add_to_knowledge"],
-      };
-    } catch (err) {
-      console.warn("[RAG] General fallback generation failed:", err.message);
-    }
+    return {
+      content: generalText,
+      answerMode: "general",
+      ragSources: [],
+      replyToQuestion: standaloneQuestion,
+      actions: ["add_to_knowledge"],
+    };
+  } catch (err) {
+    console.warn("[RAG] General fallback generation failed:", err.message);
   }
 
-  // Strict mode (or hybrid fallback failure)
   return {
     content: "I couldn't find an answer to your question in the uploaded documents for this chat.",
     answerMode: "no_context",
@@ -114,19 +108,15 @@ export const answerWithRag = async ({ room, userMessage, history = [], modeOverr
 
   // 2. Generate grounded answer
   try {
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const systemPrompt = buildGroundedPrompt(retrieved.chunks);
-
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
+    const userPrompt = `Question: ${userMessage}`;
+    const result = await callGeminiWithFallback({
       systemInstruction: systemPrompt,
+      contents: userPrompt,
       generationConfig: {
         temperature: 0.2,
       },
     });
-
-    const userPrompt = `Question: ${userMessage}`;
-    const result = await model.generateContent(userPrompt);
     const answerText = result.response.text().trim();
 
     // Check Gate 2: Model returned sentinel indicating lack of context

@@ -4,6 +4,7 @@ import RAG_CONFIG from "./config.js";
 import { embedQuery } from "./embeddings.js";
 import vectorStore from "./vectorStore.js";
 import { CONDENSE_PROMPT } from "./prompts.js";
+import { callGeminiWithFallback } from "../../utils/aiClient.js";
 
 /**
  * Rewrites a conversational follow-up question into a standalone query
@@ -22,16 +23,13 @@ export const condenseQuestion = async (question, history = []) => {
   try {
     if (!process.env.GEMINI_API_KEY) return question;
 
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-
     const formattedHistory = recentHistory
       .map((msg) => `${msg.sender?.username || (msg.isAiResponse ? "CogniBot" : "User")}: ${msg.content}`)
       .join("\n");
 
     const prompt = `${CONDENSE_PROMPT}\n\nChat History:\n${formattedHistory}\n\nFollow-up question:\n${question}`;
 
-    const result = await model.generateContent(prompt);
+    const result = await callGeminiWithFallback({ contents: prompt });
     const text = result.response.text().trim();
     return text || question;
   } catch (err) {
@@ -87,8 +85,11 @@ export const retrieve = async ({ roomId, question, history = [] }) => {
 
   const topScore = rawResults[0]?.score || 0;
 
-  // 4. Filter by minimum score
-  const qualifying = rawResults.filter((r) => r.score >= RAG_CONFIG.MIN_SCORE);
+  // 4. Filter by minimum score (or keep top results if all fell below)
+  let qualifying = rawResults.filter((r) => r.score >= RAG_CONFIG.MIN_SCORE);
+  if (qualifying.length === 0 && rawResults.length > 0) {
+    qualifying = rawResults.slice(0, Math.min(rawResults.length, RAG_CONFIG.TOP_K));
+  }
 
   // 5. Deduplicate overlapping chunks
   const deduplicated = [];
@@ -101,9 +102,6 @@ export const retrieve = async ({ roomId, question, history = [] }) => {
   }
 
   if (deduplicated.length === 0) {
-    console.log(
-      `[RAG Retriever] Top score (${topScore.toFixed(3)}) fell below threshold (${RAG_CONFIG.MIN_SCORE}) for query: "${standaloneQuestion}"`
-    );
     return { standaloneQuestion, chunks: [], topScore };
   }
 

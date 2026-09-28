@@ -1,8 +1,8 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import KnowledgeSource from "../../models/KnowledgeSource.js";
 import KnowledgeChunk from "../../models/KnowledgeChunk.js";
 import Message from "../../models/Message.js";
 import Room from "../../models/Room.js";
+import { callGeminiWithFallback } from "../../utils/aiClient.js";
 
 /**
  * Generates an interactive multiple-choice quiz based on room documents
@@ -90,25 +90,23 @@ Output MUST strictly match this JSON schema:
 DOCUMENT EXCERPTS:
 ${documentContext}`;
 
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
   let result = null;
   let lastErr = null;
 
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
-      const model = genAI.getGenerativeModel({
-        model: "gemini-2.5-flash",
+      result = await callGeminiWithFallback({
+        contents: prompt,
         generationConfig: {
           temperature: 0.3,
           responseMimeType: "application/json",
         },
       });
-      result = await model.generateContent(prompt);
       if (result) break;
     } catch (err) {
       lastErr = err;
       console.warn(`[quizGenerator] Attempt ${attempt} failed (${err.message}). Retrying in ${attempt * 1.5}s...`);
-      await new Promise((r) => setTimeout(r, 1500 * attempt));
+      await new Promise((resolve) => setTimeout(resolve, attempt * 1500));
     }
   }
 

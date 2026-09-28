@@ -61,7 +61,11 @@ export const useKnowledge = (roomId, socket) => {
         },
       });
 
-      toast(`"${file.name}" uploaded, processing knowledge...`, { icon: "📄" });
+      if (data.alreadyExists) {
+        toast(`"${file.name}" is already in knowledge base and ready!`, { icon: "✅" });
+      } else {
+        toast(`"${file.name}" uploaded, processing knowledge...`, { icon: "📄" });
+      }
 
       // Optimistically add or update source
       setSources((prev) => [data.source, ...prev.filter((s) => s._id !== data.source._id)]);

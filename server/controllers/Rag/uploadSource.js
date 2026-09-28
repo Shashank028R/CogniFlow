@@ -64,9 +64,15 @@ export const uploadSource = async (req, res) => {
     });
 
     if (existing) {
-      return res.status(409).json({
-        message: `File "${file.originalname}" is already added to this chat's knowledge base`,
+      if (existing.status === "failed") {
+        existing.status = "pending";
+        await existing.save();
+        enqueueIngestion(existing._id, buffer);
+      }
+      return res.status(200).json({
+        message: `File "${file.originalname}" is ready in knowledge base`,
         source: existing,
+        alreadyExists: true,
       });
     }
 
