@@ -618,7 +618,21 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
           title="Attach File"
         >
           <Paperclip size={18} />
-        </button>        <div className="relative flex-1 rounded-xl shadow-[inset_4px_4px_8px_var(--shadow-dark),inset_-4px_-4px_8px_var(--shadow-light)] focus-within:shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)] transition-all bg-[var(--card)] overflow-hidden">
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            setNewMessage((prev) => (prev.includes("@cogni") ? prev : (prev ? `@cogni ${prev}` : "@cogni ")));
+            document.getElementById("chat-textarea")?.focus();
+          }}
+          className="w-10 h-10 mb-1 flex-shrink-0 flex items-center justify-center rounded-full bg-[var(--bg)] p-1.5 shadow-[4px_4px_8px_var(--shadow-dark),-4px_-4px_8px_var(--shadow-light)] hover:shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)] transition-all cursor-pointer group"
+          title="Ask CogniBot (@cogni)"
+        >
+          <img src="/ai-button-logo.png" alt="CogniAI" className="w-full h-full object-contain group-hover:scale-110 transition-transform" />
+        </button>
+
+        <div className="relative flex-1 rounded-xl shadow-[inset_4px_4px_8px_var(--shadow-dark),inset_-4px_-4px_8px_var(--shadow-light)] focus-within:shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)] transition-all bg-[var(--card)] overflow-hidden">
           <div 
             className="absolute inset-0 p-3 pointer-events-none whitespace-pre-wrap break-words text-[var(--text)]"
             style={{ 

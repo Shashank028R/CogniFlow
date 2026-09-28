@@ -12,10 +12,8 @@ const HomePage = () => {
 
       {/* Navbar */}
       <nav className="container mx-auto px-6 py-6 flex justify-between items-center relative z-20">
-        <div className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-xl bg-[var(--bg)] shadow-[4px_4px_8px_var(--shadow-dark),-4px_-4px_8px_var(--shadow-light)] flex items-center justify-center text-blue-600">
-            <Sparkles size={24} />
-          </div>
+        <div className="flex items-center gap-3">
+          <img src="/CogniFlow.png" alt="CogniFlow" className="w-10 h-10 object-contain rounded-xl shadow-sm" />
           <span className="text-xl font-bold tracking-tight text-slate-700 dark:text-white">CogniFlow</span>
         </div>
         <div className="flex items-center gap-6">
@@ -29,7 +27,13 @@ const HomePage = () => {
       </nav>
 
       {/* Hero Section */}
-      <section className="container mx-auto px-6 pt-20 pb-24 text-center relative z-20">
+      <section className="container mx-auto px-6 pt-12 pb-24 text-center relative z-20">
+        <div className="flex justify-center mb-6">
+          <div className="w-24 h-24 md:w-32 md:h-32 rounded-3xl p-3 bg-[var(--bg)] shadow-[8px_8px_18px_var(--shadow-dark),-8px_-8px_18px_var(--shadow-light)] flex items-center justify-center">
+            <img src="/CogniFlow.png" alt="CogniFlow AI Logo" className="w-full h-full object-contain drop-shadow-md" />
+          </div>
+        </div>
+
         <div className="inline-block mb-4 px-4 py-1.5 rounded-full bg-blue-100/50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 font-semibold text-sm shadow-sm">
           Powered by Google Gemini Vision
         </div>
@@ -64,8 +68,8 @@ const HomePage = () => {
           </Card>
 
           <Card className="flex flex-col items-start p-8 animate-breath delay-100">
-            <div className="w-14 h-14 rounded-2xl bg-[var(--bg)] shadow-[inset_4px_4px_8px_var(--shadow-dark),inset_-4px_-4px_8px_var(--shadow-light)] flex items-center justify-center text-indigo-500 mb-6">
-              <Bot size={28} />
+            <div className="w-14 h-14 rounded-2xl bg-[var(--bg)] shadow-[inset_4px_4px_8px_var(--shadow-dark),inset_-4px_-4px_8px_var(--shadow-light)] flex items-center justify-center p-2 mb-6">
+              <img src="/ai-button-logo.png" alt="CogniBot" className="w-10 h-10 object-contain rounded-lg" />
             </div>
             <h3 className="text-xl font-bold mb-3">Summon CogniBot</h3>
             <p className="text-slate-500 dark:text-slate-400 text-sm">Just type <strong className="text-indigo-500">@cogni</strong> in any group chat to bring an intelligent assistant into the conversation. It answers directly in the room for all to see.</p>
@@ -149,9 +153,8 @@ const HomePage = () => {
 
             {/* AI Response */}
             <div className="flex gap-4 flex-row-reverse justify-end w-full">
-              <div className="w-10 h-10 shrink-0 rounded-full bg-[var(--bg)] shadow-[inset_3px_3px_6px_var(--shadow-dark),inset_-3px_-3px_6px_var(--shadow-light)] flex items-center justify-center text-indigo-500 overflow-hidden">
-                <img src="/ai logo.webp" alt="CogniBot" className="w-full h-full object-cover" onError={(e) => e.target.style.display='none'} />
-                <Bot size={20} className="absolute -z-10" />
+              <div className="w-10 h-10 shrink-0 rounded-full bg-[var(--bg)] shadow-[inset_3px_3px_6px_var(--shadow-dark),inset_-3px_-3px_6px_var(--shadow-light)] flex items-center justify-center overflow-hidden p-1">
+                <img src="/ai-button-logo.png" alt="CogniBot" className="w-full h-full object-contain" />
               </div>
               <div className="bg-[var(--card)] shadow-[6px_6px_14px_#00000066,-6px_-6px_14px_var(--shadow-light)] p-4 rounded-2xl rounded-tl-none text-left max-w-[80%]">
                 <div className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed markdown-body [&>ul]:list-disc [&>ul]:ml-4 [&>ul]:mb-2">
@@ -217,7 +220,10 @@ const HomePage = () => {
       
       {/* Footer */}
       <footer className="container mx-auto px-6 py-10 flex flex-col md:flex-row justify-between items-center text-slate-500 text-sm border-t border-slate-200 dark:border-slate-800 mt-10 relative z-20">
-        <p>© 2026 CogniFlow. All rights reserved.</p>
+        <div className="flex items-center gap-2">
+          <img src="/CogniFlow.png" alt="CogniFlow" className="w-6 h-6 object-contain" />
+          <p>© 2026 CogniFlow. All rights reserved.</p>
+        </div>
         <div className="flex gap-4 mt-4 md:mt-0">
           <Link to="/about" className="hover:text-blue-500 transition-colors">Contact Developer</Link>
           <a href="https://github.com/Shashank028R/CogniFlow" target="_blank" rel="noopener noreferrer" className="hover:text-blue-500 transition-colors">GitHub</a>

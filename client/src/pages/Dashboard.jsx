@@ -37,8 +37,11 @@ const Dashboard = () => {
           <div
             className="p-10 rounded-2xl text-center bg-[var(--card)]/70 backdrop-blur-3xl
             shadow-[8px_8px_18px_var(--shadow-dark),-8px_-8px_18px_var(--shadow-light)]
-            animate-[fadeIn_0.5s_ease] border border-white/20 dark:border-white/5"
+            animate-[fadeIn_0.5s_ease] border border-white/20 dark:border-white/5 flex flex-col items-center"
           >
+            <div className="w-16 h-16 mb-4 rounded-2xl bg-white/10 dark:bg-white/5 p-2 shadow-inner border border-white/20 flex items-center justify-center">
+              <img src="/CogniFlow.png" alt="CogniFlow Logo" className="w-full h-full object-contain" />
+            </div>
             <h2 className="text-xl font-semibold text-[var(--text)]">
               Welcome to <span className="text-blue-600">CogniFlow</span>
             </h2>

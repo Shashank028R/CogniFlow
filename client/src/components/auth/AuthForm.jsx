@@ -36,6 +36,11 @@ const AuthForm = ({
 
   return (
     <>
+      <div className="flex justify-center mb-3">
+        <div className="w-14 h-14 rounded-2xl bg-white/20 dark:bg-white/5 p-2 shadow-sm border border-white/20 flex items-center justify-center">
+          <img src="/CogniFlow.png" alt="CogniFlow Logo" className="w-full h-full object-contain" />
+        </div>
+      </div>
       <h2 className="text-center text-xl font-semibold text-[var(--text)] mb-1">
         Welcome to{" "}
         <span className="text-blue-600 drop-shadow-[0_0_6px_rgba(37,99,235,0.5)]">
