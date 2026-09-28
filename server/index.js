@@ -16,11 +16,34 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const allowedOrigins = [
+  "https://cogniflow-client.onrender.com",
+  "http://localhost:5173",
+  "http://localhost:3000",
+];
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin) || origin.endsWith(".onrender.com") || origin.includes("localhost")) {
+      callback(null, true);
+    } else {
+      callback(null, true);
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"],
+  optionsSuccessStatus: 200,
+};
+
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: "*",
+    origin: (origin, callback) => {
+      callback(null, true);
+    },
     methods: ["GET", "POST"],
+    credentials: true,
   },
 });
 
@@ -30,7 +53,7 @@ handleSocket(io);
 
 import { initCogniBot } from "./utils/initCogniBot.js";
 
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 connectDb().then(() => {
   initCogniBot();
