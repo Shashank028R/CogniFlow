@@ -6,7 +6,7 @@ import Card from "../components/ui/Card";
 
 const AboutPage = () => {
   return (
-    <div className="min-h-screen font-sans text-[var(--text)] relative z-10 overflow-hidden bg-[var(--bg)] flex flex-col">
+    <div className="min-h-screen font-sans text-[var(--text)] relative z-10 overflow-hidden bg-transparent flex flex-col">
       
       {/* Decorative background elements */}
       <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-500/10 rounded-full blur-[120px] pointer-events-none"></div>

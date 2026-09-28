@@ -30,9 +30,13 @@ const ParticleBackground = () => {
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
       <Particles
         key={particleColor}
-        id="tsparticles-home"
+        id="tsparticles-bg"
         init={particlesInit}
         options={{
+          fullScreen: {
+            enable: true,
+            zIndex: 0,
+          },
           background: {
             color: {
               value: "transparent",

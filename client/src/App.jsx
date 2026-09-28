@@ -8,6 +8,7 @@ import HomePage from "./pages/HomePage";
 import AboutPage from "./pages/AboutPage";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import ProfilePage from "./pages/ProfilePage";
+import ParticleBackground from "./components/ui/ParticleBackground";
 
 function App() {
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -28,8 +29,9 @@ function App() {
   const toggleTheme = () => setIsDarkMode(!isDarkMode);
 
   return (
-    <div className="bg-[var(--bg)] min-h-screen relative z-0 transition-colors duration-500">
-      
+    <div className="bg-[var(--bg)] min-h-screen relative overflow-hidden transition-colors duration-500">
+      <ParticleBackground />
+
       <Toaster
         position="top-right"
         toastOptions={{
@@ -54,28 +56,30 @@ function App() {
         }}
       />
 
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="/auth" element={<AuthPage />} />
+      <div className="relative z-10 min-h-screen">
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/auth" element={<AuthPage />} />
 
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <ProfilePage />
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </div>
     </div>
   );
 }

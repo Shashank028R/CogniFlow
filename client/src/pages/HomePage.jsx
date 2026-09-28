@@ -2,14 +2,12 @@ import { useNavigate, Link } from "react-router-dom";
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
 import { MessageSquare, Zap, Eye, CheckCheck, CloudUpload, Key, Image as ImageIcon, X, FileText } from "lucide-react";
-import ParticleBackground from "../components/ui/ParticleBackground";
 
 const HomePage = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] transition-colors duration-300 relative selection:bg-blue-500 selection:text-white">
-      <ParticleBackground />
+    <div className="min-h-screen bg-transparent text-[var(--text)] transition-colors duration-300 relative selection:bg-blue-500 selection:text-white">
 
       {/* Navbar */}
       <nav className="container mx-auto px-6 py-4 flex justify-between items-center relative z-20 border-b border-slate-200/60 dark:border-slate-800/60 backdrop-blur-md bg-[var(--bg)]/70 sticky top-0">
