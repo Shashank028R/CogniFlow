@@ -12,9 +12,9 @@ const Dashboard = () => {
       <div
         className={`
           ${selectedChat ? "hidden md:flex" : "flex"}
-          w-full md:w-[450px] h-full
-          p-3 md:p-5 md:pr-0
-          transition-all duration-300
+          w-full md:w-[360px] lg:w-[390px] h-full
+          p-2 md:p-3 md:pr-0
+          transition-all duration-200
         `}
       >
         <RoomSideBar
@@ -29,17 +29,17 @@ const Dashboard = () => {
       <div
         className={`
           ${selectedChat ? "flex" : "hidden md:flex"}
-          flex-1 items-center justify-center p-3 md:p-5
-          transition-all duration-300
+          flex-1 items-center justify-center p-2 md:p-3
+          transition-all duration-200
         `}
       >
         {!selectedChat ? (
           <div
-            className="p-10 rounded-2xl text-center bg-[var(--card)]/70 backdrop-blur-3xl
-            shadow-[8px_8px_18px_var(--shadow-dark),-8px_-8px_18px_var(--shadow-light)]
-            animate-[fadeIn_0.5s_ease] border border-white/20 dark:border-white/5 flex flex-col items-center"
+            className="p-8 rounded-2xl text-center bg-[var(--card)]/80 backdrop-blur-xl
+            shadow-[0_4px_20px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.25)]
+            animate-[fadeIn_0.3s_ease] border border-slate-200/80 dark:border-slate-800/80 flex flex-col items-center max-w-sm mx-4"
           >
-            <div className="w-16 h-16 mb-4 rounded-2xl bg-white/10 dark:bg-white/5 p-2 shadow-inner border border-white/20 flex items-center justify-center">
+            <div className="w-16 h-16 mb-4 rounded-2xl bg-slate-100 dark:bg-slate-800/80 p-2.5 border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-center shadow-xs">
               <img src="/CogniFlow.png" alt="CogniFlow Logo" className="w-full h-full object-contain" />
             </div>
             <h2 className="text-xl font-semibold text-[var(--text)]">

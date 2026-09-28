@@ -165,7 +165,7 @@ const Sidebar = ({ selectedChat, setSelectedChat, onlineUsers, setOnlineUsers })
   };
 
   return (
-    <div className="h-full w-full bg-[var(--card)]/70 backdrop-blur-3xl flex flex-col p-4 rounded-3xl shadow-[10px_10px_20px_var(--shadow-dark),-10px_-10px_20px_var(--shadow-light)] border border-white/20 dark:border-white/5 z-20">
+    <div className="h-full w-full bg-[var(--card)]/80 backdrop-blur-2xl flex flex-col p-3 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.04)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.25)] border border-slate-200/80 dark:border-slate-800/80 z-20">
       <SidebarHeader onSettingsClick={() => navigate("/profile")} />
 
       <RoomModal
@@ -182,7 +182,7 @@ const Sidebar = ({ selectedChat, setSelectedChat, onlineUsers, setOnlineUsers })
         handleSearch={handleSearch}
       />
 
-      <div className="flex-1 overflow-y-auto flex flex-col gap-3 pr-1">
+      <div className="flex-1 overflow-y-auto flex flex-col gap-1 pr-1 scrollbar-hide">
         {search ? (
           <SearchResults
             loadingSearch={loadingSearch}
@@ -203,7 +203,7 @@ const Sidebar = ({ selectedChat, setSelectedChat, onlineUsers, setOnlineUsers })
       </div>
 
       {/* ACTIONS */}
-      <div className="mt-3 flex items-center justify-between gap-3">
+      <div className="mt-2 pt-2 border-t border-slate-200/60 dark:border-slate-800/60 flex items-center justify-between gap-2">
         <div className="flex-1">
           <LogoutButton onClick={handleLogout} />
         </div>
@@ -218,24 +218,21 @@ const Sidebar = ({ selectedChat, setSelectedChat, onlineUsers, setOnlineUsers })
               root.classList.add("dark");
               localStorage.setItem("theme", "dark");
             }
-            // Force re-render of this icon
             setSearch(search);
           }}
           title="Toggle Theme"
-          className="w-12 h-12 flex-shrink-0 rounded-full font-bold text-gray-500 hover:text-blue-500
-          bg-[var(--bg)] flex items-center justify-center text-xl
-          shadow-[4px_4px_8px_var(--shadow-dark),-4px_-4px_8px_var(--shadow-light)]
-          transition-all duration-300 ease-in-out
-          hover:shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)]
-          active:scale-95 cursor-pointer"
+          className="w-9 h-9 flex-shrink-0 rounded-xl text-slate-500 hover:text-slate-800 dark:hover:text-slate-200
+          bg-slate-100/70 dark:bg-slate-800/70 hover:bg-slate-200/70 dark:hover:bg-slate-700/70
+          border border-slate-200/80 dark:border-slate-700/80
+          flex items-center justify-center shadow-xs
+          transition-colors duration-150 active:scale-95 cursor-pointer"
         >
-          {document.documentElement.classList.contains("dark") ? <Sun size={20} className="text-amber-500" /> : <Moon size={20} className="text-indigo-500" />}
+          {document.documentElement.classList.contains("dark") ? <Sun size={17} className="text-amber-500" /> : <Moon size={17} className="text-indigo-500" />}
         </button>
         <div className="relative">
           <button
             onClick={async () => {
               try {
-                // Search for CogniBot to get its ID, then access chat
                 const { data } = await axios.get(
                   `${BackendUrl}/api/user?search=CogniBot`,
                   { headers: { Authorization: `Bearer ${token}` } }
@@ -250,10 +247,10 @@ const Sidebar = ({ selectedChat, setSelectedChat, onlineUsers, setOnlineUsers })
               }
             }}
             title="Chat with CogniAi"
-            className="group absolute -top-16 right-0 h-12 flex items-center justify-start rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_4px_15px_rgba(37,99,235,0.4)] transition-all duration-300 w-12 hover:w-32 overflow-hidden cursor-pointer z-50 p-2"
+            className="group absolute -top-14 right-0 h-10 flex items-center justify-start rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-[0_2px_10px_rgba(37,99,235,0.3)] transition-all duration-200 w-10 hover:w-28 overflow-hidden cursor-pointer z-50 p-1.5"
           >
-            <img src="/ai-button-logo.png" alt="CogniAi" className="w-8 h-8 object-contain flex-shrink-0 rounded-full" />
-            <span className="whitespace-nowrap opacity-0 group-hover:opacity-100 font-bold transition-opacity duration-300 ml-2 overflow-hidden text-sm">
+            <img src="/ai-button-logo.png" alt="CogniAi" className="w-7 h-7 object-contain flex-shrink-0 rounded-full" />
+            <span className="whitespace-nowrap opacity-0 group-hover:opacity-100 font-semibold transition-opacity duration-200 ml-1.5 overflow-hidden text-xs">
               CogniAi
             </span>
           </button>
@@ -261,11 +258,11 @@ const Sidebar = ({ selectedChat, setSelectedChat, onlineUsers, setOnlineUsers })
           <button
             onClick={() => setIsRoomModalOpen(true)}
             title="Create Group"
-            className="w-12 h-12 flex-shrink-0 rounded-full font-bold text-blue-600
-            bg-[var(--bg)] flex items-center justify-center text-2xl
-            shadow-[4px_4px_8px_var(--shadow-dark),-4px_-4px_8px_var(--shadow-light)]
-            transition-all duration-300 ease-in-out
-            hover:shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)]
+            className="w-9 h-9 flex-shrink-0 rounded-xl font-bold text-blue-600
+            bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40
+            border border-blue-200/60 dark:border-blue-800/60
+            flex items-center justify-center text-lg
+            shadow-xs transition-colors duration-150
             active:scale-95 cursor-pointer relative z-40"
           >
             +

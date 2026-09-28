@@ -2,8 +2,9 @@ const Avatar = ({ text, src, size = "w-10 h-10" }) => {
   return (
     <div
       className={`${size} rounded-full overflow-hidden flex items-center justify-center
-      bg-[var(--card)]
-      shadow-[inset_3px_3px_6px_var(--shadow-dark),inset_-3px_-3px_6px_var(--shadow-light)]`}
+      bg-slate-100 dark:bg-slate-800
+      border border-slate-200/80 dark:border-slate-700/60
+      shadow-[0_1px_3px_rgba(0,0,0,0.05)] flex-shrink-0`}
     >
       {src ? (
         <img src={src} alt="avatar" className="w-full h-full object-cover" />

@@ -2,26 +2,24 @@ import { Settings } from "lucide-react";
 
 const SidebarHeader = ({ onSettingsClick }) => {
   return (
-    <div className="mb-6 flex justify-between items-center px-2 pt-2">
+    <div className="mb-3 flex justify-between items-center px-1 pt-1">
       <div className="flex items-center gap-2.5">
-        <img src="/CogniFlow.png" alt="CogniFlow" className="w-8 h-8 object-contain rounded-lg shadow-sm" />
-        <h2 className="text-2xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-gray-700 to-gray-900 dark:from-gray-200 dark:to-gray-400 drop-shadow-sm transition-all duration-500">
-          Cogni<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-500 dark:from-cyan-400 dark:to-blue-500 drop-shadow-[0_0_8px_#2563eb66] dark:drop-shadow-[0_0_12px_#22d3ee80]">Flow</span>
+        <img src="/CogniFlow.png" alt="CogniFlow" className="w-7 h-7 object-contain rounded-lg shadow-xs" />
+        <h2 className="text-xl font-bold tracking-tight text-slate-800 dark:text-slate-100">
+          Cogni<span className="text-blue-600">Flow</span>
         </h2>
       </div>
 
       <button
         onClick={onSettingsClick}
-        className="w-10 h-10 rounded-full flex items-center justify-center text-gray-500 hover:text-blue-600
-        transition-all duration-300 ease-out
-        bg-[var(--card)]
-        shadow-[5px_5px_10px_var(--shadow-dark),-5px_-5px_10px_var(--shadow-light)] 
-        hover:shadow-[inset_3px_3px_6px_var(--shadow-dark),inset_-3px_-3px_6px_var(--shadow-light)]
-        active:shadow-[inset_5px_5px_10px_var(--shadow-dark),inset_-5px_-5px_10px_var(--shadow-light)]
-        cursor-pointer outline-0 group"
+        className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-500 hover:text-slate-800 dark:hover:text-slate-200
+        bg-slate-100/70 dark:bg-slate-800/70 hover:bg-slate-200/70 dark:hover:bg-slate-700/70
+        border border-slate-200/80 dark:border-slate-700/80
+        shadow-xs transition-all duration-200
+        active:scale-95 cursor-pointer outline-none group"
         title="Profile & Settings"
       >
-        <Settings size={20} className="group-hover:rotate-90 transition-transform duration-500 ease-in-out" />
+        <Settings size={17} className="group-hover:rotate-45 transition-transform duration-300 ease-out" />
       </button>
     </div>
   );

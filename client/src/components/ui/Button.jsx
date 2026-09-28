@@ -1,19 +1,16 @@
-const Button = ({ children, ...props }) => {
+const Button = ({ children, className = "", ...props }) => {
   return (
     <button
       {...props}
-      className="
-      w-full p-3 rounded-xl font-semibold text-blue-600 bg-[var(--bg)]
-      shadow-[6px_6px_12px_var(--shadow-dark),-6px_-6px_12px_var(--shadow-light)]
-      transition-all duration-300 ease-in-out
-      hover:shadow-[8px_8px_16px_var(--shadow-dark),-8px_-8px_16px_var(--shadow-light)]
-      hover:-translate-y-0.5
-      active:translate-y-0
-      active:scale-95
-      active:shadow-[inset_4px_4px_8px_var(--shadow-dark),inset_-4px_-4px_8px_var(--shadow-light)]
-      focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-[#eef2f7]
-      cursor-pointer
-      "
+      className={`
+        w-full py-2.5 px-4 rounded-xl font-medium text-white bg-blue-600 hover:bg-blue-700
+        shadow-[0_2px_8px_rgba(37,99,235,0.2)] hover:shadow-[0_4px_12px_rgba(37,99,235,0.3)]
+        active:scale-[0.99]
+        transition-all duration-200 ease-out
+        focus:outline-none focus:ring-2 focus:ring-blue-500/30
+        cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed
+        ${className}
+      `}
     >
       {children}
     </button>

@@ -211,63 +211,63 @@ const ProfilePage = () => {
         </div>
       )}
 
-      <div className="w-full max-w-lg bg-[var(--bg)] rounded-3xl p-8 shadow-[10px_10px_20px_var(--shadow-dark),-10px_-10px_20px_var(--shadow-light)] animate-[slideIn_0.3s_ease]">
+      <div className="w-full max-w-lg bg-[var(--card)]/80 backdrop-blur-2xl rounded-2xl p-6 md:p-8 shadow-[0_8px_32px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.25)] border border-slate-200/80 dark:border-slate-800 animate-[fadeIn_0.2s_ease]">
         
-        <div className="flex items-center gap-4 mb-8">
+        <div className="flex items-center gap-3.5 mb-6">
           <button 
             onClick={() => navigate(-1)}
             type="button"
-            className="w-10 h-10 flex items-center justify-center rounded-full text-gray-500 hover:text-blue-600 bg-[var(--bg)] shadow-[4px_4px_8px_var(--shadow-dark),-4px_-4px_8px_var(--shadow-light)] hover:shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)] transition-all cursor-pointer"
+            className="w-9 h-9 flex items-center justify-center rounded-xl text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 bg-slate-100/70 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/80 shadow-xs active:scale-95 transition-all cursor-pointer"
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft size={18} />
           </button>
-          <h1 className="text-2xl font-bold text-[var(--text)]">Edit Profile</h1>
+          <h1 className="text-xl font-bold text-[var(--text)]">Edit Profile</h1>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-          <div className="flex flex-col items-center mb-4">
-            <div className="w-24 h-24 mb-4 rounded-full shadow-[6px_6px_12px_var(--shadow-dark),-6px_-6px_12px_var(--shadow-light)] p-1 bg-[var(--bg)]">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div className="flex flex-col items-center mb-2">
+            <div className="w-20 h-20 mb-3 rounded-full border border-slate-200/80 dark:border-slate-700/80 p-1 bg-slate-100 dark:bg-slate-800 shadow-xs">
               <Avatar src={formData.profilePic} text={formData.username.charAt(0).toUpperCase()} size="w-full h-full" />
             </div>
-            <p className="text-sm text-gray-500">Profile Preview</p>
+            <p className="text-xs text-slate-500">Profile Preview</p>
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-semibold text-gray-600 px-1">Email (Read Only)</label>
+            <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 px-1">Email (Read Only)</label>
             <input
               type="text"
               name="email"
               value={formData.email}
               disabled
-              className="w-full p-3 rounded-xl bg-[var(--bg)] text-gray-400 border-none outline-none shadow-[inset_4px_4px_8px_var(--shadow-dark),inset_-4px_-4px_8px_var(--shadow-light)] cursor-not-allowed"
+              className="w-full py-2.5 px-3 rounded-xl bg-slate-100/60 dark:bg-slate-800/40 text-slate-400 border border-slate-200/60 dark:border-slate-800 cursor-not-allowed text-sm"
             />
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-semibold text-gray-600 px-1">Username</label>
+            <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 px-1">Username</label>
             <input
               type="text"
               name="username"
               value={formData.username}
               onChange={handleChange}
               required
-              className="w-full p-3 rounded-xl bg-[var(--bg)] text-[var(--text)] border-none outline-none shadow-[inset_4px_4px_8px_var(--shadow-dark),inset_-4px_-4px_8px_var(--shadow-light)] focus:shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)] transition-all"
+              className="w-full py-2.5 px-3 rounded-xl bg-slate-50/70 dark:bg-slate-800/60 text-[var(--text)] border border-slate-200/80 dark:border-slate-700/80 shadow-xs focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition-all text-sm outline-none"
             />
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-semibold text-gray-600 px-1">Bio</label>
+            <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 px-1">Bio</label>
             <textarea
               name="bio"
               value={formData.bio}
               onChange={handleChange}
               rows={3}
-              className="w-full p-3 rounded-xl bg-[var(--bg)] text-[var(--text)] border-none outline-none shadow-[inset_4px_4px_8px_var(--shadow-dark),inset_-4px_-4px_8px_var(--shadow-light)] focus:shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)] transition-all resize-none"
+              className="w-full py-2.5 px-3 rounded-xl bg-slate-50/70 dark:bg-slate-800/60 text-[var(--text)] border border-slate-200/80 dark:border-slate-700/80 shadow-xs focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition-all resize-none text-sm outline-none"
             />
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-semibold text-gray-600 px-1">Profile Picture</label>
+            <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 px-1">Profile Picture</label>
             <div className="flex items-center gap-3">
               <input
                 type="file"
@@ -279,22 +279,22 @@ const ProfilePage = () => {
               <button
                 type="button"
                 onClick={() => document.getElementById("profile-pic-upload").click()}
-                className="w-full p-3 rounded-xl bg-[var(--bg)] text-blue-600 font-bold border-none outline-none shadow-[4px_4px_8px_var(--shadow-dark),-4px_-4px_8px_var(--shadow-light)] hover:shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)] transition-all cursor-pointer"
+                className="w-full py-2.5 px-3 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 font-semibold border border-blue-200/70 dark:border-blue-800/70 shadow-xs hover:bg-blue-100/70 dark:hover:bg-blue-900/50 active:scale-95 transition-all cursor-pointer text-xs"
               >
                 Upload New Photo
               </button>
             </div>
-            <span className="text-xs text-gray-400 px-1 mt-1">Select a JPG or PNG to crop</span>
+            <span className="text-[11px] text-slate-400 px-1 mt-0.5">Select a JPG or PNG to crop</span>
           </div>
 
           <button
             type="submit"
             disabled={isSaving}
-            className="w-full mt-4 flex items-center justify-center gap-2 py-4 rounded-xl bg-blue-500 text-white font-bold shadow-[4px_4px_10px_rgba(37,99,235,0.3),-4px_-4px_10px_var(--shadow-light)] hover:bg-blue-600 hover:scale-[1.02] transition-all cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
+            className="w-full mt-2 flex items-center justify-center gap-2 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-[0_2px_8px_rgba(37,99,235,0.25)] active:scale-95 transition-all cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed text-sm"
           >
             {isSaving ? "Saving..." : (
               <>
-                <Save size={18} /> Save Changes
+                <Save size={16} /> Save Changes
               </>
             )}
           </button>

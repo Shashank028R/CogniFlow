@@ -1,13 +1,14 @@
-const Card = ({ children }) => {
+const Card = ({ children, className = "" }) => {
   return (
     <div
-      className="
-          p-8 rounded-2xl bg-[var(--card)]/70 backdrop-blur-3xl border border-white/20 dark:border-white/5
-          shadow-[10px_10px_20px_var(--shadow-dark),-10px_-10px_20px_var(--shadow-light)]
-          transition-all duration-500
-          hover:shadow-[12px_12px_24px_var(--shadow-dark),-12px_-12px_24px_var(--shadow-light)]
-          hover:-translate-y-1
-        "
+      className={`
+        p-6 rounded-2xl bg-[var(--card)]/80 backdrop-blur-xl border border-slate-200/70 dark:border-slate-800/80
+        shadow-[0_4px_20px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.2)]
+        hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] dark:hover:shadow-[0_8px_24px_rgba(0,0,0,0.3)]
+        hover:border-slate-300 dark:hover:border-slate-700
+        transition-all duration-300
+        ${className}
+      `}
     >
       {children}
     </div>

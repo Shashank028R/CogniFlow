@@ -321,17 +321,18 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
   };
 
   return (
-    <div className="flex flex-col w-full h-full max-w-5xl bg-[var(--card)]/70 backdrop-blur-3xl rounded-3xl shadow-[10px_10px_20px_var(--shadow-dark),-10px_-10px_20px_var(--shadow-light)] overflow-hidden animate-[fadeIn_0.3s_ease] border border-white/20 dark:border-white/5">
-      <div className="flex items-center justify-between p-4 bg-transparent border-b border-gray-200/30 dark:border-gray-700/30 shadow-[0_4px_10px_rgba(0,0,0,0.02)] z-10">
+    <div className="flex flex-col w-full h-full max-w-5xl bg-[var(--card)]/80 backdrop-blur-2xl rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.04)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.25)] overflow-hidden animate-[fadeIn_0.2s_ease] border border-slate-200/80 dark:border-slate-800/80">
+      <div className="flex items-center justify-between p-3 px-4 bg-[var(--card)]/60 border-b border-slate-200/80 dark:border-slate-800/80 shadow-xs z-10">
         <div className="flex items-center gap-3">
           <button
-            className="md:hidden text-blue-600 font-bold hover:scale-110 transition-transform cursor-pointer"
+            className="md:hidden text-blue-600 font-bold hover:opacity-80 transition-opacity cursor-pointer text-sm"
             onClick={() => setSelectedChat(null)}
           >
             ←
           </button>
 
           <Avatar
+            size="w-9 h-9"
             src={selectedChat.isGroupChat ? (selectedChat.profilePic || "/RoomChat.png") : (!selectedChat.isGroupChat ? selectedChat.members.find(m => m._id !== currentUserId)?.profilePic : null)}
             text={
               !selectedChat.isGroupChat
@@ -341,14 +342,14 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
           />
 
           <div className="flex flex-col">
-            <h2 className="text-lg font-semibold text-[var(--text)] leading-tight">
+            <h2 className="text-base font-semibold text-[var(--text)] leading-tight">
               {getChatName()}
             </h2>
             {!selectedChat.isGroupChat && (() => {
               const otherUser = selectedChat.members.find((m) => m._id !== currentUserId);
               const isOnline = otherUser && onlineUsers.includes(otherUser._id);
               if (isOnline) {
-                return <span className="text-xs text-green-500 font-medium">Online</span>;
+                return <span className="text-[11px] text-emerald-500 font-medium leading-none mt-0.5">Online</span>;
               }
               return null;
             })()}
@@ -358,27 +359,27 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
         <div className="relative">
           <button 
             onClick={() => setShowMenu(!showMenu)}
-            className="text-gray-500 hover:text-blue-600 font-bold px-3 py-1 rounded-xl shadow-[4px_4px_8px_var(--shadow-dark),-4px_-4px_8px_var(--shadow-light)] transition-all cursor-pointer"
+            className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 bg-slate-100/70 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/80 shadow-xs active:scale-95 transition-colors cursor-pointer text-sm"
           >
             ⋮
           </button>
           
           {showMenu && (
-            <div className="absolute right-0 mt-2 w-48 bg-[var(--card)] rounded-xl shadow-[8px_8px_16px_var(--shadow-dark),-8px_-8px_16px_var(--shadow-light)] z-50 overflow-hidden border border-gray-200">
+            <div className="absolute right-0 mt-2 w-44 bg-[var(--card)] rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.12)] z-50 overflow-hidden border border-slate-200 dark:border-slate-800">
               {selectedChat.isGroupChat && (
                 <button
                   onClick={() => {
                     setIsGroupSettingsOpen(true);
                     setShowMenu(false);
                   }}
-                  className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors border-b border-gray-200"
+                  className="w-full text-left px-3.5 py-2.5 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-b border-slate-200 dark:border-slate-800"
                 >
                   Group Settings
                 </button>
               )}
               <button
                 onClick={handleClearChat}
-                className="w-full text-left px-4 py-3 text-sm text-red-500 hover:bg-gray-100 transition-colors"
+                className="w-full text-left px-3.5 py-2.5 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
               >
                 Clear Chat
               </button>
@@ -490,12 +491,12 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
                     )}
 
                     <div
-                      className={`p-3 text-sm shadow-sm flex flex-col ${
+                      className={`p-3 text-sm flex flex-col ${
                         isDeleted 
-                          ? "bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-gray-400 italic rounded-2xl border border-gray-300 dark:border-slate-600"
+                          ? "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 italic rounded-2xl border border-slate-200 dark:border-slate-700"
                           : isMyMessage
-                            ? "bg-blue-500 text-white rounded-2xl rounded-tr-none shadow-[4px_4px_10px_rgba(37,99,235,0.2)]"
-                            : "bg-[var(--card)] text-black dark:text-white rounded-2xl rounded-tl-none shadow-[6px_6px_14px_#00000066,-6px_-6px_14px_var(--shadow-light)] dark:shadow-[4px_4px_12px_#3b82f666,-4px_-4px_12px_var(--shadow-light)] transition-all"
+                            ? "bg-blue-600 text-white rounded-2xl rounded-tr-xs shadow-[0_2px_8px_rgba(37,99,235,0.2)]"
+                            : "bg-slate-100/90 dark:bg-slate-800/90 text-slate-800 dark:text-slate-100 rounded-2xl rounded-tl-xs border border-slate-200/70 dark:border-slate-700/60 shadow-xs"
                       }`}
                     >
                       {isDeleted ? (
@@ -604,7 +605,7 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
         </div>
       )}
 
-      <div className="p-4 bg-transparent flex items-end gap-3 z-10 border-t border-gray-200/30 dark:border-gray-700/30">
+      <div className="p-3 bg-[var(--card)]/60 flex items-end gap-2 z-10 border-t border-slate-200/80 dark:border-slate-800/80">
         <input
           type="file"
           id="file-upload"
@@ -614,10 +615,10 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
         />
         <button 
           onClick={() => document.getElementById("file-upload").click()}
-          className="w-10 h-10 mb-1 flex-shrink-0 flex items-center justify-center rounded-full text-gray-500 hover:text-blue-600 bg-[var(--bg)] font-bold shadow-[4px_4px_8px_var(--shadow-dark),-4px_-4px_8px_var(--shadow-light)] hover:shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)] transition-all cursor-pointer"
+          className="w-9 h-9 mb-0.5 flex-shrink-0 flex items-center justify-center rounded-xl text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 bg-slate-100/70 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/80 shadow-xs hover:bg-slate-200/70 dark:hover:bg-slate-700/70 active:scale-95 transition-all cursor-pointer"
           title="Attach File"
         >
-          <Paperclip size={18} />
+          <Paperclip size={16} />
         </button>
 
         <button
@@ -626,15 +627,15 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
             setNewMessage((prev) => (prev.includes("@cogni") ? prev : (prev ? `@cogni ${prev}` : "@cogni ")));
             document.getElementById("chat-textarea")?.focus();
           }}
-          className="w-10 h-10 mb-1 flex-shrink-0 flex items-center justify-center rounded-full bg-[var(--bg)] p-1.5 shadow-[4px_4px_8px_var(--shadow-dark),-4px_-4px_8px_var(--shadow-light)] hover:shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)] transition-all cursor-pointer group"
+          className="w-9 h-9 mb-0.5 flex-shrink-0 flex items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200/60 dark:border-blue-800/60 p-1.5 shadow-xs hover:border-blue-400/80 active:scale-95 transition-all cursor-pointer group"
           title="Ask CogniBot (@cogni)"
         >
-          <img src="/ai-button-logo.png" alt="CogniAI" className="w-full h-full object-contain group-hover:scale-110 transition-transform" />
+          <img src="/ai-button-logo.png" alt="CogniAI" className="w-full h-full object-contain" />
         </button>
 
-        <div className="relative flex-1 rounded-xl shadow-[inset_4px_4px_8px_var(--shadow-dark),inset_-4px_-4px_8px_var(--shadow-light)] focus-within:shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)] transition-all bg-[var(--card)] overflow-hidden">
+        <div className="relative flex-1 rounded-xl border border-slate-200/80 dark:border-slate-700/80 bg-slate-50/70 dark:bg-slate-800/60 focus-within:border-blue-500/70 focus-within:ring-2 focus-within:ring-blue-500/10 transition-all overflow-hidden shadow-xs">
           <div 
-            className="absolute inset-0 p-3 pointer-events-none whitespace-pre-wrap break-words text-[var(--text)]"
+            className="absolute inset-0 p-2.5 px-3 pointer-events-none whitespace-pre-wrap break-words text-[var(--text)] text-sm"
             style={{ 
               fontFamily: "inherit", 
               fontSize: "inherit", 
@@ -643,10 +644,10 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
             }}
           >
             {!newMessage ? (
-              <span className="text-gray-400">Type a message...</span>
+              <span className="text-slate-400">Type a message...</span>
             ) : (
               newMessage.split(/(@cogni)/i).map((part, i) => 
-                part.toLowerCase() === '@cogni' ? <span key={i} className="text-blue-500 drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]">{part}</span> : part
+                part.toLowerCase() === '@cogni' ? <span key={i} className="text-blue-500 font-medium">{part}</span> : part
               )
             )}
           </div>
@@ -677,14 +678,14 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
               e.target.style.height = "auto";
               e.target.style.height = Math.min(e.target.scrollHeight, 120) + "px";
             }}
-            className="w-full h-full p-3 bg-transparent border-none outline-none resize-none overflow-hidden text-transparent caret-[var(--text)] relative z-10"
+            className="w-full h-full p-2.5 px-3 bg-transparent border-none outline-none resize-none overflow-hidden text-transparent caret-[var(--text)] text-sm relative z-10"
             spellCheck="false"
           />
         </div>
 
         <button
           onClick={handleSubmit}
-          className="w-10 h-10 mb-1 flex-shrink-0 flex items-center justify-center rounded-full bg-blue-500 text-white font-bold shadow-[4px_4px_8px_var(--shadow-dark),-4px_-4px_8px_var(--shadow-light)] hover:bg-blue-600 hover:scale-105 transition-all cursor-pointer"
+          className="w-9 h-9 mb-0.5 flex-shrink-0 flex items-center justify-center rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-[0_2px_8px_rgba(37,99,235,0.25)] active:scale-95 transition-all cursor-pointer text-sm"
         >
           ➤
         </button>
