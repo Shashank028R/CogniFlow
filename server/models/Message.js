@@ -28,6 +28,9 @@ const messageSchema = new mongoose.Schema(
     filePublicId: {
       type: String,
     },
+    fileName: {
+      type: String,
+    },
     isAiResponse: {
       type: Boolean,
       default: false,

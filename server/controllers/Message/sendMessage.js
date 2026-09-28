@@ -6,7 +6,7 @@ import { generateDocumentQuiz } from "../../services/rag/quizGenerator.js";
 
 const sendMessage = async (req, res) => {
   try {
-    const { content, roomId, messageType, fileUrl, filePublicId, ragMode } = req.body;
+    const { content, roomId, messageType, fileUrl, filePublicId, fileName, ragMode } = req.body;
 
     if (!roomId || (!content && !fileUrl)) {
       return res.status(400).json({
@@ -31,6 +31,7 @@ const sendMessage = async (req, res) => {
       messageType,
       fileUrl,
       filePublicId,
+      fileName: fileName || (fileUrl ? decodeURIComponent(fileUrl.split("/").pop().split("?")[0]) : ""),
       deliveredTo: [req.user._id],
       readBy: [req.user._id],
     });
@@ -55,7 +56,7 @@ const sendMessage = async (req, res) => {
 
     // --- AI & RAG INTEGRATION ---
     const isDirectAI = !room.isGroupChat && room.members.some((m) => m.toString() === global.cogniBotId);
-    const isMentionedAI = room.isGroupChat && content && content.toLowerCase().includes("@cogni");
+    const isMentionedAI = Boolean(content && /@cogni\b/i.test(content));
 
     if ((isDirectAI || isMentionedAI) && req.user._id.toString() !== global.cogniBotId) {
       (async () => {
@@ -63,6 +64,10 @@ const sendMessage = async (req, res) => {
           let prompt = content || "";
           if (isMentionedAI) {
             prompt = prompt.replace(/@cogni/gi, "").trim();
+          }
+
+          if (!prompt && fileUrl) {
+            prompt = "Please analyze and explain the main points of this attached document.";
           }
 
           // Fetch recent chat history for context
@@ -108,29 +113,29 @@ const sendMessage = async (req, res) => {
             }
           }
 
-          // Try RAG first if no chat file attachment is present (or if explicitly requested via ragMode)
+          // Try RAG first if knowledge sources exist for this room
           let ragResult = null;
-          if (!aiResponseText && (!fileUrl || ragMode)) {
+          if (!aiResponseText && prompt) {
             try {
               ragResult = await answerWithRag({
                 room,
                 userMessage: prompt,
                 history,
-                modeOverride: ragMode || null,
+                modeOverride: ragMode || "grounded",
               });
             } catch (ragErr) {
               console.warn("[sendMessage] RAG execution error, falling back to standard AI:", ragErr.message);
             }
           }
 
-          if (ragResult) {
+          if (ragResult && ragResult.answerMode === "grounded") {
             aiResponseText = ragResult.content;
             answerMode = ragResult.answerMode;
             ragSources = ragResult.ragSources || [];
             replyToQuestion = ragResult.replyToQuestion || null;
             actions = ragResult.actions || [];
           } else {
-            // Standard multimodal AI response
+            // Standard multimodal AI response (with direct PDF/image inspection)
             aiResponseText = await generateAIResponse(prompt, history, fileUrl);
             answerMode = "plain";
           }
@@ -166,12 +171,10 @@ const sendMessage = async (req, res) => {
           await room.save();
 
           if (global.io) {
-            if (room.isGroupChat) {
-              global.io.in(roomId).emit("message received", populatedAIMessage);
-            } else {
-              global.io.in(req.user._id.toString()).emit("message received", populatedAIMessage);
-              global.io.in(global.cogniBotId).emit("message received", populatedAIMessage);
-            }
+            global.io.in(roomId.toString()).emit("message received", populatedAIMessage);
+            room.members.forEach((memberId) => {
+              global.io.in(memberId.toString()).emit("message received", populatedAIMessage);
+            });
           }
         } catch (aiError) {
           console.error("Error generating AI response:", aiError);

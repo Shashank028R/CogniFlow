@@ -251,7 +251,7 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
       }
 
       const messagePayload = {
-        content: newMessage || (uploadData ? uploadData.originalName : ""),
+        content: newMessage.trim(),
         roomId: selectedChat._id,
       };
 
@@ -263,11 +263,20 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
         messagePayload.messageType = uploadData.resourceType === "image" ? "image" : "file";
         messagePayload.fileUrl = uploadData.fileUrl;
         messagePayload.filePublicId = uploadData.publicId;
+        messagePayload.fileName = attachedFile.file.name;
+
+        if (!messagePayload.content) {
+          messagePayload.content = attachedFile.file.name;
+        }
 
         // Auto-ingest document into Room Knowledge Base if PDF or text
         const fileName = attachedFile.file.name.toLowerCase();
         if (fileName.endsWith(".pdf") || fileName.endsWith(".txt") || attachedFile.file.type === "application/pdf") {
-          uploadSource(attachedFile.file);
+          try {
+            await uploadSource(attachedFile.file);
+          } catch (e) {
+            console.warn("Knowledge source auto-upload warning:", e);
+          }
         }
       }
 
@@ -663,16 +672,65 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
                       ) : m.messageType === "image" && m.fileUrl ? (
                         <div className="flex flex-col gap-2">
                           <img src={m.fileUrl} alt="attachment" className="max-w-[250px] max-h-[250px] rounded-xl object-cover cursor-pointer hover:opacity-90 transition-opacity" onClick={() => window.open(m.fileUrl, '_blank')} />
-                          {m.content !== "Attachment" && <span>{m.content}</span>}
+                          {m.content && m.content !== "Attachment" && !m.content.startsWith("http") && (
+                            <div className={`markdown-body text-sm break-words pt-1 px-0.5 ${isMyMessage ? 'text-white' : 'text-[var(--text)]'}`}>
+                              <ReactMarkdown remarkPlugins={[remarkGfm]}>{m.content}</ReactMarkdown>
+                            </div>
+                          )}
                         </div>
                       ) : m.messageType === "file" && m.fileUrl ? (
-                        <div className="flex flex-col gap-2">
-                          <a href={m.fileUrl.replace('/upload/', '/upload/fl_attachment/')} target="_blank" rel="noopener noreferrer" className={`flex items-center gap-3 p-3 rounded-xl transition-all ${isMyMessage ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[var(--bg)] hover:bg-gray-200 dark:hover:bg-slate-800 shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)] dark:hover:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.5),inset_-4px_-4px_8px_rgba(255,255,255,0.02)]'}`}>
-                            <FileText size={24} className={isMyMessage ? "text-white" : "text-blue-500"} />
-                            <span className="truncate max-w-[150px] font-medium">{m.content}</span>
-                            <Download size={18} className={`ml-2 flex-shrink-0 ${isMyMessage ? "text-blue-200" : "text-gray-400"}`} />
-                          </a>
-                        </div>
+                        (() => {
+                          const docName = m.fileName || (m.fileUrl ? decodeURIComponent(m.fileUrl.split("/").pop().split("?")[0]) : "Document.pdf");
+                          const hasPromptText = Boolean(
+                            m.content && 
+                            m.content !== docName && 
+                            m.content !== "Attachment" &&
+                            !m.content.toLowerCase().endsWith(".pdf") &&
+                            !m.content.toLowerCase().endsWith(".txt")
+                          );
+
+                          return (
+                            <div className="flex flex-col gap-2">
+                              {/* Document Card */}
+                              <a
+                                href={m.fileUrl.replace('/upload/', '/upload/fl_attachment/')}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={`flex items-center gap-3 p-2.5 px-3 rounded-xl transition-all border ${
+                                  isMyMessage
+                                    ? 'bg-blue-700/60 border-blue-400/30 hover:bg-blue-700/90 text-white'
+                                    : 'bg-[var(--card)]/90 border-slate-200/80 dark:border-slate-700 hover:bg-slate-200/60 dark:hover:bg-slate-700/50 text-[var(--text)]'
+                                } shadow-xs group/file`}
+                              >
+                                <div className={`p-2 rounded-lg flex-shrink-0 ${
+                                  isMyMessage 
+                                    ? 'bg-blue-500/40 text-white' 
+                                    : 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400'
+                                }`}>
+                                  <FileText size={20} />
+                                </div>
+                                <div className="flex-1 min-w-0 flex flex-col pr-1">
+                                  <span className="font-semibold text-xs truncate" title={docName}>
+                                    {docName}
+                                  </span>
+                                  <span className={`text-[10px] ${isMyMessage ? 'text-blue-200' : 'text-slate-400'}`}>
+                                    Document • Click to download
+                                  </span>
+                                </div>
+                                <Download size={16} className={`flex-shrink-0 ${isMyMessage ? "text-blue-200 group-hover/file:text-white" : "text-gray-400 group-hover/file:text-blue-500"}`} />
+                              </a>
+
+                              {/* Prompt / Message written below the document card */}
+                              {hasPromptText && (
+                                <div className={`markdown-body text-sm break-words pt-1 px-0.5 ${isMyMessage ? 'text-white' : 'text-[var(--text)]'}`}>
+                                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                    {m.content}
+                                  </ReactMarkdown>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()
                       ) : m.messageType === "quiz" && m.quizData ? (
                         <div className="flex flex-col gap-2">
                           <QuizCard quiz={m.quizData} messageId={m._id} />
