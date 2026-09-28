@@ -163,91 +163,76 @@ const RoomModal = ({ isOpen, onClose, rooms, setRooms }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md animate-[fadeIn_0.2s_ease] p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-[fadeIn_0.2s_ease] p-4">
       
       {/* Crop Modal Overlay */}
       {imgSrc && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-[fadeIn_0.2s_ease-out]">
-          <div className="bg-white dark:bg-[#272729] border border-[#e0e0e0] dark:border-[#333336] p-6 rounded-[18px] max-w-lg w-full flex flex-col items-center">
-            <h2 className="text-lg font-semibold mb-4 text-[#1d1d1f] dark:text-white">Crop Group Picture</h2>
-            <div className="max-h-[60vh] overflow-hidden w-full bg-black rounded-[14px] flex items-center justify-center">
+          <div className="bg-[var(--bg)] p-6 rounded-3xl shadow-2xl max-w-lg w-full flex flex-col items-center">
+            <h2 className="text-xl font-bold mb-4 text-[var(--text)]">Crop Group Picture</h2>
+            <div className="max-h-[60vh] overflow-hidden w-full bg-black rounded-xl flex items-center justify-center">
               <ReactCrop crop={crop} onChange={(_, percentCrop) => setCrop(percentCrop)} onComplete={(c) => setCompletedCrop(c)} aspect={1} circularCrop>
                 <img ref={imgRef} alt="Crop preview" src={imgSrc} onLoad={onImageLoad} className="max-h-[60vh] object-contain block" />
               </ReactCrop>
             </div>
-            <div className="flex gap-3 mt-5 w-full">
-              <button onClick={() => setImgSrc("")} className="flex-1 py-2.5 rounded-full border border-[#e0e0e0] dark:border-[#333336] text-[#1d1d1f] dark:text-white hover:bg-black/5 dark:hover:bg-white/5 active:scale-[0.95] transition-all flex items-center justify-center gap-2 text-sm font-normal cursor-pointer">
-                <X size={16} /> Cancel
+            <div className="flex gap-4 mt-6 w-full">
+              <button onClick={() => setImgSrc("")} className="flex-1 py-3 rounded-xl bg-gray-200 text-gray-700 font-bold shadow-[4px_4px_8px_var(--shadow-dark),-4px_-4px_8px_var(--shadow-light)] hover:shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)] transition-all flex items-center justify-center gap-2">
+                <X size={18} /> Cancel
               </button>
-              <button onClick={handleUploadCrop} disabled={isUploadingCrop || !completedCrop} className="flex-1 py-2.5 rounded-full bg-[#0066cc] hover:bg-[#0071e3] text-white active:scale-[0.95] transition-all flex items-center justify-center gap-2 text-sm font-normal disabled:opacity-50 cursor-pointer">
-                {isUploadingCrop ? "Processing..." : <><Check size={16} /> Apply</>}
+              <button onClick={handleUploadCrop} disabled={isUploadingCrop || !completedCrop} className="flex-1 py-3 rounded-xl bg-blue-500 text-white font-bold shadow-[4px_4px_10px_rgba(37,99,235,0.3),-4px_-4px_10px_var(--shadow-light)] hover:bg-blue-600 hover:scale-[1.02] transition-all flex items-center justify-center gap-2 disabled:opacity-50">
+                {isUploadingCrop ? "Processing..." : <><Check size={18} /> Apply</>}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      <div className="bg-white dark:bg-[#272729] border border-[#e0e0e0] dark:border-[#333336] w-full max-w-md p-6 rounded-[18px] flex flex-col gap-4 max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-1">
-          <h2 className="text-[19px] font-semibold text-[#1d1d1f] dark:text-white tracking-tight">Create Room</h2>
-          <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center text-[#86868b] hover:text-[#1d1d1f] dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer">✕</button>
+      <div className="bg-[var(--card)] w-full max-w-md p-6 rounded-3xl shadow-[10px_10px_20px_rgba(0,0,0,0.2)] flex flex-col gap-4 max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-2">
+          <h2 className="text-xl font-bold text-[var(--text)]">Create Room</h2>
+          <button onClick={onClose} className="text-red-500 font-bold text-xl hover:scale-110 transition-transform cursor-pointer">✕</button>
         </div>
 
         <div className="flex flex-col items-center gap-2 mb-2">
           <div className="relative group cursor-pointer" onClick={() => document.getElementById("group-pic-upload").click()}>
-            <div className="w-20 h-20 rounded-full border border-[#e0e0e0] dark:border-[#333336] p-1 bg-[#f5f5f7] dark:bg-[#1d1d1f] flex items-center justify-center">
+            <div className="w-20 h-20 rounded-full shadow-[6px_6px_12px_var(--shadow-dark),-6px_-6px_12px_var(--shadow-light)] p-1 bg-[var(--bg)]">
               <Avatar src={profilePic} text={roomName ? roomName.charAt(0).toUpperCase() : "G"} size="w-full h-full" />
             </div>
             <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-              <Camera size={22} className="text-white" />
+              <Camera size={24} className="text-white" />
             </div>
             <input type="file" id="group-pic-upload" className="hidden" accept="image/*" onChange={onSelectFile} />
           </div>
-          <span className="text-xs text-[#86868b]">Group Picture (Optional)</span>
+          <span className="text-xs text-gray-500 font-medium">Group Picture (Optional)</span>
         </div>
 
-        <input
-          type="text"
-          placeholder="Group Name"
-          value={roomName}
-          onChange={(e) => setRoomName(e.target.value)}
-          className="w-full px-4 py-2.5 rounded-full border border-[#e0e0e0] dark:border-[#333336] outline-none bg-[#f5f5f7] dark:bg-[#1d1d1f] text-[#1d1d1f] dark:text-white focus:border-[#0071e3] text-sm transition-all"
-        />
+        <input type="text" placeholder="Group Name" value={roomName} onChange={(e) => setRoomName(e.target.value)} className="w-full p-3 rounded-xl border-none outline-none bg-[var(--card)] text-[var(--text)] shadow-[inset_4px_4px_8px_var(--shadow-dark),inset_-4px_-4px_8px_var(--shadow-light)] focus:shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)] transition-all" />
 
-        <input
-          type="text"
-          placeholder="Add Users (e.g. John, Jane)"
-          onChange={(e) => handleSearch(e.target.value)}
-          className="w-full px-4 py-2.5 rounded-full border border-[#e0e0e0] dark:border-[#333336] outline-none bg-[#f5f5f7] dark:bg-[#1d1d1f] text-[#1d1d1f] dark:text-white focus:border-[#0071e3] text-sm transition-all"
-        />
+        <input type="text" placeholder="Add Users (e.g. John, Jane)" onChange={(e) => handleSearch(e.target.value)} className="w-full p-3 rounded-xl border-none outline-none bg-[var(--card)] text-[var(--text)] shadow-[inset_4px_4px_8px_var(--shadow-dark),inset_-4px_-4px_8px_var(--shadow-light)] focus:shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)] transition-all" />
 
         <div className="flex flex-wrap gap-2">
           {selectedUsers.map((u) => (
-            <span key={u._id} className="px-3 py-1 bg-[#f5f5f7] dark:bg-[#1d1d1f] border border-[#e0e0e0] dark:border-[#333336] text-[#0066cc] dark:text-[#2997ff] text-xs rounded-full flex items-center gap-1 font-medium">
+            <span key={u._id} className="px-3 py-1 bg-[var(--bg)] text-blue-800 text-xs rounded-full flex items-center gap-1 shadow-[2px_2px_4px_var(--shadow-dark),-2px_-2px_4px_var(--shadow-light)] font-medium">
               {u.username}
-              <button onClick={() => handleDelete(u)} className="font-bold text-[#86868b] ml-1 hover:text-red-500 transition-colors">×</button>
+              <button onClick={() => handleDelete(u)} className="font-bold text-gray-400 ml-1 hover:text-red-500 transition-colors">x</button>
             </span>
           ))}
         </div>
 
-        <div className="max-h-32 overflow-y-auto flex flex-col gap-1.5">
+        <div className="max-h-32 overflow-y-auto flex flex-col gap-2">
           {loading ? (
-            <p className="text-xs text-[#86868b] text-center">Searching...</p>
+            <p className="text-xs text-gray-500 text-center animate-pulse">Searching...</p>
           ) : (
             searchResult?.slice(0, 4).map((user) => (
-              <div key={user._id} onClick={() => handleAddUser(user)} className="flex items-center gap-3 p-2 rounded-[12px] cursor-pointer hover:bg-[#f5f5f7] dark:hover:bg-[#1d1d1f] transition-all">
+              <div key={user._id} onClick={() => handleAddUser(user)} className="flex items-center gap-3 p-2 rounded-xl cursor-pointer hover:bg-[var(--bg)] hover:shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)] transition-all">
                 <Avatar src={user.profilePic} text={user.username.charAt(0).toUpperCase()} size="w-8 h-8" />
-                <span className="text-sm font-medium text-[#1d1d1f] dark:text-white">{user.username}</span>
+                <span className="text-sm font-medium text-gray-700">{user.username}</span>
               </div>
             ))
           )}
         </div>
 
-        <button
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-          className="mt-2 w-full py-2.5 rounded-full font-normal text-[14px] text-white bg-[#0066cc] hover:bg-[#0071e3] active:scale-[0.95] transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-        >
+        <button onClick={handleSubmit} disabled={isSubmitting} className="mt-2 w-full py-3 rounded-xl font-bold text-white bg-blue-500 shadow-[4px_4px_10px_rgba(37,99,235,0.3),-4px_-4px_10px_var(--shadow-light)] hover:bg-blue-600 hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed">
           {isSubmitting ? "Creating..." : "Create Room"}
         </button>
       </div>

@@ -93,7 +93,7 @@ const ProfilePage = () => {
     const initialCrop = centerCrop(
       makeAspectCrop(
         { unit: '%', width: 80 },
-        1,
+        1, // 1:1 aspect ratio
         width,
         height
       ),
@@ -151,7 +151,7 @@ const ProfilePage = () => {
       
       setFormData({ ...formData, profilePic: data.fileUrl });
       toast.success("Picture updated successfully!", { id: toastId });
-      setImgSrc("");
+      setImgSrc(""); // Close crop modal
     } catch (error) {
       toast.error("Failed to upload cropped picture", { id: toastId });
     } finally {
@@ -161,21 +161,21 @@ const ProfilePage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f5f5f7] dark:bg-black">
-        <div className="w-10 h-10 border-2 border-[#0066cc] border-t-transparent rounded-full animate-spin"></div>
+      <div className="min-h-screen flex items-center justify-center bg-[var(--bg)]">
+        <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin shadow-[4px_4px_10px_var(--shadow-dark),-4px_-4px_10px_var(--shadow-light)]"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-[#f5f5f7] dark:bg-black relative">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-transparent relative">
       
       {/* Crop Modal Overlay */}
       {imgSrc && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md p-4 animate-[fadeIn_0.2s_ease-out]">
-          <div className="bg-white dark:bg-[#272729] border border-[#e0e0e0] dark:border-[#333336] p-6 rounded-[18px] max-w-lg w-full flex flex-col items-center">
-            <h2 className="text-lg font-semibold mb-4 text-[#1d1d1f] dark:text-white">Crop Profile Picture</h2>
-            <div className="max-h-[60vh] overflow-hidden w-full bg-black rounded-[14px] flex items-center justify-center">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-[fadeIn_0.2s_ease-out]">
+          <div className="bg-[var(--bg)] p-6 rounded-3xl shadow-2xl max-w-lg w-full flex flex-col items-center">
+            <h2 className="text-xl font-bold mb-4 text-[var(--text)]">Crop Profile Picture</h2>
+            <div className="max-h-[60vh] overflow-hidden w-full bg-black rounded-xl flex items-center justify-center">
               <ReactCrop
                 crop={crop}
                 onChange={(_, percentCrop) => setCrop(percentCrop)}
@@ -192,85 +192,82 @@ const ProfilePage = () => {
                 />
               </ReactCrop>
             </div>
-            <div className="flex gap-3 mt-5 w-full">
+            <div className="flex gap-4 mt-6 w-full">
               <button
                 onClick={() => setImgSrc("")}
-                className="flex-1 py-2.5 rounded-full border border-[#e0e0e0] dark:border-[#333336] text-[#1d1d1f] dark:text-white hover:bg-black/5 dark:hover:bg-white/5 active:scale-[0.95] transition-all flex items-center justify-center gap-2 text-sm font-normal cursor-pointer"
+                className="flex-1 py-3 rounded-xl bg-gray-200 text-gray-700 font-bold shadow-[4px_4px_8px_var(--shadow-dark),-4px_-4px_8px_var(--shadow-light)] hover:shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)] transition-all flex items-center justify-center gap-2"
               >
-                <X size={16} /> Cancel
+                <X size={18} /> Cancel
               </button>
               <button
                 onClick={handleUploadCrop}
                 disabled={isUploadingCrop || !completedCrop}
-                className="flex-1 py-2.5 rounded-full bg-[#0066cc] hover:bg-[#0071e3] text-white active:scale-[0.95] transition-all flex items-center justify-center gap-2 text-sm font-normal disabled:opacity-50 cursor-pointer"
+                className="flex-1 py-3 rounded-xl bg-blue-500 text-white font-bold shadow-[4px_4px_10px_rgba(37,99,235,0.3),-4px_-4px_10px_var(--shadow-light)] hover:bg-blue-600 hover:scale-[1.02] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isUploadingCrop ? "Uploading..." : <><Check size={16} /> Apply</>}
+                {isUploadingCrop ? "Uploading..." : <><Check size={18} /> Apply</>}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      <div className="w-full max-w-lg bg-white dark:bg-[#1d1d1f] border border-[#e0e0e0] dark:border-[#333336] rounded-[18px] p-6 md:p-8 animate-[slideIn_0.3s_ease]">
+      <div className="w-full max-w-lg bg-[var(--bg)] rounded-3xl p-8 shadow-[10px_10px_20px_var(--shadow-dark),-10px_-10px_20px_var(--shadow-light)] animate-[slideIn_0.3s_ease]">
         
-        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-[#e0e0e0] dark:border-[#333336]">
+        <div className="flex items-center gap-4 mb-8">
           <button 
             onClick={() => navigate(-1)}
             type="button"
-            className="w-9 h-9 flex items-center justify-center rounded-full text-[#86868b] hover:text-[#1d1d1f] dark:hover:text-white bg-[#f5f5f7] dark:bg-[#272729] border border-[#e0e0e0] dark:border-[#333336] active:scale-[0.95] transition-all cursor-pointer"
+            className="w-10 h-10 flex items-center justify-center rounded-full text-gray-500 hover:text-blue-600 bg-[var(--bg)] shadow-[4px_4px_8px_var(--shadow-dark),-4px_-4px_8px_var(--shadow-light)] hover:shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)] transition-all cursor-pointer"
           >
-            <ArrowLeft size={18} />
+            <ArrowLeft size={20} />
           </button>
-          <div>
-            <h1 className="text-xl font-semibold text-[#1d1d1f] dark:text-white tracking-tight">Account Settings</h1>
-            <p className="text-xs text-[#86868b]">Manage your personal profile and appearance.</p>
-          </div>
+          <h1 className="text-2xl font-bold text-[var(--text)]">Edit Profile</h1>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col items-center mb-2">
-            <div className="w-20 h-20 mb-2 rounded-full border border-[#e0e0e0] dark:border-[#333336] p-1 bg-[#f5f5f7] dark:bg-[#272729] flex items-center justify-center">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+          <div className="flex flex-col items-center mb-4">
+            <div className="w-24 h-24 mb-4 rounded-full shadow-[6px_6px_12px_var(--shadow-dark),-6px_-6px_12px_var(--shadow-light)] p-1 bg-[var(--bg)]">
               <Avatar src={formData.profilePic} text={formData.username.charAt(0).toUpperCase()} size="w-full h-full" />
             </div>
-            <p className="text-xs text-[#86868b]">Avatar Preview</p>
+            <p className="text-sm text-gray-500">Profile Preview</p>
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold uppercase tracking-wider text-[#86868b] px-1">Email</label>
+            <label className="text-sm font-semibold text-gray-600 px-1">Email (Read Only)</label>
             <input
               type="text"
               name="email"
               value={formData.email}
               disabled
-              className="w-full px-4 py-2.5 rounded-full bg-[#f5f5f7] dark:bg-[#272729] text-[#86868b] border border-[#e0e0e0] dark:border-[#333336] outline-none text-sm cursor-not-allowed"
+              className="w-full p-3 rounded-xl bg-[var(--bg)] text-gray-400 border-none outline-none shadow-[inset_4px_4px_8px_var(--shadow-dark),inset_-4px_-4px_8px_var(--shadow-light)] cursor-not-allowed"
             />
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold uppercase tracking-wider text-[#86868b] px-1">Username</label>
+            <label className="text-sm font-semibold text-gray-600 px-1">Username</label>
             <input
               type="text"
               name="username"
               value={formData.username}
               onChange={handleChange}
               required
-              className="w-full px-4 py-2.5 rounded-full bg-[#f5f5f7] dark:bg-[#272729] text-[#1d1d1f] dark:text-white border border-[#e0e0e0] dark:border-[#333336] focus:border-[#0071e3] outline-none text-sm transition-all"
+              className="w-full p-3 rounded-xl bg-[var(--bg)] text-[var(--text)] border-none outline-none shadow-[inset_4px_4px_8px_var(--shadow-dark),inset_-4px_-4px_8px_var(--shadow-light)] focus:shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)] transition-all"
             />
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold uppercase tracking-wider text-[#86868b] px-1">Bio</label>
+            <label className="text-sm font-semibold text-gray-600 px-1">Bio</label>
             <textarea
               name="bio"
               value={formData.bio}
               onChange={handleChange}
               rows={3}
-              className="w-full p-3.5 rounded-[14px] bg-[#f5f5f7] dark:bg-[#272729] text-[#1d1d1f] dark:text-white border border-[#e0e0e0] dark:border-[#333336] focus:border-[#0071e3] outline-none text-sm transition-all resize-none"
+              className="w-full p-3 rounded-xl bg-[var(--bg)] text-[var(--text)] border-none outline-none shadow-[inset_4px_4px_8px_var(--shadow-dark),inset_-4px_-4px_8px_var(--shadow-light)] focus:shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)] transition-all resize-none"
             />
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold uppercase tracking-wider text-[#86868b] px-1">Profile Picture</label>
+            <label className="text-sm font-semibold text-gray-600 px-1">Profile Picture</label>
             <div className="flex items-center gap-3">
               <input
                 type="file"
@@ -282,22 +279,22 @@ const ProfilePage = () => {
               <button
                 type="button"
                 onClick={() => document.getElementById("profile-pic-upload").click()}
-                className="w-full py-2.5 px-4 rounded-full bg-[#f5f5f7] dark:bg-[#272729] text-[#0066cc] dark:text-[#2997ff] border border-[#e0e0e0] dark:border-[#333336] hover:bg-black/5 dark:hover:bg-white/5 active:scale-[0.95] text-sm font-normal transition-all cursor-pointer"
+                className="w-full p-3 rounded-xl bg-[var(--bg)] text-blue-600 font-bold border-none outline-none shadow-[4px_4px_8px_var(--shadow-dark),-4px_-4px_8px_var(--shadow-light)] hover:shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)] transition-all cursor-pointer"
               >
                 Upload New Photo
               </button>
             </div>
-            <span className="text-xs text-[#86868b] px-1 mt-0.5">JPG or PNG image will open crop selector</span>
+            <span className="text-xs text-gray-400 px-1 mt-1">Select a JPG or PNG to crop</span>
           </div>
 
           <button
             type="submit"
             disabled={isSaving}
-            className="w-full mt-3 flex items-center justify-center gap-2 py-3 rounded-full bg-[#0066cc] hover:bg-[#0071e3] text-white text-sm font-normal active:scale-[0.95] transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full mt-4 flex items-center justify-center gap-2 py-4 rounded-xl bg-blue-500 text-white font-bold shadow-[4px_4px_10px_rgba(37,99,235,0.3),-4px_-4px_10px_var(--shadow-light)] hover:bg-blue-600 hover:scale-[1.02] transition-all cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {isSaving ? "Saving..." : (
               <>
-                <Save size={16} /> Save Changes
+                <Save size={18} /> Save Changes
               </>
             )}
           </button>

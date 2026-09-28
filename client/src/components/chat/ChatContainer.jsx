@@ -321,12 +321,11 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
   };
 
   return (
-    <div className="flex flex-col w-full h-full max-w-5xl bg-white dark:bg-[#1d1d1f] rounded-[18px] border border-[#e0e0e0] dark:border-[#333336] overflow-hidden animate-[fadeIn_0.3s_ease]">
-      {/* HEADER */}
-      <div className="flex items-center justify-between px-4 py-3 bg-[#f5f5f7]/80 dark:bg-[#1d1d1f]/80 backdrop-blur-md border-b border-[#e0e0e0] dark:border-[#333336] z-10">
+    <div className="flex flex-col w-full h-full max-w-5xl bg-[var(--card)]/70 backdrop-blur-3xl rounded-3xl shadow-[10px_10px_20px_var(--shadow-dark),-10px_-10px_20px_var(--shadow-light)] overflow-hidden animate-[fadeIn_0.3s_ease] border border-white/20 dark:border-white/5">
+      <div className="flex items-center justify-between p-4 bg-transparent border-b border-gray-200/30 dark:border-gray-700/30 shadow-[0_4px_10px_rgba(0,0,0,0.02)] z-10">
         <div className="flex items-center gap-3">
           <button
-            className="md:hidden text-[#0066cc] dark:text-[#2997ff] font-medium hover:opacity-80 transition-opacity cursor-pointer"
+            className="md:hidden text-blue-600 font-bold hover:scale-110 transition-transform cursor-pointer"
             onClick={() => setSelectedChat(null)}
           >
             ←
@@ -342,14 +341,14 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
           />
 
           <div className="flex flex-col">
-            <h2 className="text-[17px] font-semibold text-[#1d1d1f] dark:text-white leading-tight tracking-tight">
+            <h2 className="text-lg font-semibold text-[var(--text)] leading-tight">
               {getChatName()}
             </h2>
             {!selectedChat.isGroupChat && (() => {
               const otherUser = selectedChat.members.find((m) => m._id !== currentUserId);
               const isOnline = otherUser && onlineUsers.includes(otherUser._id);
               if (isOnline) {
-                return <span className="text-[12px] text-[#34c759] font-medium">Online</span>;
+                return <span className="text-xs text-green-500 font-medium">Online</span>;
               }
               return null;
             })()}
@@ -359,27 +358,27 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
         <div className="relative">
           <button 
             onClick={() => setShowMenu(!showMenu)}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-[#86868b] hover:text-[#1d1d1f] dark:hover:text-white border border-[#e0e0e0] dark:border-[#333336] bg-white dark:bg-[#272729] active:scale-[0.95] transition-all cursor-pointer"
+            className="text-gray-500 hover:text-blue-600 font-bold px-3 py-1 rounded-xl shadow-[4px_4px_8px_var(--shadow-dark),-4px_-4px_8px_var(--shadow-light)] transition-all cursor-pointer"
           >
             ⋮
           </button>
           
           {showMenu && (
-            <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-[#272729] rounded-[14px] border border-[#e0e0e0] dark:border-[#333336] z-50 overflow-hidden p-1 shadow-none">
+            <div className="absolute right-0 mt-2 w-48 bg-[var(--card)] rounded-xl shadow-[8px_8px_16px_var(--shadow-dark),-8px_-8px_16px_var(--shadow-light)] z-50 overflow-hidden border border-gray-200">
               {selectedChat.isGroupChat && (
                 <button
                   onClick={() => {
                     setIsGroupSettingsOpen(true);
                     setShowMenu(false);
                   }}
-                  className="w-full text-left px-3 py-2 text-sm text-[#1d1d1f] dark:text-white hover:bg-black/5 dark:hover:bg-white/5 rounded-[8px] transition-colors"
+                  className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors border-b border-gray-200"
                 >
                   Group Settings
                 </button>
               )}
               <button
                 onClick={handleClearChat}
-                className="w-full text-left px-3 py-2 text-sm text-[#ff3b30] hover:bg-black/5 dark:hover:bg-white/5 rounded-[8px] transition-colors"
+                className="w-full text-left px-4 py-3 text-sm text-red-500 hover:bg-gray-100 transition-colors"
               >
                 Clear Chat
               </button>
@@ -396,20 +395,20 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
       />
 
       {/* MESSAGES */}
-      <div className="flex-1 overflow-y-auto scrollbar-hide p-4 flex flex-col gap-3 bg-white dark:bg-[#1d1d1f]" onClick={() => setShowMenu(false)}>
+      <div className="flex-1 overflow-y-auto scrollbar-hide p-4 flex flex-col gap-3" onClick={() => setShowMenu(false)}>
         {loadingMessages ? (
-          <p className="text-center text-[#86868b] mt-10 text-sm">
+          <p className="text-center text-gray-400 mt-10 animate-pulse text-sm">
             Loading chat history...
           </p>
         ) : messages.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center opacity-70">
-            <div className="w-16 h-16 mb-3 rounded-full bg-[#f5f5f7] dark:bg-[#272729] border border-[#e0e0e0] dark:border-[#333336] flex items-center justify-center">
-              <svg className="w-7 h-7 text-[#86868b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+            <div className="w-20 h-20 mb-4 rounded-full bg-[var(--card)] shadow-[inset_4px_4px_8px_var(--shadow-dark),inset_-4px_-4px_8px_var(--shadow-light)] flex items-center justify-center">
+              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
               </svg>
             </div>
-            <h3 className="text-[#1d1d1f] dark:text-white font-semibold text-[17px] tracking-tight">No messages yet</h3>
-            <p className="text-[#86868b] text-sm max-w-[250px] mt-1">
+            <h3 className="text-[var(--text)] font-semibold text-lg">No messages yet</h3>
+            <p className="text-gray-500 text-sm max-w-[250px] mt-1">
               Send a message to start the conversation!
             </p>
           </div>
@@ -443,8 +442,8 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
             return (
               <React.Fragment key={m._id}>
                 {showDateDivider && (
-                  <div className="flex justify-center my-3">
-                    <div className="bg-[#f5f5f7] dark:bg-[#272729] border border-[#e0e0e0] dark:border-[#333336] px-3.5 py-1 rounded-full text-xs font-normal text-[#86868b]">
+                  <div className="flex justify-center my-4">
+                    <div className="bg-[var(--card)]/50 backdrop-blur-md px-4 py-1 rounded-full text-xs font-semibold text-[var(--text)] shadow-[2px_2px_4px_var(--shadow-dark),-2px_-2px_4px_var(--shadow-light)] border border-white/10">
                       {dateLabel}
                     </div>
                   </div>
@@ -454,85 +453,85 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
                 >
                   <div className="max-w-[75%] flex flex-col relative">
                     {!isMyMessage && selectedChat.isGroupChat && (
-                      <span className="text-xs text-[#86868b] ml-2 mb-1">
+                      <span className="text-xs text-gray-500 ml-2 mb-1">
                         {m.sender.username}
                       </span>
                     )}
 
                     {isMyMessage && !isDeleted && (
-                      <div className="absolute -left-16 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1.5">
+                      <div className="absolute -left-16 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
                         <button 
                           onClick={() => initiateEdit(m)}
-                          className="p-1.5 text-[#86868b] hover:text-[#0066cc] bg-white dark:bg-[#272729] border border-[#e0e0e0] dark:border-[#333336] rounded-full active:scale-[0.95] transition-all cursor-pointer"
+                          className="p-1.5 text-gray-400 hover:text-blue-500 bg-white rounded-full shadow-sm hover:shadow-md transition-all cursor-pointer"
                           title="Edit Message"
                         >
-                          <Pencil size={13} />
+                          <Pencil size={14} />
                         </button>
                         <button 
                           onClick={() => openDeleteModal(m._id, senderId)}
-                          className="p-1.5 text-[#86868b] hover:text-[#ff3b30] bg-white dark:bg-[#272729] border border-[#e0e0e0] dark:border-[#333336] rounded-full active:scale-[0.95] transition-all cursor-pointer"
+                          className="p-1.5 text-gray-400 hover:text-red-500 bg-white rounded-full shadow-sm hover:shadow-md transition-all cursor-pointer"
                           title="Delete Message"
                         >
-                          <Trash2 size={13} />
+                          <Trash2 size={14} />
                         </button>
                       </div>
                     )}
 
                     {!isMyMessage && !isDeleted && (
-                      <div className="absolute -right-8 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1.5">
+                      <div className="absolute -right-8 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
                         <button 
                           onClick={() => openDeleteModal(m._id, senderId)}
-                          className="p-1.5 text-[#86868b] hover:text-[#ff3b30] bg-white dark:bg-[#272729] border border-[#e0e0e0] dark:border-[#333336] rounded-full active:scale-[0.95] transition-all cursor-pointer"
+                          className="p-1.5 text-gray-400 hover:text-red-500 bg-white rounded-full shadow-sm hover:shadow-md transition-all cursor-pointer"
                           title="Delete Message"
                         >
-                          <Trash2 size={13} />
+                          <Trash2 size={14} />
                         </button>
                       </div>
                     )}
 
                     <div
-                      className={`p-3 text-[14px] flex flex-col ${
+                      className={`p-3 text-sm shadow-sm flex flex-col ${
                         isDeleted 
-                          ? "bg-[#f5f5f7] dark:bg-[#272729] text-[#86868b] italic rounded-[18px] border border-[#e0e0e0] dark:border-[#333336]"
+                          ? "bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-gray-400 italic rounded-2xl border border-gray-300 dark:border-slate-600"
                           : isMyMessage
-                            ? "bg-[#0066cc] text-white rounded-[18px] rounded-br-[4px]"
-                            : "bg-[#f5f5f7] dark:bg-[#272729] text-[#1d1d1f] dark:text-[#f5f5f7] border border-[#e0e0e0] dark:border-[#333336] rounded-[18px] rounded-bl-[4px]"
+                            ? "bg-blue-500 text-white rounded-2xl rounded-tr-none shadow-[4px_4px_10px_rgba(37,99,235,0.2)]"
+                            : "bg-[var(--card)] text-black dark:text-white rounded-2xl rounded-tl-none shadow-[6px_6px_14px_#00000066,-6px_-6px_14px_var(--shadow-light)] dark:shadow-[4px_4px_12px_#3b82f666,-4px_-4px_12px_var(--shadow-light)] transition-all"
                       }`}
                     >
                       {isDeleted ? (
                         "This message was deleted"
                       ) : m.messageType === "image" && m.fileUrl ? (
                         <div className="flex flex-col gap-2">
-                          <img src={m.fileUrl} alt="attachment" className="max-w-[250px] max-h-[250px] rounded-[14px] object-cover cursor-pointer hover:opacity-95 shadow-apple-product transition-opacity" onClick={() => window.open(m.fileUrl, '_blank')} />
+                          <img src={m.fileUrl} alt="attachment" className="max-w-[250px] max-h-[250px] rounded-xl object-cover cursor-pointer hover:opacity-90 transition-opacity" onClick={() => window.open(m.fileUrl, '_blank')} />
                           {m.content !== "Attachment" && <span>{m.content}</span>}
                         </div>
                       ) : m.messageType === "file" && m.fileUrl ? (
                         <div className="flex flex-col gap-2">
-                          <a href={m.fileUrl.replace('/upload/', '/upload/fl_attachment/')} target="_blank" rel="noopener noreferrer" className={`flex items-center gap-3 p-3 rounded-[12px] transition-all ${isMyMessage ? 'bg-[#0055b3] hover:bg-[#004799] text-white' : 'bg-white dark:bg-[#1d1d1f] hover:bg-black/5 dark:hover:bg-white/5 border border-[#e0e0e0] dark:border-[#333336]'}`}>
-                            <FileText size={22} className={isMyMessage ? "text-white" : "text-[#0066cc] dark:text-[#2997ff]"} />
-                            <span className="truncate max-w-[150px] font-medium text-sm">{m.content}</span>
-                            <Download size={16} className={`ml-2 flex-shrink-0 ${isMyMessage ? "text-blue-100" : "text-[#86868b]"}`} />
+                          <a href={m.fileUrl.replace('/upload/', '/upload/fl_attachment/')} target="_blank" rel="noopener noreferrer" className={`flex items-center gap-3 p-3 rounded-xl transition-all ${isMyMessage ? 'bg-blue-600 hover:bg-blue-700' : 'bg-[var(--bg)] hover:bg-gray-200 dark:hover:bg-slate-800 shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)] dark:hover:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.5),inset_-4px_-4px_8px_rgba(255,255,255,0.02)]'}`}>
+                            <FileText size={24} className={isMyMessage ? "text-white" : "text-blue-500"} />
+                            <span className="truncate max-w-[150px] font-medium">{m.content}</span>
+                            <Download size={18} className={`ml-2 flex-shrink-0 ${isMyMessage ? "text-blue-200" : "text-gray-400"}`} />
                           </a>
                         </div>
                       ) : (
-                        <div className="markdown-body text-[14px] leading-relaxed [&>p]:mb-2 last:[&>p]:mb-0 [&>ul]:list-disc [&>ul]:ml-4 [&>ul]:mb-2 [&>ol]:list-decimal [&>ol]:ml-4 [&>ol]:mb-2 [&>h1]:text-base [&>h1]:font-semibold [&>h1]:mb-2 [&>h2]:text-sm [&>h2]:font-semibold [&>h2]:mb-2 [&>strong]:font-semibold [&_a]:text-[#2997ff] [&_a]:underline break-words">
+                        <div className="markdown-body text-sm [&>p]:mb-2 last:[&>p]:mb-0 [&>ul]:list-disc [&>ul]:ml-4 [&>ul]:mb-2 [&>ol]:list-decimal [&>ol]:ml-4 [&>ol]:mb-2 [&>h1]:text-lg [&>h1]:font-bold [&>h1]:mb-2 [&>h2]:text-base [&>h2]:font-bold [&>h2]:mb-2 [&>strong]:font-bold [&_a]:text-blue-300 [&_a]:underline break-words">
                           <ReactMarkdown remarkPlugins={[remarkGfm]}>
                             {m.content}
                           </ReactMarkdown>
                         </div>
                       )}
                       
-                      <div className={`flex items-center justify-end gap-1 mt-1 ${isMyMessage ? "text-white/70" : "text-[#86868b]"} text-[10px]`}>
+                      <div className={`flex items-center justify-end gap-1 mt-1 ${isMyMessage ? "text-blue-100" : "text-gray-400"} text-[10px]`}>
                         {m.isEdited && !isDeleted && <span>(edited)</span>}
                         <span>{timeString}</span>
                         {isMyMessage && !isDeleted && (
                           <span className="ml-1 flex items-center">
                             {m.readBy?.length > 0 ? (
-                              <CheckCheck size={14} className="text-white" />
+                              <CheckCheck size={14} className="text-cyan-300 drop-shadow-[0_0_2px_rgba(0,255,255,0.8)]" />
                             ) : m.deliveredTo?.length > 0 ? (
-                              <CheckCheck size={14} className="text-white/60" />
+                              <CheckCheck size={14} className="text-blue-200/80" />
                             ) : (
-                              <Check size={14} className="text-white/60" />
+                              <Check size={14} className="text-blue-200/80" />
                             )}
                           </span>
                         )}
@@ -546,10 +545,10 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
         )}
         {isTypingIndicatorVisible && (
           <div className="flex justify-start w-full mt-2 mb-2 animate-[fadeIn_0.3s_ease]">
-            <div className="bg-[#f5f5f7] dark:bg-[#272729] border border-[#e0e0e0] dark:border-[#333336] px-3.5 py-2 rounded-[18px] rounded-bl-[4px] flex items-center gap-1.5">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#0066cc] animate-bounce [animation-delay:-0.3s]"></div>
-              <div className="w-1.5 h-1.5 rounded-full bg-[#0066cc] animate-bounce [animation-delay:-0.15s]"></div>
-              <div className="w-1.5 h-1.5 rounded-full bg-[#0066cc] animate-bounce"></div>
+            <div className="bg-[var(--card)] px-4 py-3 rounded-2xl rounded-tl-none shadow-sm border border-gray-200/50 dark:border-gray-800/50 flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-blue-400 animate-bounce [animation-delay:-0.3s]"></div>
+              <div className="w-2 h-2 rounded-full bg-blue-400 animate-bounce [animation-delay:-0.15s]"></div>
+              <div className="w-2 h-2 rounded-full bg-blue-400 animate-bounce"></div>
             </div>
           </div>
         )}
@@ -558,33 +557,33 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
 
       {/* INPUT AREA */}
       {editingMessageId && (
-        <div className="bg-[#f5f5f7] dark:bg-[#272729] px-4 py-2 border-t border-[#e0e0e0] dark:border-[#333336] flex justify-between items-center z-10">
+        <div className="bg-blue-50 px-4 py-2 border-t border-blue-100 flex justify-between items-center z-10 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]">
           <div className="flex flex-col">
-            <span className="text-xs font-semibold text-[#0066cc] dark:text-[#2997ff]">Editing Message</span>
-            <span className="text-xs text-[#86868b] truncate max-w-sm">Esc to cancel</span>
+            <span className="text-xs font-semibold text-blue-600">Editing Message</span>
+            <span className="text-xs text-gray-500 truncate max-w-sm">Esc to cancel</span>
           </div>
           <button 
             onClick={cancelEdit}
-            className="text-[#86868b] hover:text-[#1d1d1f] dark:hover:text-white cursor-pointer p-1 rounded-full transition-colors"
+            className="text-gray-400 hover:text-gray-600 cursor-pointer p-1 rounded-full hover:bg-blue-100 transition-colors"
           >
-            <X size={15} />
+            <X size={16} />
           </button>
         </div>
       )}
       {/* File Preview Container */}
       {attachedFile && (
-        <div className="mx-4 mb-2 p-3 bg-[#f5f5f7] dark:bg-[#272729] rounded-[14px] border border-[#e0e0e0] dark:border-[#333336] flex items-center justify-between relative animate-[fadeIn_0.2s_ease]">
+        <div className="mx-4 mb-2 p-3 bg-[var(--bg)] rounded-xl border border-blue-500/30 flex items-center justify-between shadow-[4px_4px_8px_var(--shadow-dark),-4px_-4px_8px_var(--shadow-light)] relative animate-[fadeIn_0.2s_ease]">
           <div className="flex items-center gap-3 overflow-hidden">
             {attachedFile.type === 'image' ? (
-              <img src={attachedFile.previewUrl} alt="Preview" className="w-12 h-12 object-cover rounded-[8px]" />
+              <img src={attachedFile.previewUrl} alt="Preview" className="w-12 h-12 object-cover rounded-md" />
             ) : (
-              <div className="w-12 h-12 bg-white dark:bg-[#1d1d1f] border border-[#e0e0e0] dark:border-[#333336] text-[#0066cc] rounded-[8px] flex items-center justify-center">
-                <FileText size={22} />
+              <div className="w-12 h-12 bg-[var(--card)] text-blue-500 rounded-md flex items-center justify-center shadow-inner">
+                <FileText size={24} />
               </div>
             )}
             <div className="flex flex-col overflow-hidden">
-              <span className="text-sm font-medium text-[#1d1d1f] dark:text-white truncate">{attachedFile.file.name}</span>
-              <span className="text-xs text-[#86868b]">{(attachedFile.file.size / 1024).toFixed(1)} KB</span>
+              <span className="text-sm font-semibold text-[var(--text)] truncate">{attachedFile.file.name}</span>
+              <span className="text-xs text-gray-500">{(attachedFile.file.size / 1024).toFixed(1)} KB</span>
             </div>
           </div>
           <button 
@@ -592,20 +591,20 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
               setAttachedFile(null);
               URL.revokeObjectURL(attachedFile.previewUrl);
             }}
-            className="p-1 text-[#86868b] hover:text-[#ff3b30] transition-colors cursor-pointer"
+            className="p-1 text-gray-400 hover:text-red-500 transition-colors cursor-pointer"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
           
           {isUploading && (
-            <div className="absolute inset-0 bg-white/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center rounded-[14px] z-10">
-              <span className="text-sm font-medium text-[#0066cc] animate-pulse">Uploading...</span>
+            <div className="absolute inset-0 bg-[var(--bg)]/80 backdrop-blur-sm flex items-center justify-center rounded-xl z-10">
+              <span className="text-sm font-bold text-blue-500 animate-pulse">Uploading...</span>
             </div>
           )}
         </div>
       )}
 
-      <div className="p-3 bg-white dark:bg-[#1d1d1f] flex items-end gap-2.5 z-10 border-t border-[#e0e0e0] dark:border-[#333336]">
+      <div className="p-4 bg-transparent flex items-end gap-3 z-10 border-t border-gray-200/30 dark:border-gray-700/30">
         <input
           type="file"
           id="file-upload"
@@ -615,27 +614,25 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
         />
         <button 
           onClick={() => document.getElementById("file-upload").click()}
-          className="w-10 h-10 mb-0.5 flex-shrink-0 flex items-center justify-center rounded-full text-[#86868b] hover:text-[#1d1d1f] dark:hover:text-white bg-[#f5f5f7] dark:bg-[#272729] border border-[#e0e0e0] dark:border-[#333336] active:scale-[0.95] transition-all cursor-pointer"
+          className="w-10 h-10 mb-1 flex-shrink-0 flex items-center justify-center rounded-full text-gray-500 hover:text-blue-600 bg-[var(--bg)] font-bold shadow-[4px_4px_8px_var(--shadow-dark),-4px_-4px_8px_var(--shadow-light)] hover:shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)] transition-all cursor-pointer"
           title="Attach File"
         >
           <Paperclip size={18} />
-        </button>
-
-        <div className="relative flex-1 rounded-full border border-[#e0e0e0] dark:border-[#333336] bg-[#f5f5f7] dark:bg-[#272729] focus-within:border-[#0071e3] transition-all overflow-hidden flex items-center min-h-[44px]">
+        </button>        <div className="relative flex-1 rounded-xl shadow-[inset_4px_4px_8px_var(--shadow-dark),inset_-4px_-4px_8px_var(--shadow-light)] focus-within:shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)] transition-all bg-[var(--card)] overflow-hidden">
           <div 
-            className="absolute inset-0 px-4 py-2.5 pointer-events-none whitespace-pre-wrap break-words text-[#1d1d1f] dark:text-white text-sm"
+            className="absolute inset-0 p-3 pointer-events-none whitespace-pre-wrap break-words text-[var(--text)]"
             style={{ 
               fontFamily: "inherit", 
-              fontSize: "14px", 
-              lineHeight: "1.47",
+              fontSize: "inherit", 
+              lineHeight: "inherit",
               zIndex: 5
             }}
           >
             {!newMessage ? (
-              <span className="text-[#86868b]">Type a message... (Use @Cogni for AI)</span>
+              <span className="text-gray-400">Type a message...</span>
             ) : (
               newMessage.split(/(@cogni)/i).map((part, i) => 
-                part.toLowerCase() === '@cogni' ? <span key={i} className="text-[#0066cc] dark:text-[#2997ff] font-semibold">{part}</span> : part
+                part.toLowerCase() === '@cogni' ? <span key={i} className="text-blue-500 drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]">{part}</span> : part
               )
             )}
           </div>
@@ -666,14 +663,14 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
               e.target.style.height = "auto";
               e.target.style.height = Math.min(e.target.scrollHeight, 120) + "px";
             }}
-            className="w-full h-full px-4 py-2.5 bg-transparent border-none outline-none resize-none overflow-hidden text-transparent caret-[#1d1d1f] dark:caret-white relative z-10 text-sm"
+            className="w-full h-full p-3 bg-transparent border-none outline-none resize-none overflow-hidden text-transparent caret-[var(--text)] relative z-10"
             spellCheck="false"
           />
         </div>
 
         <button
           onClick={handleSubmit}
-          className="w-10 h-10 mb-0.5 flex-shrink-0 flex items-center justify-center rounded-full bg-[#0066cc] hover:bg-[#0071e3] text-white active:scale-[0.95] transition-all cursor-pointer"
+          className="w-10 h-10 mb-1 flex-shrink-0 flex items-center justify-center rounded-full bg-blue-500 text-white font-bold shadow-[4px_4px_8px_var(--shadow-dark),-4px_-4px_8px_var(--shadow-light)] hover:bg-blue-600 hover:scale-105 transition-all cursor-pointer"
         >
           ➤
         </button>

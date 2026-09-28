@@ -36,19 +36,26 @@ const AuthForm = ({
 
   return (
     <>
-      <h2 className="text-center text-[24px] font-semibold text-[#1d1d1f] dark:text-white tracking-tight mb-1">
-        Cogni<span className="text-[#0066cc] dark:text-[#2997ff]">Flow</span>
+      <h2 className="text-center text-xl font-semibold text-[var(--text)] mb-1">
+        Welcome to{" "}
+        <span className="text-blue-600 drop-shadow-[0_0_6px_rgba(37,99,235,0.5)]">
+          Cogni
+          <span className="text-green-500 drop-shadow-[0_0_6px_rgba(37,235,67,0.5)]">
+            Flow
+          </span>
+        </span>
       </h2>
 
-      <p className="text-center text-[14px] text-[#86868b] mb-6 font-normal">
+      <p className="text-center text-sm text-slate-500 mb-6">
         {isVerifying
-          ? "Verify your email with the one-time code"
+          ? "Verify your email with OTP"
           : isLogin
-          ? "Sign in with your CogniFlow account"
-          : "Create your new CogniFlow account"}
+          ? "Login to your account"
+          : "Create your account"}
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+
         {!isLogin && !isVerifying && (
           <Input
             type="text"
@@ -84,42 +91,42 @@ const AuthForm = ({
             <Input
               type="text"
               name="otp"
-              placeholder="Enter 6-digit code"
+              placeholder="Enter 6-digit OTP"
               value={form.otp}
               onChange={handleChange}
             />
             <div className="text-right">
               <span
                 onClick={onResendClick}
-                className={`text-xs font-normal transition-colors ${
+                className={`text-xs font-medium transition-colors ${
                   timeLeft > 0
-                    ? "text-[#86868b] cursor-not-allowed"
-                    : "text-[#0066cc] dark:text-[#2997ff] cursor-pointer hover:underline"
+                    ? "text-gray-400 cursor-not-allowed"
+                    : "text-blue-600 cursor-pointer hover:text-blue-500"
                 }`}
               >
-                {timeLeft > 0 ? `Resend code in ${timeLeft}s` : "Resend code"}
+                {timeLeft > 0 ? `Resend OTP in ${timeLeft}s` : "Resend OTP?"}
               </span>
             </div>
           </div>
         )}
 
         <Button>
-          {isVerifying ? "Verify Code" : isLogin ? "Sign In" : "Create Account"}
+          {isVerifying ? "Verify OTP" : isLogin ? "Login" : "Register"}
         </Button>
       </form>
 
-      <p className="text-center text-[14px] text-[#86868b] mt-5">
+      <p className="text-center text-sm text-slate-500 mt-4">
         {isLogin
           ? "Don't have an account?"
           : "Already have an account?"}{" "}
         <span
-          className="text-[#0066cc] dark:text-[#2997ff] cursor-pointer hover:underline"
+          className="text-blue-600 cursor-pointer font-medium hover:drop-shadow-[0_0_6px_rgba(37,99,235,0.4)]"
           onClick={() => {
             setIsLogin(!isLogin);
             setIsVerifying(false);
           }}
         >
-          {isLogin ? "Sign up" : "Sign in"}
+          {isLogin ? "Register" : "Login"}
         </span>
       </p>
     </>

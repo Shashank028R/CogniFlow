@@ -36,17 +36,21 @@ function App() {
         position="top-right"
         toastOptions={{
           className:
-            "rounded-[18px] px-4 py-3 bg-white dark:bg-[#272729] text-[#1d1d1f] dark:text-[#f5f5f7] border border-[#e0e0e0] dark:border-[#333336] shadow-none text-[14px]",
+            "rounded-xl px-4 py-3 bg-[var(--bg)] text-[var(--text)] shadow-[6px_6px_12px_var(--shadow-dark),-6px_-6px_12px_var(--shadow-light)] border border-black/5",
+
           success: {
+            className:
+              "shadow-[6px_6px_12px_var(--shadow-dark),-6px_-6px_12px_var(--shadow-light),0_0_6px_rgba(37,99,235,0.3)]",
             iconTheme: {
-              primary: "#0066cc",
-              secondary: "#ffffff",
+              primary: "#2563eb",
+              secondary: "#eef2f7",
             },
           },
+
           error: {
             iconTheme: {
-              primary: "#ff3b30",
-              secondary: "#ffffff",
+              primary: "#ef4444",
+              secondary: "#eef2f7",
             },
           },
         }}
