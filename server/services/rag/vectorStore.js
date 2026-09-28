@@ -131,7 +131,13 @@ export const vectorStore = {
     }
 
     try {
-      return await atlasVectorStore.search(params);
+      const results = await atlasVectorStore.search(params);
+      if (results && results.length > 0) {
+        return results;
+      }
+      // If Atlas returned 0 results (e.g. Atlas Search vector index not yet configured or syncing in Atlas cluster),
+      // fall back to memory cosine search
+      return await memoryVectorStore.search(params);
     } catch (err) {
       console.warn(
         `[RAG vectorStore] Atlas Vector Search failed (${err.message}). Falling back to memory cosine search.`

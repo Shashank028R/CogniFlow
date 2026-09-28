@@ -18,37 +18,73 @@ export const handleSocket = (io) => {
       console.log("User joined the room ", room);
     });
 
+    const getEntityId = (entity) => {
+      if (!entity) return "";
+      if (typeof entity === "string") return entity;
+      if (entity._id) return entity._id.toString();
+      if (entity.id) return entity.id.toString();
+      if (typeof entity.toString === "function") return entity.toString();
+      return String(entity);
+    };
+
     socket.on("new message", (newMessage) => {
-      let chat = newMessage.room;
+      try {
+        let chat = newMessage.room;
+        if (!chat) return;
 
-      if (!chat.members) {
-        // Fallback if members are not populated
-        return socket.in(chat._id || chat).emit("message received", newMessage);
+        if (!chat.members || !Array.isArray(chat.members)) {
+          return socket.in(getEntityId(chat)).emit("message received", newMessage);
+        }
+
+        const senderId = getEntityId(newMessage.sender);
+        chat.members.forEach((member) => {
+          const memberId = getEntityId(member);
+          if (!memberId || memberId === senderId) return;
+          socket.in(memberId).emit("message received", newMessage);
+        });
+      } catch (err) {
+        console.error("[Socket] Error handling new message:", err);
       }
-
-      chat.members.forEach((member) => {
-        if (member._id.toString() === newMessage.sender._id.toString()) return;
-        socket.in(member._id.toString()).emit("message received", newMessage);
-      });
     });
-    socket.on("message edited", (editedMessage) => {
-      let chat = editedMessage.room;
-      if (!chat.members) return socket.in(chat._id || chat).emit("message edited", editedMessage);
 
-      chat.members.forEach((member) => {
-        if (member._id.toString() === editedMessage.sender._id.toString()) return;
-        socket.in(member._id.toString()).emit("message edited", editedMessage);
-      });
+    socket.on("message edited", (editedMessage) => {
+      try {
+        let chat = editedMessage.room;
+        if (!chat) return;
+
+        if (!chat.members || !Array.isArray(chat.members)) {
+          return socket.in(getEntityId(chat)).emit("message edited", editedMessage);
+        }
+
+        const senderId = getEntityId(editedMessage.sender);
+        chat.members.forEach((member) => {
+          const memberId = getEntityId(member);
+          if (!memberId || memberId === senderId) return;
+          socket.in(memberId).emit("message edited", editedMessage);
+        });
+      } catch (err) {
+        console.error("[Socket] Error handling message edited:", err);
+      }
     });
 
     socket.on("message deleted", (deletedMessage) => {
-      let chat = deletedMessage.room;
-      if (!chat.members) return socket.in(chat._id || chat).emit("message deleted", deletedMessage);
+      try {
+        let chat = deletedMessage.room;
+        if (!chat) return;
 
-      chat.members.forEach((member) => {
-        if (member._id.toString() === deletedMessage.sender._id.toString()) return;
-        socket.in(member._id.toString()).emit("message deleted", deletedMessage);
-      });
+        if (!chat.members || !Array.isArray(chat.members)) {
+          return socket.in(getEntityId(chat)).emit("message deleted", deletedMessage);
+        }
+
+        const senderId = getEntityId(deletedMessage.sender);
+        chat.members.forEach((member) => {
+          const memberId = getEntityId(member);
+          if (!memberId || memberId === senderId) return;
+          socket.in(memberId).emit("message deleted", deletedMessage);
+        });
+      } catch (err) {
+        console.error("[Socket] Error handling message deleted:", err);
+      }
     });
 
     socket.on("chat cleared", (data) => {
