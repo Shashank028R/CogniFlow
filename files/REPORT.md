@@ -300,3 +300,29 @@ The implementation plan is maintained in [files/IMPLEMENTATION_PLAN.md](IMPLEMEN
 Both services have been executed and verified in this environment:
 - **Backend Server (`node index.js`)**: Listening on `http://localhost:3000`, connected to MongoDB Atlas, CogniBot initialized.
 - **Frontend Client (`npm run dev`)**: Listening on `http://localhost:5173`, Vite bundled dependencies and served App shell.
+
+---
+
+## 11. Design System Architecture: Apple Design Language (DESIGN-apple.md)
+
+In accordance with the specification outlined in `DESIGN-apple.md`, the frontend UI was systematically overhauled to eliminate neumorphism, neon glows, and arbitrary gradient overlays, standardizing on the Apple Design System:
+
+1. **Color Token Uniformity:**
+   - Single interactive accent: **Action Blue (`#0066cc`)**, with **Focus Blue (`#0071e3`)** for focus rings and **Sky Link Blue (`#2997ff`)** on dark canvases.
+   - Canvas backgrounds: Pure White (`#ffffff`), Parchment (`#f5f5f7`), and Dark Tiles (`#272729`, `#1d1d1f`, `#252527`).
+   - Hairline borders (`#e0e0e0` / `#333336`) replacing thick borders and complex drop-shadows.
+
+2. **Typography & Hierarchy:**
+   - Display typography calibrated to SF Pro Display with tight negative letter-spacing (`-0.025em`) and font-weight 600.
+   - Body typography at 17px/14px with relaxed line heights (1.47), weight 400. Weight 500 deliberately eliminated.
+
+3. **Shapes & Micro-interactions:**
+   - Radius scale: `rounded-[18px]` for all utility cards and modal bodies (`store-utility-card`), `rounded-full` (`pill`) for primary CTAs and search inputs.
+   - Micro-interactions: `active:scale-[0.95]` applied uniformly to buttons, capsules, and interactive items.
+
+4. **Elevation Philosophy:**
+   - Exactly one signature shadow (`shadow-apple-product`: `0 5px 30px rgba(0, 0, 0, 0.18)`) reserved strictly for photographic imagery resting on surfaces. Chrome, cards, and buttons remain flat with hairline division.
+
+5. **Landing Page Museum Gallery:**
+   - Full-bleed alternating tiles: Light Canvas Hero → Dark `#272729` CogniBot AI Tile → Parchment `#f5f5f7` Store Utility Grid → Near-Black `#252527` Privacy Editorial Tile → Parchment Footer with relaxed leading links (`leading-[2.41]`).
+
