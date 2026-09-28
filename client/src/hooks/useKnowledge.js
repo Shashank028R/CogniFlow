@@ -61,7 +61,7 @@ export const useKnowledge = (roomId, socket) => {
         },
       });
 
-      toast.info(`"${file.name}" uploaded, processing knowledge...`);
+      toast(`"${file.name}" uploaded, processing knowledge...`, { icon: "📄" });
 
       // Optimistically add or update source
       setSources((prev) => [data.source, ...prev.filter((s) => s._id !== data.source._id)]);
@@ -86,7 +86,7 @@ export const useKnowledge = (roomId, socket) => {
         { roomId, title, text },
         authHeaders
       );
-      toast.info("Text note added, processing knowledge...");
+      toast("Text note added, processing knowledge...", { icon: "📝" });
       setSources((prev) => [data.source, ...prev.filter((s) => s._id !== data.source._id)]);
       return data.source;
     } catch (err) {
