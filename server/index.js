@@ -10,6 +10,8 @@ import authRouter from "./routes/authRouter.js";
 import messageRouter from "./routes/messageRouter.js";
 import userRouter from "./routes/userRouter.js";
 import uploadRouter from "./routes/uploadRouter.js";
+import ragRouter from "./routes/ragRouter.js";
+import { resetStalledIngestions } from "./services/rag/ingestQueue.js";
 
 dotenv.config();
 
@@ -57,6 +59,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 connectDb().then(() => {
   initCogniBot();
+  resetStalledIngestions();
 });
 
 app.use("/api/auth", authRouter);
@@ -64,6 +67,7 @@ app.use("/api/chat", chatRouter);
 app.use("/api/messages", messageRouter);
 app.use("/api/user", userRouter);
 app.use("/api/upload", uploadRouter);
+app.use("/api/rag", ragRouter);
 app.use("/uploads", express.static("uploads"));
 
 app.get("/", (req, res) => {

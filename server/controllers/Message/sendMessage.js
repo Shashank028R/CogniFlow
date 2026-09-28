@@ -1,9 +1,11 @@
 import Message from "../../models/Message.js";
 import Room from "../../models/Room.js";
+import { generateAIResponse } from "../../utils/aiClient.js";
+import { answerWithRag } from "../../services/rag/index.js";
 
 const sendMessage = async (req, res) => {
   try {
-    const { content, roomId, messageType, fileUrl, filePublicId } = req.body;
+    const { content, roomId, messageType, fileUrl, filePublicId, ragMode } = req.body;
 
     if (!roomId || (!content && !fileUrl)) {
       return res.status(400).json({
@@ -24,25 +26,20 @@ const sendMessage = async (req, res) => {
     const message = await Message.create({
       sender: req.user._id,
       room: roomId,
-      content: content || "",
-      messageType: messageType || "text",
-      fileUrl: fileUrl || "",
-      filePublicId: filePublicId || "",
+      content,
+      messageType,
+      fileUrl,
+      filePublicId,
+      deliveredTo: [req.user._id],
+      readBy: [req.user._id],
     });
 
     const populatedMessage = await message.populate([
       { path: "sender", select: "username profilePic" },
-      {
-        path: "room",
-        select: "name isGroupChat members",
-        populate: {
-          path: "members",
-          select: "username profilePic email",
-        },
-      },
+      { path: "room", select: "name isGroupChat members" },
     ]);
 
-    // Increment unread counts for all members except the sender
+    // Update unread count for other members
     room.members.forEach((memberId) => {
       if (memberId.toString() !== req.user._id.toString()) {
         const currentCount = room.unreadCounts.get(memberId.toString()) || 0;
@@ -55,17 +52,16 @@ const sendMessage = async (req, res) => {
 
     res.status(201).json(populatedMessage);
 
-    // --- AI INTEGRATION ---
-    const isDirectAI = !room.isGroupChat && room.members.some(m => m.toString() === global.cogniBotId);
-    const isMentionedAI = room.isGroupChat && content.toLowerCase().includes("@cogni");
+    // --- AI & RAG INTEGRATION ---
+    const isDirectAI = !room.isGroupChat && room.members.some((m) => m.toString() === global.cogniBotId);
+    const isMentionedAI = room.isGroupChat && content && content.toLowerCase().includes("@cogni");
 
     if ((isDirectAI || isMentionedAI) && req.user._id.toString() !== global.cogniBotId) {
-      // Process AI response asynchronously
-      import("../../utils/aiClient.js").then(async ({ generateAIResponse }) => {
+      (async () => {
         try {
-          let prompt = content;
+          let prompt = content || "";
           if (isMentionedAI) {
-            prompt = content.replace(/@cogni/gi, "").trim();
+            prompt = prompt.replace(/@cogni/gi, "").trim();
           }
 
           // Fetch recent chat history for context
@@ -73,20 +69,47 @@ const sendMessage = async (req, res) => {
             .sort({ createdAt: -1 })
             .limit(10)
             .populate("sender", "username");
-          
-          const history = recentMessages.reverse().map(msg => ({
-            role: msg.sender._id.toString() === global.cogniBotId ? 'model' : 'user',
-            content: `[${msg.sender.username}]: ${msg.content}`
+
+          const history = recentMessages.reverse().map((msg) => ({
+            role: msg.sender?._id?.toString() === global.cogniBotId ? "model" : "user",
+            content: `[${msg.sender?.username || "User"}]: ${msg.content}`,
           }));
 
           if (global.io) {
             global.io.in(roomId).emit("typing", roomId);
           }
 
-          const aiResponseText = await generateAIResponse(prompt, history, fileUrl);
+          let aiResponseText = "";
+          let answerMode = "plain";
+          let ragSources = [];
+          let replyToQuestion = null;
+          let actions = [];
 
-          if (global.io) {
-            global.io.in(roomId).emit("stop typing", roomId);
+          // Try RAG first if no chat file attachment is present (or if explicitly requested via ragMode)
+          let ragResult = null;
+          if (!fileUrl || ragMode) {
+            try {
+              ragResult = await answerWithRag({
+                room,
+                userMessage: prompt,
+                history,
+                modeOverride: ragMode || null,
+              });
+            } catch (ragErr) {
+              console.warn("[sendMessage] RAG execution error, falling back to standard AI:", ragErr.message);
+            }
+          }
+
+          if (ragResult) {
+            aiResponseText = ragResult.content;
+            answerMode = ragResult.answerMode;
+            ragSources = ragResult.ragSources || [];
+            replyToQuestion = ragResult.replyToQuestion || null;
+            actions = ragResult.actions || [];
+          } else {
+            // Standard multimodal AI response
+            aiResponseText = await generateAIResponse(prompt, history, fileUrl);
+            answerMode = "plain";
           }
 
           const aiMessage = await Message.create({
@@ -96,45 +119,46 @@ const sendMessage = async (req, res) => {
             messageType: "text",
             fileUrl: "",
             filePublicId: "",
+            isAiResponse: true,
+            answerMode,
+            ragSources,
+            replyToQuestion,
+            actions,
           });
 
           const populatedAIMessage = await aiMessage.populate([
             { path: "sender", select: "username profilePic" },
-            { path: "room", select: "name isGroupChat members" }
+            { path: "room", select: "name isGroupChat members" },
           ]);
 
           room.lastMessage = aiMessage._id;
-          
+
           room.members.forEach((memberId) => {
             if (memberId.toString() !== global.cogniBotId) {
               const currentCount = room.unreadCounts.get(memberId.toString()) || 0;
               room.unreadCounts.set(memberId.toString(), currentCount + 1);
             }
           });
-          
+
           await room.save();
 
-          // We don't have direct access to 'io' here, so we might need a global event emitter
-          // or we can emit via a socket utility if we export it from socketHandler.js
-          // Since we can't emit from here easily without refactoring, we can use a small hack
-          // by requiring socket instance or emitting an internal event that socketHandler listens to.
-          // For now, let's just create a global emitter.
           if (global.io) {
             if (room.isGroupChat) {
               global.io.in(roomId).emit("message received", populatedAIMessage);
             } else {
-              // emit to the user
               global.io.in(req.user._id.toString()).emit("message received", populatedAIMessage);
-              global.io.in(global.cogniBotId).emit("message received", populatedAIMessage); // Optional
+              global.io.in(global.cogniBotId).emit("message received", populatedAIMessage);
             }
           }
-
         } catch (aiError) {
           console.error("Error generating AI response:", aiError);
+        } finally {
+          if (global.io) {
+            global.io.in(roomId).emit("stop typing", roomId);
+          }
         }
-      });
+      })();
     }
-
   } catch (error) {
     console.error("Error sending message:", error);
     res.status(500).json({ message: "Server error while sending message." });

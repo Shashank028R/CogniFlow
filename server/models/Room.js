@@ -70,6 +70,13 @@ const roomSchema = new mongoose.Schema(
       of: Number,
       default: {},
     },
+    ragSettings: {
+      mode: {
+        type: String,
+        enum: ["off", "strict", "hybrid"],
+        default: "strict",
+      },
+    },
   },
   { timestamps: true },
 );

@@ -18,11 +18,14 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "file-type": "^22.1.1",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.6.1",
     "multer": "^2.1.1",
     "multer-storage-cloudinary": "^4.0.0",
     "nodemailer": "^8.0.7",
+    "p-queue": "^9.3.3",
+    "pdfjs-dist": "^6.3.289",
     "socket.io": "^4.8.3"
   }
 }

@@ -58,6 +58,39 @@ const messageSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
+    answerMode: {
+      type: String,
+      enum: ["grounded", "no_context", "general", "plain"],
+      default: "plain",
+    },
+    ragSources: [
+      {
+        chunk: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "KnowledgeChunk",
+        },
+        source: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "KnowledgeSource",
+        },
+        title: String,
+        page: Number,
+        score: Number,
+        snippet: String,
+      },
+    ],
+    replyToQuestion: {
+      type: String,
+      default: null,
+    },
+    actions: {
+      type: [String],
+      default: [],
+    },
+    learned: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true },
 );

@@ -3,11 +3,18 @@ import Avatar from "../ui/Avatar";
 import toast from "react-hot-toast";
 import axios from "axios";
 import io from "socket.io-client";
-import { Pencil, Trash2, X, Paperclip, FileText, Download, MoreVertical, Check, CheckCheck } from "lucide-react";
+import { Pencil, Trash2, X, Paperclip, FileText, Download, MoreVertical, Check, CheckCheck, BookOpen, Sparkles } from "lucide-react";
 import DeleteMessageModal from "./DeleteMessageModal";
 import GroupSettingsModal from "./GroupSettingsModal";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+
+import { useKnowledge } from "../../hooks/useKnowledge";
+import KnowledgePanel from "../rag/KnowledgePanel";
+import CitationChips from "../rag/CitationChips";
+import AnswerBadge from "../rag/AnswerBadge";
+import FallbackActions from "../rag/FallbackActions";
+import LearnModal from "../rag/LearnModal";
 
 const EndPoint = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
 
@@ -33,17 +40,40 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
   const [attachedFile, setAttachedFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
 
+  // RAG State
+  const [isKnowledgePanelOpen, setIsKnowledgePanelOpen] = useState(false);
+  const [learnModalMessage, setLearnModalMessage] = useState(null);
+  const [perMessageRagMode, setPerMessageRagMode] = useState(null);
+
   const socketRef = useRef(null);
+  const [socketInstance, setSocketInstance] = useState(null);
   const messagesEndRef = useRef(null);
 
-  useEffect(() => {
-    socketRef.current = io(EndPoint);
+  const {
+    sources,
+    ragMode,
+    isUploading: isKnowledgeUploading,
+    uploadProgress,
+    readySourcesCount,
+    uploadSource,
+    uploadText,
+    toggleSource,
+    deleteSource,
+    updateMode,
+    answerGeneral,
+    learnFromAnswer,
+  } = useKnowledge(selectedChat?._id, socketInstance);
 
-    socketRef.current.on("connect", () => {
+  useEffect(() => {
+    const s = io(EndPoint);
+    socketRef.current = s;
+    setSocketInstance(s);
+
+    s.on("connect", () => {
       console.log("Socket connected");
-      socketRef.current.emit("setup", currentUserId);
+      s.emit("setup", currentUserId);
       if (selectedChat) {
-        socketRef.current.emit("join chat", selectedChat._id);
+        s.emit("join chat", selectedChat._id);
       }
     });
 
@@ -223,6 +253,10 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
         roomId: selectedChat._id,
       };
 
+      if (perMessageRagMode) {
+        messagePayload.ragMode = perMessageRagMode;
+      }
+
       if (uploadData) {
         messagePayload.messageType = uploadData.resourceType === "image" ? "image" : "file";
         messagePayload.fileUrl = uploadData.fileUrl;
@@ -356,35 +390,56 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
           </div>
         </div>
 
-        <div className="relative">
-          <button 
-            onClick={() => setShowMenu(!showMenu)}
-            className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 bg-slate-100/70 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/80 shadow-xs active:scale-95 transition-colors cursor-pointer text-sm"
+        <div className="flex items-center gap-2">
+          {/* Knowledge Base Toggle Button */}
+          <button
+            onClick={() => setIsKnowledgePanelOpen(true)}
+            className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all cursor-pointer shadow-xs active:scale-95 ${
+              readySourcesCount > 0
+                ? "bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400"
+                : "bg-slate-100/70 dark:bg-slate-800/70 border-slate-200/80 dark:border-slate-700/80 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+            }`}
+            title="Room Knowledge Base"
           >
-            ⋮
+            <BookOpen size={15} />
+            <span className="hidden sm:inline">Knowledge</span>
+            {readySourcesCount > 0 && (
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-blue-600 text-white">
+                {readySourcesCount}
+              </span>
+            )}
           </button>
-          
-          {showMenu && (
-            <div className="absolute right-0 mt-2 w-44 bg-[var(--card)] rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.12)] z-50 overflow-hidden border border-slate-200 dark:border-slate-800">
-              {selectedChat.isGroupChat && (
+
+          <div className="relative">
+            <button 
+              onClick={() => setShowMenu(!showMenu)}
+              className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 bg-slate-100/70 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/80 shadow-xs active:scale-95 transition-colors cursor-pointer text-sm"
+            >
+              ⋮
+            </button>
+            
+            {showMenu && (
+              <div className="absolute right-0 mt-2 w-44 bg-[var(--card)] rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.12)] z-50 overflow-hidden border border-slate-200 dark:border-slate-800">
+                {selectedChat.isGroupChat && (
+                  <button
+                    onClick={() => {
+                      setIsGroupSettingsOpen(true);
+                      setShowMenu(false);
+                    }}
+                    className="w-full text-left px-3.5 py-2.5 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-b border-slate-200 dark:border-slate-800"
+                  >
+                    Group Settings
+                  </button>
+                )}
                 <button
-                  onClick={() => {
-                    setIsGroupSettingsOpen(true);
-                    setShowMenu(false);
-                  }}
-                  className="w-full text-left px-3.5 py-2.5 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-b border-slate-200 dark:border-slate-800"
+                  onClick={handleClearChat}
+                  className="w-full text-left px-3.5 py-2.5 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
                 >
-                  Group Settings
+                  Clear Chat
                 </button>
-              )}
-              <button
-                onClick={handleClearChat}
-                className="w-full text-left px-3.5 py-2.5 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
-              >
-                Clear Chat
-              </button>
-            </div>
-          )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -515,11 +570,24 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
                           </a>
                         </div>
                       ) : (
-                        <div className="markdown-body text-sm [&>p]:mb-2 last:[&>p]:mb-0 [&>ul]:list-disc [&>ul]:ml-4 [&>ul]:mb-2 [&>ol]:list-decimal [&>ol]:ml-4 [&>ol]:mb-2 [&>h1]:text-lg [&>h1]:font-bold [&>h1]:mb-2 [&>h2]:text-base [&>h2]:font-bold [&>h2]:mb-2 [&>strong]:font-bold [&_a]:text-blue-300 [&_a]:underline break-words">
-                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                            {m.content}
-                          </ReactMarkdown>
-                        </div>
+                        <>
+                          {m.isAiResponse && <AnswerBadge answerMode={m.answerMode} />}
+                          <div className="markdown-body text-sm [&>p]:mb-2 last:[&>p]:mb-0 [&>ul]:list-disc [&>ul]:ml-4 [&>ul]:mb-2 [&>ol]:list-decimal [&>ol]:ml-4 [&>ol]:mb-2 [&>h1]:text-lg [&>h1]:font-bold [&>h1]:mb-2 [&>h2]:text-base [&>h2]:font-bold [&>h2]:mb-2 [&>strong]:font-bold [&_a]:text-blue-300 [&_a]:underline break-words">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                              {m.content}
+                            </ReactMarkdown>
+                          </div>
+                          {m.isAiResponse && m.ragSources && m.ragSources.length > 0 && (
+                            <CitationChips sources={m.ragSources} />
+                          )}
+                          {m.isAiResponse && (
+                            <FallbackActions
+                              message={m}
+                              onAnswerGeneral={answerGeneral}
+                              onOpenLearnModal={(targetMsg) => setLearnModalMessage(targetMsg)}
+                            />
+                          )}
+                        </>
                       )}
                       
                       <div className={`flex items-center justify-end gap-1 mt-1 ${isMyMessage ? "text-blue-100" : "text-gray-400"} text-[10px]`}>
@@ -705,6 +773,31 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
           )
         }
       />
+
+      {/* Knowledge Panel Slide-over */}
+      <KnowledgePanel
+        isOpen={isKnowledgePanelOpen}
+        onClose={() => setIsKnowledgePanelOpen(false)}
+        sources={sources}
+        ragMode={ragMode}
+        isUploading={isKnowledgeUploading}
+        uploadProgress={uploadProgress}
+        onUploadFile={uploadSource}
+        onUploadText={uploadText}
+        onToggleSource={toggleSource}
+        onDeleteSource={deleteSource}
+        onUpdateMode={updateMode}
+      />
+
+      {/* Learn from Answer Modal */}
+      {learnModalMessage && (
+        <LearnModal
+          isOpen={Boolean(learnModalMessage)}
+          onClose={() => setLearnModalMessage(null)}
+          message={learnModalMessage}
+          onSave={learnFromAnswer}
+        />
+      )}
     </div>
   );
 };
