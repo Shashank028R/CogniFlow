@@ -23,8 +23,8 @@ const ParticleBackground = () => {
     return () => observer.disconnect();
   }, []);
 
-  const particleColor = isDark ? "#424245" : "#d2d2d7";
-  const linkColor = isDark ? "#333336" : "#e0e0e0";
+  const particleColor = isDashboard && !isDark ? "#64748b" : "#94a3b8";
+  const linkColor = isDashboard && !isDark ? "#94a3b8" : "#cbd5e1";
 
   const particlesInit = useCallback(async (engine) => {
     await loadSlim(engine);

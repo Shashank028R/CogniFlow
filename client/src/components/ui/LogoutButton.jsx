@@ -2,15 +2,19 @@ const LogoutButton = ({ onClick }) => {
   return (
     <button
       onClick={onClick}
-      className="w-full py-2.5 px-4 rounded-[8px] font-normal text-[14px] text-white
-      bg-[#1d1d1f] hover:bg-[#333336] dark:bg-[#272729] dark:hover:bg-[#333336]
-      border border-transparent dark:border-[#333336]
-      transition-all duration-150 ease-out
-      active:scale-[0.95]
-      focus:outline-none focus:ring-2 focus:ring-[#0071e3]
-      cursor-pointer flex items-center justify-center gap-2"
+      className="w-full py-2 rounded-xl font-semibold text-red-500
+      bg-[var(--bg)]
+      shadow-[5px_5px_10px_var(--shadow-dark),-5px_-5px_10px_var(--shadow-light)]
+      transition-all duration-300 ease-in-out
+      hover:shadow-[7px_7px_14px_var(--shadow-dark),-7px_-7px_14px_var(--shadow-light)]
+      hover:-translate-y-0.5
+      active:translate-y-0
+      active:scale-95
+      active:shadow-[inset_3px_3px_6px_var(--shadow-dark),inset_-3px_-3px_6px_var(--shadow-light)]
+      focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 focus:ring-offset-[#eef2f7]
+      cursor-pointer"
     >
-      Sign Out
+      Logout
     </button>
   );
 };

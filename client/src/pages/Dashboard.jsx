@@ -35,21 +35,16 @@ const Dashboard = () => {
       >
         {!selectedChat ? (
           <div
-            className="p-10 rounded-[18px] text-center bg-white dark:bg-[#1d1d1f]
-            border border-[#e0e0e0] dark:border-[#333336]
-            max-w-md w-full animate-[fadeIn_0.3s_ease]"
+            className="p-10 rounded-2xl text-center bg-[var(--card)]/70 backdrop-blur-3xl
+            shadow-[8px_8px_18px_var(--shadow-dark),-8px_-8px_18px_var(--shadow-light)]
+            animate-[fadeIn_0.5s_ease] border border-white/20 dark:border-white/5"
           >
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#f5f5f7] dark:bg-[#272729] border border-[#e0e0e0] dark:border-[#333336] flex items-center justify-center">
-              <svg className="w-7 h-7 text-[#0066cc] dark:text-[#2997ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-              </svg>
-            </div>
-            <h2 className="text-[21px] font-semibold text-[#1d1d1f] dark:text-white tracking-tight">
-              Welcome to <span className="text-[#0066cc] dark:text-[#2997ff]">CogniFlow</span>
+            <h2 className="text-xl font-semibold text-[var(--text)]">
+              Welcome to <span className="text-blue-600">CogniFlow</span>
             </h2>
 
-            <p className="mt-2 text-sm text-[#86868b] leading-relaxed">
-              Select a conversation from the sidebar to start messaging in real time.
+            <p className="mt-2 text-gray-500">
+              Select a chat to start messaging 🚀
             </p>
           </div>
         ) : (
