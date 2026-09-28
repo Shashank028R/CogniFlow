@@ -11,6 +11,7 @@ import deleteSource from "../controllers/Rag/deleteSource.js";
 import updateRagSettings from "../controllers/Rag/updateRagSettings.js";
 import answerGeneral from "../controllers/Rag/answerGeneral.js";
 import learnFromMessage from "../controllers/Rag/learnFromMessage.js";
+import generateQuizController from "../controllers/Rag/generateQuiz.js";
 
 const router = express.Router();
 
@@ -52,5 +53,8 @@ router.patch("/rooms/:roomId/settings", updateRagSettings);
 // Message Actions (General Answer & Learn)
 router.post("/messages/:messageId/answer-general", answerGeneral);
 router.post("/messages/:messageId/learn", learnFromMessage);
+
+// Interactive Document Quiz
+router.post("/rooms/:roomId/quiz", generateQuizController);
 
 export default router;

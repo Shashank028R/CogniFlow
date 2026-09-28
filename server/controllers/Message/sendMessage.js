@@ -2,6 +2,7 @@ import Message from "../../models/Message.js";
 import Room from "../../models/Room.js";
 import { generateAIResponse } from "../../utils/aiClient.js";
 import { answerWithRag } from "../../services/rag/index.js";
+import { generateDocumentQuiz } from "../../services/rag/quizGenerator.js";
 
 const sendMessage = async (req, res) => {
   try {
@@ -85,9 +86,31 @@ const sendMessage = async (req, res) => {
           let replyToQuestion = null;
           let actions = [];
 
+          // Check for Document Quiz request
+          const isQuizRequest = /\b(quiz|mcq|test me on|quiz me)\b/i.test(prompt) || prompt.trim().startsWith("/quiz");
+          if (isQuizRequest) {
+            try {
+              const quizResult = await generateDocumentQuiz({
+                roomId,
+                userId: req.user._id,
+                topic: prompt.replace(/\/quiz|quiz me|quiz|test me/gi, "").trim(),
+              });
+
+              if (quizResult.status === "success") {
+                // Quiz message created and broadcasted via socket
+                return;
+              } else if (quizResult.status === "no_documents") {
+                aiResponseText = quizResult.message;
+                answerMode = "plain";
+              }
+            } catch (quizErr) {
+              console.warn("[sendMessage] Quiz generation error:", quizErr.message);
+            }
+          }
+
           // Try RAG first if no chat file attachment is present (or if explicitly requested via ragMode)
           let ragResult = null;
-          if (!fileUrl || ragMode) {
+          if (!aiResponseText && (!fileUrl || ragMode)) {
             try {
               ragResult = await answerWithRag({
                 room,

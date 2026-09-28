@@ -2,11 +2,13 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import dotenv from "dotenv";
 dotenv.config();
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-const model = genAI.getGenerativeModel({ 
-  model: "gemma-4-26b-a4b-it",
-  systemInstruction: "You are CogniBot, a helpful, intelligent AI assistant in the CogniFlow chat app. NEVER output your internal thoughts, reasoning, or scratchpad notes. ONLY output the final conversational reply directly to the user."
-});
+const getAiModel = () => {
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+  return genAI.getGenerativeModel({ 
+    model: "gemini-2.5-flash",
+    systemInstruction: "You are CogniBot, a helpful, intelligent AI assistant in the CogniFlow chat app. NEVER output your internal thoughts, reasoning, or scratchpad notes. ONLY output the final conversational reply directly to the user."
+  });
+};
 
 export const generateAIResponse = async (prompt, history = [], fileUrl = null) => {
   try {
@@ -45,6 +47,7 @@ export const generateAIResponse = async (prompt, history = [], fileUrl = null) =
       }
     }
 
+    const model = getAiModel();
     const result = await model.generateContent(parts);
     const text = result.response.text();
 

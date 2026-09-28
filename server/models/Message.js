@@ -18,7 +18,7 @@ const messageSchema = new mongoose.Schema(
     },
     messageType: {
       type: String,
-      enum: ["text", "image", "file"],
+      enum: ["text", "image", "file", "quiz"],
       default: "text",
     },
 
@@ -58,6 +58,21 @@ const messageSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
+    quizData: {
+      title: { type: String, default: "Document Knowledge Quiz" },
+      questions: [
+        {
+          id: Number,
+          question: String,
+          options: [String],
+          correctAnswerIndex: Number,
+          explanation: String,
+          sourceTitle: String,
+          sourcePage: Number,
+        },
+      ],
+      totalQuestions: Number,
+    },
     answerMode: {
       type: String,
       enum: ["grounded", "no_context", "general", "plain"],

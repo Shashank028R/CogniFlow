@@ -15,6 +15,7 @@ import CitationChips from "../rag/CitationChips";
 import AnswerBadge from "../rag/AnswerBadge";
 import FallbackActions from "../rag/FallbackActions";
 import LearnModal from "../rag/LearnModal";
+import QuizCard from "../rag/QuizCard";
 
 const EndPoint = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
 
@@ -62,6 +63,7 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
     updateMode,
     answerGeneral,
     learnFromAnswer,
+    generateQuiz,
   } = useKnowledge(selectedChat?._id, socketInstance);
 
   useEffect(() => {
@@ -257,10 +259,16 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
         messagePayload.ragMode = perMessageRagMode;
       }
 
-      if (uploadData) {
+      if (attachedFile) {
         messagePayload.messageType = uploadData.resourceType === "image" ? "image" : "file";
         messagePayload.fileUrl = uploadData.fileUrl;
         messagePayload.filePublicId = uploadData.publicId;
+
+        // Auto-ingest document into Room Knowledge Base if PDF or text
+        const fileName = attachedFile.file.name.toLowerCase();
+        if (fileName.endsWith(".pdf") || fileName.endsWith(".txt") || attachedFile.file.type === "application/pdf") {
+          uploadSource(attachedFile.file);
+        }
       }
 
       const { data } = await axios.post(
@@ -391,6 +399,18 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Quiz Me Button */}
+          {readySourcesCount > 0 && (
+            <button
+              onClick={() => generateQuiz()}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-violet-200/90 dark:border-violet-800/80 bg-violet-50/80 dark:bg-violet-950/40 text-violet-600 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-900/40 text-xs font-semibold shadow-xs active:scale-95 transition-all cursor-pointer"
+              title="Take an interactive quiz on uploaded documents"
+            >
+              <Sparkles size={14} className="text-violet-500 animate-pulse" />
+              <span className="hidden sm:inline">Quiz Me</span>
+            </button>
+          )}
+
           {/* Knowledge Base Toggle Button */}
           <button
             onClick={() => setIsKnowledgePanelOpen(true)}
@@ -457,17 +477,101 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
             Loading chat history...
           </p>
         ) : messages.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center text-center opacity-70">
-            <div className="w-20 h-20 mb-4 rounded-full bg-[var(--card)] shadow-[inset_4px_4px_8px_var(--shadow-dark),inset_-4px_-4px_8px_var(--shadow-light)] flex items-center justify-center">
-              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-              </svg>
-            </div>
-            <h3 className="text-[var(--text)] font-semibold text-lg">No messages yet</h3>
-            <p className="text-gray-500 text-sm max-w-[250px] mt-1">
-              Send a message to start the conversation!
-            </p>
-          </div>
+          (() => {
+            const otherUser = !selectedChat.isGroupChat ? selectedChat.members?.find((m) => String(m._id) !== String(currentUserId)) : null;
+            const isCogniBot = otherUser && (otherUser.username === "CogniBot" || otherUser.email === "cognibot@system.local");
+
+            if (isCogniBot) {
+              return (
+                <div className="flex-1 flex flex-col items-center justify-center p-6 text-center max-w-lg mx-auto animate-[fadeIn_0.3s_ease]">
+                  <div className="relative w-20 h-20 mb-4 rounded-3xl bg-gradient-to-tr from-blue-600 to-indigo-600 p-0.5 shadow-xl shadow-blue-500/20">
+                    <div className="w-full h-full bg-[var(--card)] rounded-[22px] flex items-center justify-center p-3">
+                      <img src="/ai-button-logo.png" alt="CogniAi" className="w-full h-full object-contain" />
+                    </div>
+                  </div>
+
+                  <h3 className="text-xl font-bold text-[var(--text)] tracking-tight">
+                    CogniAi Study & Knowledge Hub
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mt-1 mb-5">
+                    Upload any PDF, slides, or documents. Ask questions with verified citations or test your comprehension with interactive quizzes!
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full mb-4">
+                    <button
+                      onClick={() => setIsKnowledgePanelOpen(true)}
+                      className="p-3 rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 hover:bg-slate-100/90 dark:hover:bg-slate-800/80 text-left flex items-start gap-2.5 transition-all shadow-xs active:scale-[0.99] cursor-pointer"
+                    >
+                      <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center flex-shrink-0">
+                        <BookOpen size={16} />
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-[var(--text)]">Knowledge Base</div>
+                        <div className="text-[11px] text-slate-400">
+                          {readySourcesCount > 0 ? `${readySourcesCount} documents loaded` : "Upload PDFs or notes"}
+                        </div>
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        if (readySourcesCount > 0) {
+                          generateQuiz();
+                        } else {
+                          setIsKnowledgePanelOpen(true);
+                        }
+                      }}
+                      className="p-3 rounded-2xl border border-violet-200/80 dark:border-violet-900/60 bg-violet-50/60 dark:bg-violet-950/30 hover:bg-violet-100/70 text-left flex items-start gap-2.5 transition-all shadow-xs active:scale-[0.99] cursor-pointer"
+                    >
+                      <div className="w-8 h-8 rounded-xl bg-violet-100/80 dark:bg-violet-900/50 text-violet-600 dark:text-violet-400 flex items-center justify-center flex-shrink-0">
+                        <Sparkles size={16} />
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-violet-900 dark:text-violet-200">Take a Quiz</div>
+                        <div className="text-[11px] text-violet-600/70 dark:text-violet-400/70">
+                          {readySourcesCount > 0 ? "Generate 5 MCQs" : "Upload doc to quiz"}
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+
+                  <div className="flex flex-wrap items-center justify-center gap-1.5">
+                    <span className="text-[11px] text-slate-400 mr-1">Suggestions:</span>
+                    {[
+                      "Quiz me on key facts",
+                      "Summarize main takeaways",
+                      "Explain core concepts",
+                    ].map((sug, i) => (
+                      <button
+                        key={i}
+                        onClick={() => {
+                          setNewMessage(`@cogni ${sug}`);
+                          document.getElementById("chat-textarea")?.focus();
+                        }}
+                        className="text-[11px] px-2.5 py-1 rounded-full bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 border border-slate-200/60 dark:border-slate-700/60 transition-colors cursor-pointer"
+                      >
+                        {sug}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              );
+            }
+
+            return (
+              <div className="flex-1 flex flex-col items-center justify-center text-center opacity-70">
+                <div className="w-20 h-20 mb-4 rounded-full bg-[var(--card)] shadow-[inset_4px_4px_8px_var(--shadow-dark),inset_-4px_-4px_8px_var(--shadow-light)] flex items-center justify-center">
+                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                  </svg>
+                </div>
+                <h3 className="text-[var(--text)] font-semibold text-lg">No messages yet</h3>
+                <p className="text-gray-500 text-sm max-w-[250px] mt-1">
+                  Send a message to start the conversation!
+                </p>
+              </div>
+            );
+          })()
         ) : (
           messages.map((m, index) => {
             const senderId = m.sender?._id || m.sender?.id;
@@ -568,6 +672,10 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
                             <span className="truncate max-w-[150px] font-medium">{m.content}</span>
                             <Download size={18} className={`ml-2 flex-shrink-0 ${isMyMessage ? "text-blue-200" : "text-gray-400"}`} />
                           </a>
+                        </div>
+                      ) : m.messageType === "quiz" && m.quizData ? (
+                        <div className="flex flex-col gap-2">
+                          <QuizCard quiz={m.quizData} messageId={m._id} />
                         </div>
                       ) : (
                         <>
@@ -787,6 +895,7 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
         onToggleSource={toggleSource}
         onDeleteSource={deleteSource}
         onUpdateMode={updateMode}
+        onGenerateQuiz={generateQuiz}
       />
 
       {/* Learn from Answer Modal */}

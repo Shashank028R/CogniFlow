@@ -247,6 +247,25 @@ export const useKnowledge = (roomId, socket) => {
 
   const readySourcesCount = sources.filter((s) => s.status === "ready" && s.enabled).length;
 
+  // Generate interactive document quiz
+  const generateQuiz = async (topic = "", numQuestions = 5) => {
+    if (!roomId) return;
+    try {
+      toast("Generating quiz from documents...", { icon: "🎯" });
+      const { data } = await axios.post(
+        `${BackendUrl}/api/rag/rooms/${roomId}/quiz`,
+        { topic, numQuestions },
+        authHeaders
+      );
+      toast.success("Document quiz ready!");
+      return data;
+    } catch (err) {
+      const msg = err.response?.data?.message || "Failed to generate quiz. Please ensure documents are uploaded.";
+      toast.error(msg);
+      throw err;
+    }
+  };
+
   return {
     sources,
     loading,
@@ -261,6 +280,7 @@ export const useKnowledge = (roomId, socket) => {
     updateMode,
     answerGeneral,
     learnFromAnswer,
+    generateQuiz,
     refreshSources: fetchSources,
   };
 };

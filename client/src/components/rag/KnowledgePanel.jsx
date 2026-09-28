@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { X, UploadCloud, Plus, FileText, BookOpen, Layers } from "lucide-react";
+import { X, UploadCloud, Plus, FileText, BookOpen, Layers, Sparkles } from "lucide-react";
 import ModeSelector from "./ModeSelector";
 import SourceItem from "./SourceItem";
 
@@ -15,6 +15,7 @@ export const KnowledgePanel = ({
   onToggleSource,
   onDeleteSource,
   onUpdateMode,
+  onGenerateQuiz,
 }) => {
   const [activeTab, setActiveTab] = useState("file"); // "file" | "text"
   const [textTitle, setTextTitle] = useState("");
@@ -78,6 +79,31 @@ export const KnowledgePanel = ({
         
         {/* Mode Selector */}
         <ModeSelector mode={ragMode} onSelectMode={onUpdateMode} />
+
+        {/* Quick Quiz on Documents Action */}
+        {readyCount > 0 && onGenerateQuiz && (
+          <div className="p-3.5 rounded-2xl bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-violet-600/10 border border-blue-500/25 flex items-center justify-between shadow-xs">
+            <div className="flex flex-col">
+              <span className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                <Sparkles size={14} className="text-blue-500" />
+                Test Your Knowledge
+              </span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                Generate an interactive quiz from your docs
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                onGenerateQuiz();
+                onClose();
+              }}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-xs active:scale-95 transition-all cursor-pointer flex-shrink-0"
+            >
+              <span>Take Quiz</span>
+            </button>
+          </div>
+        )}
 
         {/* Upload Tabs */}
         <div className="flex flex-col gap-2.5">
