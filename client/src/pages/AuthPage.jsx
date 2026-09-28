@@ -82,9 +82,17 @@ const AuthPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-transparent p-4 z-10 relative">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#f5f5f7] dark:bg-black p-4 z-10 relative">
       <div className="w-full max-w-md">
-        <Card>
+        <div className="mb-4 text-center">
+          <button
+            onClick={() => navigate("/")}
+            className="text-xs text-[#0066cc] dark:text-[#2997ff] hover:underline cursor-pointer inline-flex items-center gap-1"
+          >
+            ← Back to CogniFlow
+          </button>
+        </div>
+        <Card className="p-8">
           <AuthForm
             isLogin={isLogin}
             isVerifying={isVerifying}

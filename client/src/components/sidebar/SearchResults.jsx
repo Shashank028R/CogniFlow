@@ -3,7 +3,7 @@ import Avatar from "../ui/Avatar";
 const SearchResults = ({ loadingSearch, searchResult, accessChat }) => {
   if (loadingSearch) {
     return (
-      <p className="text-center text-sm text-gray-500 mt-4 animate-pulse">
+      <p className="text-center text-sm text-[#86868b] mt-4">
         Searching users...
       </p>
     );
@@ -11,7 +11,7 @@ const SearchResults = ({ loadingSearch, searchResult, accessChat }) => {
 
   if (searchResult.length === 0) {
     return (
-      <p className="text-center text-sm text-gray-500 mt-4">No users found.</p>
+      <p className="text-center text-sm text-[#86868b] mt-4">No users found.</p>
     );
   }
 
@@ -19,9 +19,9 @@ const SearchResults = ({ loadingSearch, searchResult, accessChat }) => {
     <div
       key={user._id}
       onClick={() => accessChat(user._id)}
-      className="flex items-center gap-3 p-3 rounded-xl cursor-pointer bg-[var(--card)]
-      transition-all duration-300 hover:translate-y-[1px] active:scale-[0.97]
-      shadow-[4px_4px_10px_var(--shadow-dark),-4px_-4px_10px_var(--shadow-light)] w-[calc(100%-4px)]"
+      className="flex items-center gap-3 p-3 rounded-[14px] cursor-pointer bg-white dark:bg-[#272729]
+      border border-[#e0e0e0] dark:border-[#333336]
+      transition-all duration-150 hover:border-[#0066cc] dark:hover:border-[#2997ff] active:scale-[0.98] w-full"
     >
       <Avatar
         src={user.profilePic}
@@ -29,10 +29,10 @@ const SearchResults = ({ loadingSearch, searchResult, accessChat }) => {
       />
 
       <div className="flex flex-col overflow-hidden">
-        <p className="font-medium text-sm text-[var(--text)] truncate">
+        <p className="font-semibold text-sm text-[#1d1d1f] dark:text-[#f5f5f7] truncate">
           {user.username}
         </p>
-        <p className="text-xs text-gray-500 truncate">{user.bio}</p>
+        <p className="text-xs text-[#86868b] truncate">{user.bio}</p>
       </div>
     </div>
   ));
