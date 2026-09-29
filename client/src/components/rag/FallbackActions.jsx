@@ -48,7 +48,7 @@ export const FallbackActions = ({
         <button
           type="button"
           onClick={() => onOpenLearnModal(message)}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-[var(--accent)] bg-[var(--accent-soft)] hover:bg-[var(--accent)]/20 border border-[var(--accent)]/30 shadow-xs transition-colors cursor-pointer"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 border border-emerald-200/80 dark:border-emerald-800/80 shadow-xs transition-colors cursor-pointer"
         >
           <PlusCircle size={13} />
           <span>Add to knowledge</span>
@@ -56,7 +56,7 @@ export const FallbackActions = ({
       )}
 
       {isLearned && (
-        <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent)]/30">
+        <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
           <Check size={12} />
           <span>Added to knowledge</span>
         </div>
