@@ -6,7 +6,7 @@ export const AnswerBadge = ({ answerMode }) => {
 
   if (answerMode === "grounded") {
     return (
-      <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-xs mb-1.5 self-start">
+      <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent)]/30 shadow-xs mb-1.5 self-start">
         <BookOpen size={12} className="flex-shrink-0" />
         <span>From your documents</span>
       </div>
