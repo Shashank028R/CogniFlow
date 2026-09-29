@@ -35,12 +35,12 @@ import { getAuthToken, getAuthUserId, clearAuthSession } from "../../utils/authS
 
 const SENDER_COLORS = [
   "#5B7083",
-  "#00A884",
+  "#E06928",
   "#2563EB",
   "#7C3AED",
   "#DB2777",
   "#D97706",
-  "#059669",
+  "#4F46E5",
 ];
 
 const getSenderColor = (id = "") => {

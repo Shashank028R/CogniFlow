@@ -60,22 +60,22 @@
   --border:            #E9EDEF;
   --border-strong:     #D1D7DB;
 
-  /* Accent (single brand color) */
-  --accent:            #00A884;
-  --accent-hover:      #008F72;
-  --accent-soft:       #E7F8F3;   /* subtle tinted backgrounds */
+  /* Accent (subtle warm orange) */
+  --accent:            #E06928;
+  --accent-hover:      #C95717;
+  --accent-soft:       #FDF2EA;   /* subtle warm peach/cream tint */
 
   /* Chat bubbles */
-  --bubble-out:        #D9FDD3;
+  --bubble-out:        #FCECE2;   /* calm subtle warm peach outgoing bubble */
   --bubble-out-text:   #111B21;
   --bubble-in:         #FFFFFF;
   --bubble-in-text:    #111B21;
 
   /* Status */
   --tick-sent:         #8696A0;   /* gray */
-  --tick-seen:         #53BDEB;   /* blue */
+  --tick-seen:         #E06928;   /* subtle orange */
   --danger:            #D92D20;
-  --success:           #1FA855;
+  --success:           #E06928;
 
   /* Elevation (very light) */
   --shadow-sm: 0 1px 1px rgba(11, 20, 26, 0.08);
@@ -104,11 +104,11 @@
   --border:            #222D34;
   --border-strong:     #2F3B43;
 
-  --accent:            #00A884;
-  --accent-hover:      #06CF9C;
-  --accent-soft:       #0F2A26;
+  --accent:            #F27A30;
+  --accent-hover:      #FA8D4D;
+  --accent-soft:       #301B10;
 
-  --bubble-out:        #005C4B;
+  --bubble-out:        #3E2314;
   --bubble-out-text:   #E9EDEF;
   --bubble-in:         #202C33;
   --bubble-in-text:    #E9EDEF;
