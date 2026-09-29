@@ -30,6 +30,8 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [loadingMessages, setLoadingMessages] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const isSendingRef = useRef(false);
   
   const [editingMessageId, setEditingMessageId] = useState(null);
   const [showMenu, setShowMenu] = useState(false);
@@ -222,13 +224,16 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
   };
 
   const handleSubmit = async () => {
-    if (!newMessage.trim() && !attachedFile) return;
+    if (isSendingRef.current) return;
+    const contentToSend = newMessage.trim();
+    const fileToSend = attachedFile;
+    if (!contentToSend && !fileToSend) return;
 
     if (editingMessageId) {
       try {
         const { data } = await axios.put(
           `${BackendUrl}/api/messages/${editingMessageId}`,
-          { content: newMessage },
+          { content: contentToSend },
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
@@ -244,15 +249,50 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
       return;
     }
 
+    // Lock sending to prevent double submission
+    isSendingRef.current = true;
+    setIsSending(true);
+
+    // INSTANTLY clear the input and reset height (0ms latency, zero confusion)
+    setNewMessage("");
+    setAttachedFile(null);
+    const textarea = document.getElementById("chat-textarea");
+    if (textarea) textarea.style.height = "auto";
+
+    if (selectedChatRef.current) {
+      socketRef.current?.emit("stop typing", selectedChatRef.current._id);
+    }
+
+    // Instant optimistic message
+    const tempId = `temp-${Date.now()}`;
+    const optimisticMessage = {
+      _id: tempId,
+      sender: {
+        _id: currentUserId,
+        username: "You",
+      },
+      room: selectedChat,
+      content: contentToSend || (fileToSend ? fileToSend.file.name : ""),
+      messageType: fileToSend ? (fileToSend.type === "image" ? "image" : "file") : "text",
+      fileUrl: fileToSend ? fileToSend.previewUrl : "",
+      fileName: fileToSend ? fileToSend.file.name : "",
+      createdAt: new Date().toISOString(),
+      deliveredTo: [currentUserId],
+      readBy: [currentUserId],
+      isOptimistic: true,
+    };
+
+    setMessages((prev) => [...prev, optimisticMessage]);
+
     try {
       let uploadData = null;
       
-      if (attachedFile) {
+      if (fileToSend) {
         setIsUploading(true);
         const toastId = toast.loading("Uploading attachment...");
         try {
           const formData = new FormData();
-          formData.append("file", attachedFile.file);
+          formData.append("file", fileToSend.file);
 
           const response = await axios.post(`${BackendUrl}/api/upload`, formData, {
             headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
@@ -262,13 +302,16 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
         } catch (error) {
           toast.error("Failed to upload attachment", { id: toastId });
           setIsUploading(false);
+          setMessages((prev) => prev.filter((m) => m._id !== tempId));
+          setNewMessage(contentToSend);
+          setAttachedFile(fileToSend);
           return;
         }
         setIsUploading(false);
       }
 
       const messagePayload = {
-        content: newMessage.trim(),
+        content: contentToSend,
         roomId: selectedChat._id,
       };
 
@@ -276,21 +319,21 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
         messagePayload.ragMode = perMessageRagMode;
       }
 
-      if (attachedFile) {
+      if (fileToSend && uploadData) {
         messagePayload.messageType = uploadData.resourceType === "image" ? "image" : "file";
         messagePayload.fileUrl = uploadData.fileUrl;
         messagePayload.filePublicId = uploadData.publicId;
-        messagePayload.fileName = attachedFile.file.name;
+        messagePayload.fileName = fileToSend.file.name;
 
         if (!messagePayload.content) {
-          messagePayload.content = attachedFile.file.name;
+          messagePayload.content = fileToSend.file.name;
         }
 
         // Auto-ingest document into Room Knowledge Base if PDF or text
-        const fileName = attachedFile.file.name.toLowerCase();
-        if (fileName.endsWith(".pdf") || fileName.endsWith(".txt") || attachedFile.file.type === "application/pdf") {
+        const fileName = fileToSend.file.name.toLowerCase();
+        if (fileName.endsWith(".pdf") || fileName.endsWith(".txt") || fileToSend.file.type === "application/pdf") {
           try {
-            await uploadSource(attachedFile.file);
+            await uploadSource(fileToSend.file);
           } catch (e) {
             console.warn("Knowledge source auto-upload warning:", e);
           }
@@ -305,24 +348,22 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
         },
       );
 
-      setNewMessage("");
-      setAttachedFile(null);
-      if (attachedFile) {
-        URL.revokeObjectURL(attachedFile.previewUrl);
-      }
-
-      const textarea = document.getElementById("chat-textarea");
-      if (textarea) textarea.style.height = "auto";
-
-      setMessages((prev) => {
-        if (prev.some((m) => String(m._id) === String(data._id))) return prev;
-        return [...prev, data];
-      });
+      // Replace optimistic message with actual persisted server message
+      setMessages((prev) => prev.map((m) => (m._id === tempId ? data : m)));
       socketRef.current?.emit("new message", data);
     } catch (error) {
       console.log(error);
       toast.error("Failed to send message");
+      setMessages((prev) => prev.filter((m) => m._id !== tempId));
+      setNewMessage(contentToSend);
+      if (fileToSend) setAttachedFile(fileToSend);
       setIsUploading(false);
+    } finally {
+      isSendingRef.current = false;
+      setIsSending(false);
+      if (fileToSend) {
+        URL.revokeObjectURL(fileToSend.previewUrl);
+      }
     }
   };
 
@@ -759,7 +800,39 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
                         <>
                           {m.isAiResponse && <AnswerBadge answerMode={m.answerMode} />}
                           <div className="markdown-body text-sm [&>p]:mb-2 last:[&>p]:mb-0 [&>ul]:list-disc [&>ul]:ml-4 [&>ul]:mb-2 [&>ol]:list-decimal [&>ol]:ml-4 [&>ol]:mb-2 [&>h1]:text-lg [&>h1]:font-bold [&>h1]:mb-2 [&>h2]:text-base [&>h2]:font-bold [&>h2]:mb-2 [&>strong]:font-bold [&_a]:text-blue-300 [&_a]:underline break-words">
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            <ReactMarkdown
+                              remarkPlugins={[remarkGfm]}
+                              components={{
+                                p({ children }) {
+                                  return (
+                                    <p className="mb-2 last:mb-0">
+                                      {React.Children.map(children, (child) => {
+                                        if (typeof child === "string" && /@cogni\b/i.test(child)) {
+                                          const parts = child.split(/(@cogni\b)/gi);
+                                          return parts.map((part, i) =>
+                                            part.toLowerCase() === "@cogni" ? (
+                                              <span
+                                                key={i}
+                                                className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 mx-0.5 rounded-md font-bold text-xs shadow-xs ${
+                                                  isMyMessage
+                                                    ? "bg-white/25 text-white border border-white/40"
+                                                    : "bg-blue-600/15 text-blue-600 dark:text-blue-400 border border-blue-500/30"
+                                                }`}
+                                              >
+                                                🤖 @cogni
+                                              </span>
+                                            ) : (
+                                              part
+                                            )
+                                          );
+                                        }
+                                        return child;
+                                      })}
+                                    </p>
+                                  );
+                                },
+                              }}
+                            >
                               {m.content}
                             </ReactMarkdown>
                           </div>
@@ -781,7 +854,9 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
                         <span>{timeString}</span>
                         {isMyMessage && !isDeleted && (
                           <span className="ml-1 flex items-center">
-                            {m.readBy?.length > 0 ? (
+                            {m.isOptimistic ? (
+                              <span className="text-blue-200/90 text-[10px] animate-pulse">sending...</span>
+                            ) : m.readBy?.length > 0 ? (
                               <CheckCheck size={14} className="text-cyan-300 drop-shadow-[0_0_2px_rgba(0,255,255,0.8)]" />
                             ) : m.deliveredTo?.length > 0 ? (
                               <CheckCheck size={14} className="text-blue-200/80" />
@@ -859,6 +934,33 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
         </div>
       )}
 
+      {/* MENTION TOP INDICATOR BANNER */}
+      {newMessage.toLowerCase().includes("@cogni") && (
+        <div className="mx-3 -mb-1 px-3 py-1.5 rounded-t-xl bg-gradient-to-r from-blue-600/15 via-indigo-600/15 to-violet-600/15 border border-b-0 border-blue-500/40 backdrop-blur-md flex items-center justify-between text-xs font-medium text-blue-600 dark:text-blue-300 animate-[fadeIn_0.2s_ease]">
+          <div className="flex items-center gap-2">
+            <span className="flex h-2 w-2 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+            </span>
+            <span className="inline-flex items-center gap-1 font-bold text-blue-600 dark:text-blue-300">
+              <Sparkles size={13} className="text-blue-500" />
+              CogniBot Mentioned
+            </span>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:inline">
+              • AI assistant will automatically reply to this message
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setNewMessage((prev) => prev.replace(/@cogni/gi, "").trim())}
+            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 rounded-full hover:bg-slate-200/50 dark:hover:bg-slate-700/50 transition-colors"
+            title="Remove @cogni mention"
+          >
+            <X size={12} />
+          </button>
+        </div>
+      )}
+
       <div className="p-3 bg-[var(--card)]/60 flex items-end gap-2 z-10 border-t border-slate-200/80 dark:border-slate-800/80">
         <input
           type="file"
@@ -894,12 +996,21 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
           </span>
         </button>
 
-        <div className="relative flex-1 rounded-xl border border-slate-200/80 dark:border-slate-700/80 bg-slate-50/70 dark:bg-slate-800/60 focus-within:border-blue-500/70 focus-within:ring-2 focus-within:ring-blue-500/10 transition-all overflow-hidden shadow-xs flex items-center">
+        <div className={`relative flex-1 rounded-xl transition-all overflow-hidden shadow-xs flex items-center ${
+          newMessage.toLowerCase().includes("@cogni")
+            ? "border border-blue-500/90 ring-2 ring-blue-500/25 bg-blue-50/20 dark:bg-blue-950/20 shadow-[0_0_15px_rgba(59,130,246,0.18)]"
+            : "border border-slate-200/80 dark:border-slate-700/80 bg-slate-50/70 dark:bg-slate-800/60 focus-within:border-blue-500/70 focus-within:ring-2 focus-within:ring-blue-500/10"
+        }`}>
+          {newMessage.toLowerCase().includes("@cogni") && (
+            <span className="ml-2.5 px-2 py-0.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-xs shadow-xs flex-shrink-0 animate-[scaleIn_0.15s_ease] flex items-center gap-1 select-none">
+              🤖 @cogni
+            </span>
+          )}
           <textarea
             id="chat-textarea"
             rows={1}
             value={newMessage}
-            placeholder="Type a message or use @cogni..."
+            placeholder={newMessage.toLowerCase().includes("@cogni") ? "Ask CogniBot anything..." : "Type a message or use @cogni..."}
             onChange={(e) => {
               setNewMessage(e.target.value);
               if (selectedChatRef.current) {
@@ -913,7 +1024,9 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
-                handleSubmit();
+                if (!isSendingRef.current) {
+                  handleSubmit();
+                }
               } else if (e.key === "Escape" && editingMessageId) {
                 e.preventDefault();
                 cancelEdit();
@@ -930,9 +1043,21 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
 
         <button
           onClick={handleSubmit}
-          className="w-9 h-9 mb-0.5 flex-shrink-0 flex items-center justify-center rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-[0_2px_8px_rgba(37,99,235,0.25)] active:scale-95 transition-all cursor-pointer text-sm"
+          disabled={isSending || (!newMessage.trim() && !attachedFile)}
+          className={`w-9 h-9 mb-0.5 flex-shrink-0 flex items-center justify-center rounded-xl font-bold shadow-[0_2px_8px_rgba(37,99,235,0.25)] transition-all text-sm ${
+            isSending
+              ? "bg-blue-400 cursor-not-allowed opacity-80 text-white"
+              : (!newMessage.trim() && !attachedFile)
+              ? "bg-slate-300 dark:bg-slate-700 text-slate-500 cursor-not-allowed opacity-60"
+              : "bg-blue-600 hover:bg-blue-700 text-white active:scale-95 cursor-pointer"
+          }`}
+          title={isSending ? "Sending..." : "Send message (Enter)"}
         >
-          ➤
+          {isSending ? (
+            <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          ) : (
+            "➤"
+          )}
         </button>
       </div>
 
