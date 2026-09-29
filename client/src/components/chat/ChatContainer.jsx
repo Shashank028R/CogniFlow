@@ -420,20 +420,20 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
             </button>
           )}
 
-          {/* Knowledge Base Toggle Button */}
+          {/* CogniFlow AI Knowledge Hub Button */}
           <button
             onClick={() => setIsKnowledgePanelOpen(true)}
-            className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all cursor-pointer shadow-xs active:scale-95 ${
-              readySourcesCount > 0
-                ? "bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400"
-                : "bg-slate-100/70 dark:bg-slate-800/70 border-slate-200/80 dark:border-slate-700/80 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
-            }`}
-            title="Room Knowledge Base"
+            className="group relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-blue-200/80 dark:border-blue-800/80 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/40 text-blue-600 dark:text-blue-400 text-xs font-semibold shadow-xs hover:shadow-[0_4px_16px_rgba(37,99,235,0.25)] hover:border-blue-400/80 transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] hover:scale-105 active:scale-95 cursor-pointer"
+            title="CogniFlow AI Knowledge & Study Hub"
           >
-            <BookOpen size={15} />
-            <span className="hidden sm:inline">Knowledge</span>
+            <img
+              src="/images/ai-button-logo.png"
+              alt="CogniFlow AI"
+              className="w-4 h-4 object-contain transition-transform duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-120 group-hover:rotate-12"
+            />
+            <span className="hidden sm:inline font-semibold tracking-tight">Cogni AI</span>
             {readySourcesCount > 0 && (
-              <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-blue-600 text-white">
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-blue-600 text-white shadow-xs">
                 {readySourcesCount}
               </span>
             )}
@@ -861,10 +861,17 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
             setNewMessage((prev) => (prev.includes("@cogni") ? prev : (prev ? `@cogni ${prev}` : "@cogni ")));
             document.getElementById("chat-textarea")?.focus();
           }}
-          className="w-9 h-9 mb-0.5 flex-shrink-0 flex items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200/60 dark:border-blue-800/60 p-1.5 shadow-xs hover:border-blue-400/80 active:scale-95 transition-all cursor-pointer group"
+          className="group h-9 mb-0.5 flex-shrink-0 flex items-center justify-start rounded-xl bg-gradient-to-r from-blue-50 via-indigo-50/60 to-blue-50 dark:from-blue-950/40 dark:via-indigo-950/40 dark:to-blue-950/40 border border-blue-200/70 dark:border-blue-800/70 p-1.5 shadow-xs hover:border-blue-400/80 hover:shadow-[0_4px_16px_rgba(37,99,235,0.25)] transition-all duration-400 ease-[cubic-bezier(0.25,1,0.5,1)] w-9 hover:w-32 overflow-hidden cursor-pointer active:scale-95 z-20"
           title="Ask CogniBot (@cogni)"
         >
-          <img src="/images/ai-button-logo.png" alt="CogniAI" className="w-full h-full object-contain" />
+          <img
+            src="/images/ai-button-logo.png"
+            alt="CogniAI"
+            className="w-6 h-6 object-contain flex-shrink-0 transition-transform duration-400 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-110 group-hover:rotate-6"
+          />
+          <span className="whitespace-nowrap opacity-0 group-hover:opacity-100 font-bold text-xs text-blue-600 dark:text-blue-400 transition-all duration-400 delay-75 ease-[cubic-bezier(0.25,1,0.5,1)] ml-1.5 overflow-hidden transform -translate-x-2 group-hover:translate-x-0 select-none">
+            Ask Cogni
+          </span>
         </button>
 
         <div className="relative flex-1 rounded-xl border border-slate-200/80 dark:border-slate-700/80 bg-slate-50/70 dark:bg-slate-800/60 focus-within:border-blue-500/70 focus-within:ring-2 focus-within:ring-blue-500/10 transition-all overflow-hidden shadow-xs">

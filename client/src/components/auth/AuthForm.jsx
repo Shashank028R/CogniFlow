@@ -5,6 +5,7 @@ import Button from "../ui/Button";
 const AuthForm = ({
   isLogin,
   isVerifying,
+  isProcessing = false,
   form,
   handleChange,
   handleSubmit,
@@ -29,7 +30,7 @@ const AuthForm = ({
   }, [isVerifying, timeLeft]);
 
   const onResendClick = () => {
-    if (timeLeft > 0) return;
+    if (timeLeft > 0 || isProcessing) return;
     handleResendOTP();
     setTimeLeft(30);
   };
@@ -60,7 +61,6 @@ const AuthForm = ({
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-
         {!isLogin && !isVerifying && (
           <Input
             type="text"
@@ -68,6 +68,8 @@ const AuthForm = ({
             placeholder="Username"
             value={form.username}
             onChange={handleChange}
+            disabled={isProcessing}
+            required
           />
         )}
 
@@ -78,6 +80,8 @@ const AuthForm = ({
             placeholder="Email"
             value={form.email}
             onChange={handleChange}
+            disabled={isProcessing}
+            required
           />
         )}
 
@@ -88,6 +92,8 @@ const AuthForm = ({
             placeholder="Password"
             value={form.password}
             onChange={handleChange}
+            disabled={isProcessing}
+            required
           />
         )}
 
@@ -99,12 +105,15 @@ const AuthForm = ({
               placeholder="Enter 6-digit OTP"
               value={form.otp}
               onChange={handleChange}
+              disabled={isProcessing}
+              maxLength={6}
+              required
             />
             <div className="text-right">
               <span
                 onClick={onResendClick}
                 className={`text-xs font-medium transition-colors ${
-                  timeLeft > 0
+                  timeLeft > 0 || isProcessing
                     ? "text-gray-400 cursor-not-allowed"
                     : "text-blue-600 cursor-pointer hover:text-blue-500"
                 }`}
@@ -115,8 +124,25 @@ const AuthForm = ({
           </div>
         )}
 
-        <Button>
-          {isVerifying ? "Verify OTP" : isLogin ? "Login" : "Register"}
+        <Button
+          type="submit"
+          disabled={isProcessing}
+          className={`flex items-center justify-center gap-2 transition-all ${
+            isProcessing ? "opacity-75 cursor-not-allowed scale-[0.99]" : ""
+          }`}
+        >
+          {isProcessing ? (
+            <>
+              <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+              <span>Processing...</span>
+            </>
+          ) : isVerifying ? (
+            "Verify OTP"
+          ) : isLogin ? (
+            "Login"
+          ) : (
+            "Register"
+          )}
         </Button>
       </form>
 
@@ -125,8 +151,11 @@ const AuthForm = ({
           ? "Don't have an account?"
           : "Already have an account?"}{" "}
         <span
-          className="text-blue-600 cursor-pointer font-medium hover:drop-shadow-[0_0_6px_rgba(37,99,235,0.4)]"
+          className={`text-blue-600 font-medium hover:drop-shadow-[0_0_6px_rgba(37,99,235,0.4)] ${
+            isProcessing ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+          }`}
           onClick={() => {
+            if (isProcessing) return;
             setIsLogin(!isLogin);
             setIsVerifying(false);
           }}

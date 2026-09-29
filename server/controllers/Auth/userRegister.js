@@ -22,7 +22,7 @@ const registerUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     await OTP.deleteMany({ email });
-    const otpCode = await crypto.randomInt(100000, 999999).toString();
+    const otpCode = crypto.randomInt(100000, 999999).toString();
     await OTP.create({
       otp: otpCode,
       email,
@@ -30,13 +30,17 @@ const registerUser = async (req, res) => {
       password: hashedPassword,
     });
 
-    await sendMail(otpCode, email);
+    // Dispatch email asynchronously so Render responds immediately to the frontend
+    sendMail(otpCode, email).catch((err) => {
+      console.error("[Register] Background sendMail failed for", email, err.message);
+    });
 
-    res.json({
+    return res.status(200).json({
       message: "OTP sent to email!",
     });
   } catch (error) {
-    res.status(500).json({ message: "Internal Server Error: ", error });
+    console.error("Register Error:", error);
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 };
 

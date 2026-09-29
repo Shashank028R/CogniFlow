@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -13,6 +13,8 @@ const AuthPage = () => {
 
   const [isLogin, setIsLogin] = useState(true);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const activeToastRef = useRef(null);
 
   const [form, setForm] = useState({
     username: "",
@@ -28,7 +30,17 @@ const AuthPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const toastId = toast.loading("Processing...");
+    // Guard against multiple rapid clicks while already processing
+    if (isProcessing) return;
+
+    setIsProcessing(true);
+    if (activeToastRef.current) {
+      toast.dismiss(activeToastRef.current);
+    }
+    const toastId = toast.loading(
+      isVerifying ? "Verifying OTP..." : isLogin ? "Logging in..." : "Creating account..."
+    );
+    activeToastRef.current = toastId;
 
     try {
       if (isVerifying) {
@@ -37,7 +49,7 @@ const AuthPage = () => {
           otp: form.otp,
         });
 
-        toast.success("Email Verified!", { id: toastId });
+        toast.success("Email Verified! You can now log in.", { id: toastId });
         setIsVerifying(false);
         setIsLogin(true);
         return;
@@ -57,17 +69,27 @@ const AuthPage = () => {
         navigate("/dashboard", { replace: true });
       } else {
         setIsVerifying(true);
-        toast.success("OTP Sent!", { id: toastId });
+        toast.success("OTP Sent to your email!", { id: toastId });
       }
     } catch (err) {
       toast.error(err.response?.data?.message || "An error occurred", {
         id: toastId,
       });
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   const handleResendOTP = async () => {
+    if (isProcessing) return;
+
+    setIsProcessing(true);
+    if (activeToastRef.current) {
+      toast.dismiss(activeToastRef.current);
+    }
     const toastId = toast.loading("Resending OTP...");
+    activeToastRef.current = toastId;
+
     try {
       await axios.post(`${BackendUrl}/api/auth/register`, {
         username: form.username,
@@ -79,6 +101,8 @@ const AuthPage = () => {
       toast.error(err.response?.data?.message || "Failed to resend OTP", {
         id: toastId,
       });
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -89,6 +113,7 @@ const AuthPage = () => {
           <AuthForm
             isLogin={isLogin}
             isVerifying={isVerifying}
+            isProcessing={isProcessing}
             form={form}
             handleChange={handleChange}
             handleSubmit={handleSubmit}
