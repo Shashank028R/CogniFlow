@@ -54,11 +54,13 @@ global.io = io;
 handleSocket(io);
 
 import { initCogniBot } from "./utils/initCogniBot.js";
+import { initDemoUsers } from "./utils/initDemoUsers.js";
 
 app.use(cors(corsOptions));
 app.use(express.json());
-connectDb().then(() => {
-  initCogniBot();
+connectDb().then(async () => {
+  await initCogniBot();
+  await initDemoUsers();
   resetStalledIngestions();
 });
 

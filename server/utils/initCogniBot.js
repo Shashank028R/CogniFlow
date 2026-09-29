@@ -14,12 +14,12 @@ export const initCogniBot = async () => {
         password: hashedPassword,
         isVerified: true,
         bio: "I am your AI assistant in CogniFlow. Ask me anything!",
-        profilePic: "/ai%20logo.webp"
+        profilePic: "/images/ai-button-logo.png"
       });
       console.log("🤖 CogniBot initialized successfully!");
     } else {
-      if (botUser.profilePic !== "/ai%20logo.webp") {
-        botUser.profilePic = "/ai%20logo.webp";
+      if (botUser.profilePic !== "/images/ai-button-logo.png") {
+        botUser.profilePic = "/images/ai-button-logo.png";
         await botUser.save();
         console.log("🤖 CogniBot profile picture updated!");
       } else {

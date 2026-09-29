@@ -30,6 +30,14 @@ Users can chat in real-time, collaborate in channels, summon CogniBot in any roo
 🔗 **Live Production Deployment:** [https://cogniflow-client.onrender.com](https://cogniflow-client.onrender.com)  
 ⚡ **Active Backend Service:** [https://cogniflow-24tj.onrender.com](https://cogniflow-24tj.onrender.com) (includes automatic client failover)
 
+### 👤 Instant Demo Accounts (for multi-user testing)
+| Account | Email | Password | Purpose |
+|---|---|---|---|
+| **Demo 1** | `demo1@cogniflow.com` | `DemoUser@123` | Primary Tester |
+| **Demo 2** | `demo2@cogniflow.com` | `DemoUser@123` | Secondary Tester |
+
+> **Tip:** Open two browser windows (or an Incognito tab) and log into **Demo 1** and **Demo 2** simultaneously with 1-click on the login page to test real-time chat, typing dots, and blue checkmarks live!
+
 ---
 
 ## ⚡ Key Features

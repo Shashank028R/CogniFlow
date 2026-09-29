@@ -7,6 +7,19 @@ import Card from "../components/ui/Card";
 import AuthForm from "../components/auth/AuthForm";
 import { getBackendUrl } from "../utils/apiConfig";
 
+export const DEMO_CREDENTIALS = {
+  Demo1: {
+    username: "Demo1",
+    email: "demo1@cogniflow.com",
+    password: "DemoUser@123",
+  },
+  Demo2: {
+    username: "Demo2",
+    email: "demo2@cogniflow.com",
+    password: "DemoUser@123",
+  },
+};
+
 const AuthPage = () => {
   const navigate = useNavigate();
   const BackendUrl = getBackendUrl();
@@ -25,6 +38,55 @@ const AuthPage = () => {
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleFillDemo = (demoKey) => {
+    const creds = DEMO_CREDENTIALS[demoKey];
+    if (!creds) return;
+    setForm((prev) => ({
+      ...prev,
+      email: creds.email,
+      password: creds.password,
+    }));
+    toast.success(`Loaded ${demoKey} credentials!`, { duration: 2500 });
+  };
+
+  const handleQuickDemoLogin = async (demoKey) => {
+    if (isProcessing) return;
+    const creds = DEMO_CREDENTIALS[demoKey];
+    if (!creds) return;
+
+    setForm((prev) => ({
+      ...prev,
+      email: creds.email,
+      password: creds.password,
+    }));
+
+    setIsProcessing(true);
+    if (activeToastRef.current) {
+      toast.dismiss(activeToastRef.current);
+    }
+    const toastId = toast.loading(`Logging in as ${demoKey}...`);
+    activeToastRef.current = toastId;
+
+    try {
+      const { data } = await axios.post(`${BackendUrl}/api/auth/login`, {
+        email: creds.email,
+        password: creds.password,
+      });
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("userid", data.user.id);
+
+      toast.success(`Logged in as ${data.user.username}!`, { id: toastId });
+      navigate("/dashboard", { replace: true });
+    } catch (err) {
+      toast.error(err.response?.data?.message || `Demo login failed`, {
+        id: toastId,
+      });
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -120,6 +182,8 @@ const AuthPage = () => {
             setIsLogin={setIsLogin}
             setIsVerifying={setIsVerifying}
             handleResendOTP={handleResendOTP}
+            handleFillDemo={handleFillDemo}
+            handleQuickDemoLogin={handleQuickDemoLogin}
           />
         </Card>
       </div>
