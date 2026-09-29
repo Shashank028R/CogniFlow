@@ -6,7 +6,9 @@ import { getAuthToken } from "../utils/authStorage";
 
 const BackendUrl = getBackendUrl();
 
-export const useKnowledge = (roomId, socket) => {
+export const useKnowledge = (arg1, arg2) => {
+  const roomId = typeof arg1 === "object" && arg1 !== null ? arg1.roomId : arg1;
+  const socket = typeof arg1 === "object" && arg1 !== null ? arg1.socket : arg2;
   const [sources, setSources] = useState([]);
   const [loading, setLoading] = useState(false);
   const [ragMode, setRagMode] = useState("strict");
