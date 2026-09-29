@@ -23,8 +23,9 @@ import AnswerBadge from "./AnswerBadge";
 import CitationChips from "./CitationChips";
 import FallbackActions from "./FallbackActions";
 import LearnModal from "./LearnModal";
+import { getBackendUrl } from "../../utils/apiConfig";
 
-const BackendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+const BackendUrl = getBackendUrl();
 
 export const CogniAiModal = ({
   isOpen,

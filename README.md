@@ -27,7 +27,8 @@
 
 Users can chat in real-time, collaborate in channels, summon CogniBot in any room with `@cogni`, upload documents and images for instant AI vision inspection, and generate interactive quizzes or answers directly from their study material.
 
-🔗 **Live Production Deployment:** [https://cogniflow-client.onrender.com](https://cogniflow-client.onrender.com)
+🔗 **Live Production Deployment:** [https://cogniflow-client.onrender.com](https://cogniflow-client.onrender.com)  
+⚡ **Active Backend Service:** [https://cogniflow-24tj.onrender.com](https://cogniflow-24tj.onrender.com) (includes automatic client failover)
 
 ---
 
@@ -221,6 +222,7 @@ cd CogniFlow
 4. Set the backend URL in `client/.env`:
    ```env
    VITE_BACKEND_URL=http://localhost:3000
+   # Fallback backend automatically configured: https://cogniflow-24tj.onrender.com
    ```
 
 5. Start the client dev server:

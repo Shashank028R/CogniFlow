@@ -11,10 +11,11 @@ import SearchResults from "./SearchResults";
 import RoomList from "./RoomList";
 import LogoutButton from "../ui/LogoutButton";
 import RoomModal from "./RoomModal";
+import { getBackendUrl, createResilientSocket } from "../../utils/apiConfig";
 
 const Sidebar = ({ selectedChat, setSelectedChat, onlineUsers, setOnlineUsers }) => {
   const navigate = useNavigate();
-  const BackendUrl = import.meta.env.VITE_BACKEND_URL;
+  const BackendUrl = getBackendUrl();
 
   const socketRef = useRef(null);
 
@@ -32,7 +33,7 @@ const Sidebar = ({ selectedChat, setSelectedChat, onlineUsers, setOnlineUsers })
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    socketRef.current = io(BackendUrl);
+    socketRef.current = createResilientSocket();
 
     socketRef.current.on("connect", () => {
       console.log("Socket connected");

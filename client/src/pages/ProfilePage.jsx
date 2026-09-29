@@ -6,10 +6,11 @@ import Avatar from "../components/ui/Avatar";
 import { ArrowLeft, Save, X, Check } from "lucide-react";
 import ReactCrop, { centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
+import { getBackendUrl } from "../utils/apiConfig";
 
 const ProfilePage = () => {
   const navigate = useNavigate();
-  const BackendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+  const BackendUrl = getBackendUrl();
   const token = localStorage.getItem("token");
 
   const [isLoading, setIsLoading] = useState(true);

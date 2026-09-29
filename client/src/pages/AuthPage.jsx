@@ -5,10 +5,11 @@ import { useNavigate } from "react-router-dom";
 
 import Card from "../components/ui/Card";
 import AuthForm from "../components/auth/AuthForm";
+import { getBackendUrl } from "../utils/apiConfig";
 
 const AuthPage = () => {
   const navigate = useNavigate();
-  const BackendUrl = import.meta.env.VITE_BACKEND_URL;
+  const BackendUrl = getBackendUrl();
 
   const [isLogin, setIsLogin] = useState(true);
   const [isVerifying, setIsVerifying] = useState(false);

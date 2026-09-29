@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { getBackendUrl } from "../utils/apiConfig";
 
-const BackendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+const BackendUrl = getBackendUrl();
 
 export const useKnowledge = (roomId, socket) => {
   const [sources, setSources] = useState([]);

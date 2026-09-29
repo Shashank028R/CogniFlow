@@ -16,12 +16,12 @@ import AnswerBadge from "../rag/AnswerBadge";
 import FallbackActions from "../rag/FallbackActions";
 import LearnModal from "../rag/LearnModal";
 import QuizCard from "../rag/QuizCard";
+import { getBackendUrl, createResilientSocket } from "../../utils/apiConfig";
 
-const EndPoint = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+const EndPoint = getBackendUrl();
 
 const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
-  const BackendUrl =
-    import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+  const BackendUrl = getBackendUrl();
   const currentUserId = localStorage.getItem("userid");
   const token = localStorage.getItem("token");
 
@@ -67,7 +67,7 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
   } = useKnowledge(selectedChat?._id, socketInstance);
 
   useEffect(() => {
-    const s = io(EndPoint);
+    const s = createResilientSocket();
     socketRef.current = s;
     setSocketInstance(s);
 
