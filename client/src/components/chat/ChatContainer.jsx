@@ -3,7 +3,7 @@ import Avatar from "../ui/Avatar";
 import toast from "react-hot-toast";
 import axios from "axios";
 import io from "socket.io-client";
-import { Pencil, Trash2, X, Paperclip, FileText, Download, MoreVertical, Check, CheckCheck, BookOpen, Sparkles } from "lucide-react";
+import { Pencil, Trash2, X, Paperclip, FileText, Download, MoreVertical, Check, CheckCheck, BookOpen, Sparkles, ChevronDown } from "lucide-react";
 import DeleteMessageModal from "./DeleteMessageModal";
 import GroupSettingsModal from "./GroupSettingsModal";
 import ReactMarkdown from "react-markdown";
@@ -53,6 +53,11 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
   const socketRef = useRef(null);
   const [socketInstance, setSocketInstance] = useState(null);
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
+  const isAtBottomRef = useRef(true);
+  const prevMessagesCountRef = useRef(0);
+  const [showScrollBottom, setShowScrollBottom] = useState(false);
+  const [unreadWhileScrolled, setUnreadWhileScrolled] = useState(0);
 
   const {
     sources,
@@ -205,9 +210,76 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
     };
   }, [selectedChat?._id, BackendUrl, token]);
 
+  const scrollToBottom = (behavior = "smooth") => {
+    if (!messagesContainerRef.current) return;
+    messagesContainerRef.current.scrollTo({
+      top: messagesContainerRef.current.scrollHeight,
+      behavior,
+    });
+    isAtBottomRef.current = true;
+    setShowScrollBottom(false);
+    setUnreadWhileScrolled(0);
+  };
+
+  const handleScroll = () => {
+    if (!messagesContainerRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
+    // User is near bottom if within 120px of bottom edge
+    const isNearBottom = scrollHeight - scrollTop - clientHeight <= 120;
+    isAtBottomRef.current = isNearBottom;
+    setShowScrollBottom(!isNearBottom);
+    if (isNearBottom) {
+      setUnreadWhileScrolled(0);
+    }
+  };
+
+  // Scroll to bottom on initial message load or room change
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isTypingIndicatorVisible]);
+    if (!loadingMessages && messages.length > 0) {
+      const timer = setTimeout(() => {
+        scrollToBottom("auto");
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedChat?._id, loadingMessages]);
+
+  // Smart scroll when messages change
+  useEffect(() => {
+    if (loadingMessages) return;
+
+    const prevCount = prevMessagesCountRef.current;
+    const currentCount = messages.length;
+    prevMessagesCountRef.current = currentCount;
+
+    // Only scroll if new message was actually added
+    if (currentCount > prevCount) {
+      const latestMsg = messages[currentCount - 1];
+      const isMyMsg = latestMsg && (
+        String(latestMsg.sender?._id || latestMsg.sender?.id || latestMsg.sender) === String(currentUserId) ||
+        latestMsg.isOptimistic
+      );
+
+      if (isMyMsg) {
+        // User sent a message -> scroll to bottom
+        setTimeout(() => scrollToBottom("smooth"), 20);
+      } else {
+        // Incoming message
+        if (isAtBottomRef.current) {
+          setTimeout(() => scrollToBottom("smooth"), 20);
+        } else {
+          // User scrolled up to read past history -> DO NOT FORCE SCROLL!
+          setUnreadWhileScrolled((prev) => prev + 1);
+        }
+      }
+    }
+  }, [messages, currentUserId, loadingMessages]);
+
+  // Scroll when typing indicator shows only if user is already at the bottom
+  useEffect(() => {
+    if (isTypingIndicatorVisible && isAtBottomRef.current) {
+      scrollToBottom("smooth");
+    }
+  }, [isTypingIndicatorVisible]);
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
@@ -541,7 +613,12 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
       />
 
       {/* MESSAGES */}
-      <div className="flex-1 overflow-y-auto scrollbar-hide p-4 flex flex-col gap-3" onClick={() => setShowMenu(false)}>
+      <div 
+        ref={messagesContainerRef}
+        onScroll={handleScroll}
+        className="flex-1 overflow-y-auto scrollbar-hide p-4 flex flex-col gap-3 relative" 
+        onClick={() => setShowMenu(false)}
+      >
         {loadingMessages ? (
           <p className="text-center text-gray-400 mt-10 animate-pulse text-sm">
             Loading chat history...
@@ -881,6 +958,25 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
               <div className="w-2 h-2 rounded-full bg-blue-400 animate-bounce"></div>
             </div>
           </div>
+        )}
+        {/* Floating Scroll to Bottom Button */}
+        {showScrollBottom && (
+          <button
+            type="button"
+            onClick={() => scrollToBottom("smooth")}
+            className="sticky bottom-2 ml-auto mr-1 z-30 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--card)]/95 hover:bg-[var(--card)] text-blue-600 dark:text-blue-400 border border-slate-200/80 dark:border-slate-700/80 shadow-[0_4px_16px_rgba(0,0,0,0.15)] backdrop-blur-md transition-all active:scale-95 animate-[fadeIn_0.2s_ease] text-xs font-semibold cursor-pointer"
+            title="Scroll to latest messages"
+          >
+            <ChevronDown size={14} className="animate-bounce" />
+            {unreadWhileScrolled > 0 ? (
+              <span className="flex items-center gap-1">
+                <span>{unreadWhileScrolled} new</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+              </span>
+            ) : (
+              <span>Latest</span>
+            )}
+          </button>
         )}
         <div ref={messagesEndRef} />
       </div>
