@@ -37,7 +37,7 @@ const RoomCard = ({
         <div className="relative flex-shrink-0">
           <Avatar
             size="w-9 h-9"
-            src={room.isGroupChat ? (room.profilePic || "/RoomChat.png") : otherUser?.profilePic}
+            src={room.isGroupChat ? (room.profilePic || "/images/RoomChat.png") : otherUser?.profilePic}
             text={
               !room.isGroupChat
                 ? otherUser?.username?.charAt(0).toUpperCase()

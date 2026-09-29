@@ -40,7 +40,7 @@ const Dashboard = () => {
             animate-[fadeIn_0.3s_ease] border border-slate-200/80 dark:border-slate-800/80 flex flex-col items-center max-w-sm mx-4"
           >
             <div className="w-16 h-16 mb-4 rounded-2xl bg-slate-100 dark:bg-slate-800/80 p-2.5 border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-center shadow-xs">
-              <img src="/CogniFlow.png" alt="CogniFlow Logo" className="w-full h-full object-contain" />
+              <img src="/images/CogniFlow.png" alt="CogniFlow Logo" className="w-full h-full object-contain" />
             </div>
             <h2 className="text-xl font-semibold text-[var(--text)]">
               Welcome to <span className="text-blue-600">CogniFlow</span>

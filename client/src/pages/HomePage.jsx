@@ -12,7 +12,7 @@ const HomePage = () => {
       {/* Navbar */}
       <nav className="container mx-auto px-6 py-4 flex justify-between items-center relative z-20 border-b border-slate-200/60 dark:border-slate-800/60 backdrop-blur-md bg-[var(--bg)]/70 sticky top-0">
         <div className="flex items-center gap-2.5">
-          <img src="/CogniFlow.png" alt="CogniFlow" className="w-8 h-8 object-contain rounded-lg shadow-xs" />
+          <img src="/images/CogniFlow.png" alt="CogniFlow" className="w-8 h-8 object-contain rounded-lg shadow-xs" />
           <span className="text-lg font-bold tracking-tight text-slate-800 dark:text-white">CogniFlow</span>
         </div>
         <div className="flex items-center gap-5">
@@ -29,7 +29,7 @@ const HomePage = () => {
       <section className="container mx-auto px-6 pt-10 pb-16 text-center relative z-20">
         <div className="flex justify-center mb-5">
           <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl p-2.5 bg-white dark:bg-slate-800 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.3)] border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-center">
-            <img src="/CogniFlow.png" alt="CogniFlow AI Logo" className="w-full h-full object-contain" />
+            <img src="/images/CogniFlow.png" alt="CogniFlow AI Logo" className="w-full h-full object-contain" />
           </div>
         </div>
 
@@ -68,7 +68,7 @@ const HomePage = () => {
 
           <Card className="flex flex-col items-start p-5">
             <div className="w-11 h-11 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200/60 dark:border-indigo-800/60 flex items-center justify-center p-2 mb-4 shadow-xs">
-              <img src="/ai-button-logo.png" alt="CogniBot" className="w-7 h-7 object-contain" />
+              <img src="/images/ai-button-logo.png" alt="CogniBot" className="w-7 h-7 object-contain" />
             </div>
             <h3 className="text-base font-bold mb-1.5">Summon CogniBot</h3>
             <p className="text-slate-500 dark:text-slate-400 text-xs leading-relaxed">Just type <strong className="text-blue-600 font-semibold">@cogni</strong> in any group chat to bring an intelligent assistant into the conversation. It answers directly in the room for all to see.</p>
@@ -154,7 +154,7 @@ const HomePage = () => {
             {/* AI Response */}
             <div className="flex gap-3 flex-row-reverse justify-end w-full">
               <div className="w-8 h-8 shrink-0 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-center overflow-hidden p-1 shadow-xs">
-                <img src="/ai-button-logo.png" alt="CogniBot" className="w-full h-full object-contain" />
+                <img src="/images/ai-button-logo.png" alt="CogniBot" className="w-full h-full object-contain" />
               </div>
               <div className="bg-slate-100/90 dark:bg-slate-800/90 border border-slate-200/70 dark:border-slate-700/60 shadow-xs p-3.5 rounded-2xl rounded-tl-xs text-left max-w-[80%]">
                 <div className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed markdown-body [&>ul]:list-disc [&>ul]:ml-4 [&>ul]:mb-1">
@@ -220,7 +220,7 @@ const HomePage = () => {
       {/* Footer */}
       <footer className="container mx-auto px-6 py-8 flex flex-col md:flex-row justify-between items-center text-slate-500 text-xs border-t border-slate-200/70 dark:border-slate-800/70 mt-8 relative z-20">
         <div className="flex items-center gap-2">
-          <img src="/CogniFlow.png" alt="CogniFlow" className="w-5 h-5 object-contain" />
+          <img src="/images/CogniFlow.png" alt="CogniFlow" className="w-5 h-5 object-contain" />
           <p>© 2026 CogniFlow. All rights reserved.</p>
         </div>
         <div className="flex gap-4 mt-3 md:mt-0">

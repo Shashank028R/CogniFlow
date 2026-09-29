@@ -255,7 +255,7 @@ const Sidebar = ({ selectedChat, setSelectedChat, onlineUsers, setOnlineUsers })
             className="group absolute -top-16 right-0 h-12 flex items-center justify-start rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_4px_15px_rgba(37,99,235,0.35)] hover:shadow-[0_6px_25px_rgba(37,99,235,0.5)] transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] w-12 hover:w-32 overflow-hidden cursor-pointer z-50 p-2"
           >
             <img
-              src="/ai-button-logo.png"
+              src="/images/ai-button-logo.png"
               alt="CogniAi"
               className="w-8 h-8 object-contain flex-shrink-0 rounded-full transition-transform duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-105"
             />

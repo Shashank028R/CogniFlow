@@ -1,178 +1,335 @@
-# CogniFlow
-live demo-https://cogniflow-client.onrender.com
+# 🧠 CogniFlow — Intelligent Real-Time Collaboration & RAG Knowledge Hub
 
-CogniFlow is a production-ready, full-stack real-time chat application built with the MERN stack (MongoDB, Express, React, Node.js) that seamlessly integrates **CogniBot**, an intelligent native AI assistant powered by Google Gemini.
+<p align="center">
+  <img src="./client/public/images/CogniFlow.png" alt="CogniFlow Logo" width="120" style="border-radius: 24px;" />
+</p>
 
-This repository contains a React + Vite frontend and a Node.js + Express backend with features for real-time group and individual messaging (Socket.IO), native multimodal AI integration, Cloudinary file uploads, read receipts, and typing indicators.
+<p align="center">
+  <strong>Next-Generation Team Collaboration Platform powered by Socket.IO & Multimodal Google Gemini AI</strong>
+</p>
 
-Quick links
-- **Project Report & Architectural Audit:** [files/REPORT.md](files/REPORT.md)
-- **Implementation Plan & Roadmap:** [files/IMPLEMENTATION_PLAN.md](files/IMPLEMENTATION_PLAN.md)
-- Backend server: [server/index.js](server/index.js)
-- AI Client Configuration: [server/utils/aiClient.js](server/utils/aiClient.js)
-- Message Controller (AI Trigger): [server/controllers/Message/sendMessage.js](server/controllers/Message/sendMessage.js)
-- Socket Handlers: [server/socket/socketHandler.js](server/socket/socketHandler.js)
-- Frontend Chat Container: [client/src/components/chat/ChatContainer.jsx](client/src/components/chat/ChatContainer.jsx)
-- Message Model: [server/models/Message.js](server/models/Message.js)
-
----
-
-## Features
-
-- **Real-time Messaging:** Lightning-fast communication powered by Socket.io.
-- **Native AI Assistant (CogniBot):** Chat directly with an intelligent AI. Tag `@cogni` in any group chat to get instant AI assistance.
-- **Multimodal AI Vision:** Upload an image or PDF, and CogniBot can "see" and analyze the attachment directly in the chat!
-- **Read Receipts:** WhatsApp-style checkmarks (1 for Sent, 2 Gray for Delivered, 2 Blue for Read).
-- **Live Typing Indicators:** Real-time animated typing dots when a human or CogniBot is generating a message.
-- **File Attachments:** Share images and documents seamlessly (powered by Cloudinary).
-- **Group Chats:** Create rooms, add members, and collaborate efficiently.
-- **Online Presence:** Real-time status indicators for online users.
-- **Beautiful UI/UX:** Built with TailwindCSS, featuring smooth glassmorphic elements, dark mode, responsive design, and React-Markdown for rich text formatting.
+<p align="center">
+  <a href="https://cogniflow-client.onrender.com" target="_blank">
+    <img src="https://img.shields.io/badge/Live%20Demo-Render-46E3B7?style=for-the-badge&logo=render&logoColor=white" alt="Live Demo" />
+  </a>
+  <img src="https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge" alt="License: MIT" />
+  <img src="https://img.shields.io/badge/Node.js-18+-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js" />
+  <img src="https://img.shields.io/badge/React-18+-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React" />
+  <img src="https://img.shields.io/badge/Socket.IO-v4-010101?style=for-the-badge&logo=socket.io&logoColor=white" alt="Socket.IO" />
+  <img src="https://img.shields.io/badge/Gemini-AI%20Vision-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="Gemini AI" />
+</p>
 
 ---
 
-## Quick start (local)
+## 🌟 Overview
 
-1. Clone repo:
-   ```bash
-   git clone <repo-url>
-   cd CogniFlow
-   ```
+**CogniFlow** is a modern, full-stack real-time collaboration workspace built on the MERN stack (MongoDB, Express, React, Node.js). Designed for high-performing teams and learners, CogniFlow marries lightning-fast WebSocket communication with native multimodal AI through **CogniBot** and an integrated **RAG (Retrieval-Augmented Generation) Knowledge Hub**.
 
-2. Backend
+Users can chat in real-time, collaborate in channels, summon CogniBot in any room with `@cogni`, upload documents and images for instant AI vision inspection, and generate interactive quizzes or answers directly from their study material.
+
+🔗 **Live Production Deployment:** [https://cogniflow-client.onrender.com](https://cogniflow-client.onrender.com)
+
+---
+
+## ⚡ Key Features
+
+### 💬 Real-Time Messaging & Collaboration
+- **Instant WebSockets:** Sub-millisecond messaging latency powered by Socket.IO rooms.
+- **WhatsApp-Style Receipts:** Granular delivery status tracking:
+  - ✓ **Sent** (Single gray tick)
+  - ✓✓ **Delivered** (Double gray tick)
+  - ✓✓ **Seen / Read** (Double blue tick)
+- **Live Typing Indicators:** Animated typing dots triggered when users or CogniBot are generating messages.
+- **Direct & Group Chats:** Create 1-on-1 private channels or multi-user rooms with custom titles and avatars.
+- **Presence Tracking:** Real-time online/offline indicators for all contacts.
+
+### 🤖 Multimodal AI Assistant (CogniBot)
+- **Tag `@cogni` in Any Room:** Summon AI directly in group discussions for instant consensus, calculations, or coding help.
+- **Gemini AI Vision:** Attach images (`.png`, `.jpg`, `.webp`) or documents, and CogniBot analyzes them visually using Google Gemini's native multimodal capabilities.
+- **Robust Model Fallback Engine:** Dynamic failover across high-tier Google Generative AI models (`gemma-4-26b-a4b-it` → `gemini-2.5-flash` → `gemini-2.0-flash` → `gemini-1.5-flash` → `gemini-1.5-pro`) to ensure high availability and rate-limit resilience.
+- **Markdown & Code Highlighting:** Responses are beautifully formatted with full markdown tables, lists, and syntax blocks.
+
+### 📚 RAG Study & Knowledge Hub
+- **Document Ingestion:** Upload PDF textbooks, lecture notes, or research papers.
+- **Vector Retrieval:** Text chunking and cosine similarity retrieval over ingested knowledge.
+- **Interactive Quiz Generator:** Automatically synthesize custom multiple-choice quizzes with explanations based on your documents.
+- **Meta AI-Style Launcher:** Smooth floating launcher with expandable hover animation and slide-in drawer/modal for seamless multi-tasking.
+
+### 🎨 Apple-Grade Aesthetic & Design System
+- **Dynamic Particle Background:** Interactive particle physics canvas rendering smoothly in the background across all pages (Home, Auth, and Dashboard).
+- **Glassmorphism & Dark Mode:** Carefully balanced translucency, subtle borders, and smooth transitions tailored for low-light focus.
+- **Zero Placeholder Polish:** Clean branded SVG/PNG icons and custom typography.
+
+---
+
+## 🏗️ Architecture & Flow
+
+```mermaid
+flowchart TD
+    User([User Client - React + Vite])
+    SocketServer([Socket.IO Server])
+    ExpressAPI([Express REST API])
+    Mongo[(MongoDB Atlas)]
+    Cloudinary[(Cloudinary Media Storage)]
+    Gemini([Google Gemini Generative AI])
+    RAG([RAG Ingestion & Vector Retriever])
+
+    User -->|Real-time Messages & Typing| SocketServer
+    User -->|Auth, Rooms, History| ExpressAPI
+    User -->|PDFs & Attachments| ExpressAPI
+
+    ExpressAPI --> Mongo
+    SocketServer --> ExpressAPI
+    ExpressAPI -->|Upload Media| Cloudinary
+    ExpressAPI -->|Embed & Query Chunks| RAG
+    ExpressAPI -->|Prompt & Vision Data| Gemini
+
+    SocketServer -->|Broadcast Messages & Receipts| User
+```
+
+---
+
+## 📁 Repository Structure
+
+```
+CogniFlow/
+├── client/                     # Frontend Application (React 18 + Vite)
+│   ├── public/
+│   │   └── images/             # Canonical application branding & assets
+│   │       ├── CogniFlow.png
+│   │       ├── ai-button-logo.png
+│   │       └── RoomChat.png
+│   ├── src/
+│   │   ├── components/         # Reusable UI & feature components
+│   │   │   ├── auth/           # Login / Register forms
+│   │   │   ├── chat/           # ChatContainer, MessageItem, InputBox
+│   │   │   ├── rag/            # CogniAiModal, QuizView, ModeSelector
+│   │   │   ├── sidebar/        # Sidebar, RoomCard, SidebarHeader
+│   │   │   └── ui/             # Buttons, Modals, Avatars, Particles
+│   │   ├── hooks/              # Custom React hooks (useChat, useSocket, etc.)
+│   │   ├── pages/              # Route views (HomePage, AuthPage, Dashboard)
+│   │   ├── App.jsx             # Main router & global state
+│   │   ├── index.css           # Tailwind & CSS design system
+│   │   └── main.jsx            # Application entry point
+│   ├── .env.example            # Sample client environment variables
+│   ├── package.json
+│   └── vite.config.js
+│
+├── server/                     # Backend Application (Node.js + Express)
+│   ├── config/                 # Database & Cloudinary configurations
+│   ├── controllers/            # Route controllers
+│   │   ├── Auth/               # Register & Login controllers
+│   │   ├── Message/            # Send, edit, delete, receipt controllers
+│   │   ├── Rag/                # Upload, ingest, query, quiz controllers
+│   │   ├── Room/               # Room creation & member management
+│   │   └── User/               # User search & profile controllers
+│   ├── middlewares/            # JWT authentication & Multer upload middlewares
+│   ├── models/                 # Mongoose schemas (User, Room, Message, KnowledgeChunk)
+│   ├── routes/                 # Express API routes
+│   ├── services/rag/           # RAG chunker, parser & cosine similarity retriever
+│   ├── socket/                 # Socket.IO connection & event handlers
+│   ├── utils/                  # Gemini client & multi-model fallback cascade
+│   ├── uploads/                # Temporary file processing directory (.gitkeep)
+│   ├── .env.example            # Sample server environment variables
+│   ├── index.js                # Server entry point
+│   └── package.json
+│
+├── files/                      # Project documentation, plans & audit reports
+│   ├── DESIGN-apple.md
+│   ├── IMPLEMENTATION_PLAN.md
+│   ├── RAG_IMPLEMENTATION_PLAN.md
+│   └── REPORT.md
+│
+├── .gitignore                  # Git exclusions (node_modules, uploads, .env)
+└── README.md                   # Project documentation
+```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- **Node.js**: v18.0.0 or higher
+- **npm** or **yarn**
+- **MongoDB Atlas** database connection URI
+- **Cloudinary** account (for media storage)
+- **Google Gemini API Key** (from [Google AI Studio](https://aistudio.google.com/))
+
+---
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/Shashank028R/CogniFlow.git
+cd CogniFlow
+```
+
+---
+
+### 2. Configure Backend (`server`)
+
+1. Navigate to the server folder:
    ```bash
    cd server
+   ```
+
+2. Install dependencies:
+   ```bash
    npm install
-   # Create a .env file and fill in values (see Environment section)
+   ```
+
+3. Create a `.env` file based on `.env.example`:
+   ```bash
+   cp .env.example .env
+   ```
+
+4. Populate your environment variables in `server/.env`:
+   ```env
+   PORT=3000
+   MONGODB_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/cogniflow?retryWrites=true&w=majority
+   JWT_SECRET=your_super_secret_jwt_key
+   CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+   CLOUDINARY_API_KEY=your_cloudinary_api_key
+   CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+   GEMINI_API_KEY=your_google_gemini_api_key
+   ```
+
+5. Start the backend development server:
+   ```bash
    npm start
    ```
+   *The server runs by default on `http://localhost:3000`.*
 
-3. Frontend
+---
+
+### 3. Configure Frontend (`client`)
+
+1. Open a new terminal and navigate to the client folder:
    ```bash
    cd client
-   npm install
-   # Create a .env file and set VITE_BACKEND_URL
-   npm run dev
    ```
 
-Frontend default: http://localhost:5173  
-Backend default: http://localhost:3000
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Create a `.env` file based on `.env.example`:
+   ```bash
+   cp .env.example .env
+   ```
+
+4. Set the backend URL in `client/.env`:
+   ```env
+   VITE_BACKEND_URL=http://localhost:3000
+   ```
+
+5. Start the client dev server:
+   ```bash
+   npm run dev
+   ```
+   *The client opens by default at `http://localhost:5173`.*
 
 ---
 
-## Environment variables
+## 📡 API Reference
 
-Backend (`server/.env`) — minimal required keys:
-- `PORT=3000`
-- `MONGODB_URI=...` (Mongo Atlas connection)
-- `JWT_SECRET=...`
-- `CLOUDINARY_CLOUD_NAME=...`
-- `CLOUDINARY_API_KEY=...`
-- `CLOUDINARY_API_SECRET=...`
-- `GEMINI_API_KEY=...` (Google Generative AI key for CogniBot)
+### Authentication
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/auth/register` | Register a new user account |
+| `POST` | `/api/auth/login` | Authenticate user & receive JWT token |
 
-Frontend (`client/.env`):
-- `VITE_BACKEND_URL=http://localhost:3000`
+### Users & Directory
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/users/search?q=...` | Search users by name or email |
+| `GET` | `/api/users/profile` | Fetch authenticated user profile |
+| `PUT` | `/api/users/profile` | Update user profile or avatar |
 
----
+### Rooms & Channels
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/rooms` | Retrieve all active rooms for user |
+| `POST` | `/api/rooms` | Create a direct 1-on-1 or group room |
+| `PUT` | `/api/rooms/:id/members` | Add or remove members from group |
 
-## AI Integration (Production notes)
+### Messages & AI Interactions
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/messages/:roomId` | Fetch paginated chat history for room |
+| `POST` | `/api/messages` | Send message (triggers CogniBot on `@cogni` or DM) |
+| `PUT` | `/api/messages/:id` | Edit an existing message |
+| `DELETE` | `/api/messages/:id` | Delete a message |
 
-This project uses Google's `gemma-4-26b-a4b-it` model via the `@google/generative-ai` SDK.
+### RAG & Knowledge Hub
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/rag/upload` | Ingest PDF document, chunk and store embeddings |
+| `POST` | `/api/rag/query` | Ask questions over uploaded document context |
+| `POST` | `/api/rag/quiz` | Generate customized interactive quiz from document |
 
-Checklist:
-- Add `GEMINI_API_KEY` to backend `.env`.
-- Ensure the AI receives messages dynamically in `server/controllers/Message/sendMessage.js`.
-- For image attachments, the AI securely downloads the file via Cloudinary URL, converts it to base64, and passes it via `inlineData` to the model.
-
-Files:
-- Initialization & Parsing: [server/utils/aiClient.js](server/utils/aiClient.js)
-- Socket Emit: [server/socket/socketHandler.js](server/socket/socketHandler.js)
-
----
-
-## Common troubleshooting
-
-- AI Error "Must supply api_key": Ensure `dotenv.config()` is initialized *before* importing any SDKs like Cloudinary or Gemini.
-- Verification/Cloudinary errors: Ensure your Cloudinary credentials are correct and match your `.env` variables.
-- Typing indicator doesn't clear: Ensure socket events `typing` and `stop typing` are correctly matched to room IDs.
-- React-Markdown not rendering: Ensure you have run `npm install react-markdown remark-gfm` in the `client` directory.
-
----
-
-## API reference (high level)
-
-Auth
-- `POST /api/auth/register` — Register a new user
-- `POST /api/auth/login` — Log into an existing account
-
-Users
-- `GET /api/users/search` — Search for users to message
-
-Messages & Rooms
-- `GET /api/rooms` — Fetch user's chat rooms
-- `POST /api/rooms` — Create a new chat or group room
-- `GET /api/messages/:roomId` — Fetch messages for a specific room
-- `POST /api/messages` — Send a message (Triggers CogniBot if AI is mentioned or in DM)
-- `PUT /api/messages/:id` — Edit a message
-- `DELETE /api/messages/:id` — Delete a message
-
-Uploads
-- `POST /api/upload` — Upload an attachment (returns Cloudinary file URL and Resource Type)
+### Media Uploads
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/upload` | Upload image/document to Cloudinary (returns URL) |
 
 ---
 
-## Deploy & share
+## 🔌 Socket.IO Events
 
-- Frontend: Vercel/Render/Netlify. Set `VITE_BACKEND_URL` to backend production URL.
-- Backend: Render/Heroku/DigitalOcean. Set env vars in the deployment dashboard.
-- For public testing from local, use a tunnel (ngrok) and set `VITE_BACKEND_URL` to the public URL.
-
----
-
-## Project maintenance
-
-- Run server: `cd server && npm start`
-- Run client: `cd client && npm run dev`
-- Build frontend: `cd client && npm run build`
-
----
-
-## Contributing
-
-1. Fork → feature branch → PR
-2. Add tests for new behavior
-3. Include screenshots and step-by-step reproduction if fixing bugs
+| Event Name | Direction | Payload / Purpose |
+|---|---|---|
+| `setup` | Client → Server | Connect user and join user-specific socket channel |
+| `join chat` | Client → Server | Join room channel for real-time messaging |
+| `new message` | Client → Server | Broadcast message to room members |
+| `message received` | Server → Client | Deliver new message to active recipients |
+| `message delivered` | Both | Update message status to double gray ticks |
+| `message read` | Both | Update message status to double blue ticks |
+| `typing` | Client → Server | Broadcast typing indicator for user/room |
+| `stop typing` | Client → Server | Clear typing indicator |
+| `cogni_typing` | Server → Client | Indicate CogniBot is synthesizing a response |
 
 ---
 
-## Contacts & Support
+## 🛡️ Security & Best Practices
 
-Project emails: shashankmuz3@gmail.com  
-For deployment or AI model help, check the Render dashboard logs or Google AI Studio.
+- **Token-Based Authentication:** Signed JWT tokens with expiration handling.
+- **Secure Secret Isolation:** Sensitive keys (Gemini, Mongo, Cloudinary) isolated strictly to backend environment.
+- **Input Sanitization:** Multi-layered validation for incoming prompts, message bodies, and file uploads.
+- **Clean Repository Hygiene:** Zero tracked node_modules, build artifacts, or uploads in source control.
 
 ---
 
-## License
+## 🤝 Contributing
 
-MIT License
+Contributions are welcome! Please follow these steps:
 
-Copyright (c) 2026 @Shashank028R
+1. **Fork the repository**
+2. **Create a feature branch:**
+   ```bash
+   git checkout -b feature/amazing-feature
+   ```
+3. **Commit your changes:**
+   ```bash
+   git commit -m "feat: add amazing feature"
+   ```
+4. **Push to the branch:**
+   ```bash
+   git push origin feature/amazing-feature
+   ```
+5. **Open a Pull Request**
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+---
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+## 📄 License
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Distributed under the **MIT License**. See `LICENSE` for more information.
+
+---
+
+## 👨‍💻 Author & Support
+
+- **Author:** [Shashank](https://github.com/Shashank028R)
+- **Email:** [shashankmuz3@gmail.com](mailto:shashankmuz3@gmail.com)
+- **Project Link:** [https://github.com/Shashank028R/CogniFlow](https://github.com/Shashank028R/CogniFlow)
+- **Live Demo:** [https://cogniflow-client.onrender.com](https://cogniflow-client.onrender.com)

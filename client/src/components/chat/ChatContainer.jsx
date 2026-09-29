@@ -384,7 +384,7 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
 
           <Avatar
             size="w-9 h-9"
-            src={selectedChat.isGroupChat ? (selectedChat.profilePic || "/RoomChat.png") : (!selectedChat.isGroupChat ? selectedChat.members.find(m => m._id !== currentUserId)?.profilePic : null)}
+            src={selectedChat.isGroupChat ? (selectedChat.profilePic || "/images/RoomChat.png") : (!selectedChat.isGroupChat ? selectedChat.members.find(m => m._id !== currentUserId)?.profilePic : null)}
             text={
               !selectedChat.isGroupChat
                 ? getChatName().charAt(0).toUpperCase()
@@ -495,7 +495,7 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
                 <div className="flex-1 flex flex-col items-center justify-center p-6 text-center max-w-lg mx-auto animate-[fadeIn_0.3s_ease]">
                   <div className="relative w-20 h-20 mb-4 rounded-3xl bg-gradient-to-tr from-blue-600 to-indigo-600 p-0.5 shadow-xl shadow-blue-500/20">
                     <div className="w-full h-full bg-[var(--card)] rounded-[22px] flex items-center justify-center p-3">
-                      <img src="/ai-button-logo.png" alt="CogniAi" className="w-full h-full object-contain" />
+                      <img src="/images/ai-button-logo.png" alt="CogniAi" className="w-full h-full object-contain" />
                     </div>
                   </div>
 
@@ -864,7 +864,7 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
           className="w-9 h-9 mb-0.5 flex-shrink-0 flex items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200/60 dark:border-blue-800/60 p-1.5 shadow-xs hover:border-blue-400/80 active:scale-95 transition-all cursor-pointer group"
           title="Ask CogniBot (@cogni)"
         >
-          <img src="/ai-button-logo.png" alt="CogniAI" className="w-full h-full object-contain" />
+          <img src="/images/ai-button-logo.png" alt="CogniAI" className="w-full h-full object-contain" />
         </button>
 
         <div className="relative flex-1 rounded-xl border border-slate-200/80 dark:border-slate-700/80 bg-slate-50/70 dark:bg-slate-800/60 focus-within:border-blue-500/70 focus-within:ring-2 focus-within:ring-blue-500/10 transition-all overflow-hidden shadow-xs">

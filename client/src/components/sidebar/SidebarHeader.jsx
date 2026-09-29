@@ -4,7 +4,7 @@ const SidebarHeader = ({ onSettingsClick }) => {
   return (
     <div className="mb-3 flex justify-between items-center px-1 pt-1">
       <div className="flex items-center gap-2.5">
-        <img src="/CogniFlow.png" alt="CogniFlow" className="w-7 h-7 object-contain rounded-lg shadow-xs" />
+        <img src="/images/CogniFlow.png" alt="CogniFlow" className="w-7 h-7 object-contain rounded-lg shadow-xs" />
         <h2 className="text-xl font-bold tracking-tight text-slate-800 dark:text-slate-100">
           Cogni<span className="text-blue-600">Flow</span>
         </h2>

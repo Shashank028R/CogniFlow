@@ -229,7 +229,7 @@ export const CogniAiModal = ({
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 p-0.5 shadow-md shadow-blue-500/20 flex-shrink-0">
               <div className="w-full h-full bg-[var(--card)] rounded-[14px] flex items-center justify-center p-1.5">
-                <img src="/ai-button-logo.png" alt="CogniAi" className="w-full h-full object-contain" />
+                <img src="/images/ai-button-logo.png" alt="CogniAi" className="w-full h-full object-contain" />
               </div>
             </div>
 
