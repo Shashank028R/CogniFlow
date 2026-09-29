@@ -80,7 +80,7 @@ const AuthForm = ({
               type="button"
               disabled={isProcessing}
               onClick={() => handleQuickDemoLogin && handleQuickDemoLogin("Demo1")}
-              className="group flex flex-col items-center justify-center p-2.5 rounded-xl border border-blue-200/90 dark:border-blue-800/80 bg-white dark:bg-slate-900 hover:bg-blue-50 dark:hover:bg-blue-950/50 hover:border-blue-400 shadow-xs hover:shadow-[0_4px_12px_rgba(37,99,235,0.2)] active:scale-95 transition-all duration-200 cursor-pointer disabled:opacity-50"
+              className="group flex flex-col items-center justify-center p-2.5 rounded-xl border border-blue-200/90 dark:border-blue-800/80 bg-white dark:bg-slate-900 hover:bg-blue-50 dark:hover:bg-blue-950/50 hover:border-blue-400 shadow-xs hover:shadow-[0_4px_12px_rgba(37,99,235,0.18)] hover:-translate-y-[1px] active:scale-[0.98] transition-all duration-200 ease-[cubic-bezier(0.25,1,0.5,1)] cursor-pointer disabled:opacity-50"
               title="1-Click Login as Demo1"
             >
               <div className="flex items-center gap-1.5 font-bold text-xs text-blue-600 dark:text-blue-400">
@@ -96,7 +96,7 @@ const AuthForm = ({
               type="button"
               disabled={isProcessing}
               onClick={() => handleQuickDemoLogin && handleQuickDemoLogin("Demo2")}
-              className="group flex flex-col items-center justify-center p-2.5 rounded-xl border border-indigo-200/90 dark:border-indigo-800/80 bg-white dark:bg-slate-900 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 hover:border-indigo-400 shadow-xs hover:shadow-[0_4px_12px_rgba(99,102,241,0.2)] active:scale-95 transition-all duration-200 cursor-pointer disabled:opacity-50"
+              className="group flex flex-col items-center justify-center p-2.5 rounded-xl border border-indigo-200/90 dark:border-indigo-800/80 bg-white dark:bg-slate-900 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 hover:border-indigo-400 shadow-xs hover:shadow-[0_4px_12px_rgba(99,102,241,0.18)] hover:-translate-y-[1px] active:scale-[0.98] transition-all duration-200 ease-[cubic-bezier(0.25,1,0.5,1)] cursor-pointer disabled:opacity-50"
               title="1-Click Login as Demo2"
             >
               <div className="flex items-center gap-1.5 font-bold text-xs text-indigo-600 dark:text-indigo-400">

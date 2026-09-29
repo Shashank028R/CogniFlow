@@ -52,7 +52,7 @@ export const KnowledgePanel = ({
   const readyCount = sources.filter((s) => s.status === "ready" && s.enabled).length;
 
   return (
-    <div className="fixed inset-y-0 right-0 w-full sm:w-[420px] bg-[var(--card)]/95 backdrop-blur-2xl shadow-2xl border-l border-slate-200/80 dark:border-slate-800 z-50 flex flex-col animate-[slideIn_0.2s_ease]">
+    <div className="fixed inset-y-0 right-0 w-full sm:w-[420px] bg-[var(--card)]/95 backdrop-blur-2xl shadow-2xl border-l border-slate-200/80 dark:border-slate-800 z-50 flex flex-col animate-[slideInRight_0.25s_cubic-bezier(0.16,1,0.3,1)]">
       
       {/* Header */}
       <div className="p-4 px-5 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between">
@@ -69,7 +69,7 @@ export const KnowledgePanel = ({
         <button
           type="button"
           onClick={onClose}
-          className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:-translate-y-[1px] active:scale-95 transition-all duration-150 cursor-pointer"
         >
           <X size={18} />
         </button>
@@ -98,7 +98,7 @@ export const KnowledgePanel = ({
                 onGenerateQuiz();
                 onClose();
               }}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-xs active:scale-95 transition-all cursor-pointer flex-shrink-0"
+              className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-xs hover:-translate-y-[1px] active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.25,1,0.5,1)] cursor-pointer flex-shrink-0"
             >
               <span>Take Quiz</span>
             </button>
@@ -113,9 +113,9 @@ export const KnowledgePanel = ({
               <button
                 type="button"
                 onClick={() => setActiveTab("file")}
-                className={`px-2 py-0.5 rounded-md text-[11px] font-medium transition-colors ${
+                className={`px-2 py-0.5 rounded-md text-[11px] font-medium transition-all duration-150 active:scale-95 cursor-pointer ${
                   activeTab === "file"
-                    ? "bg-blue-600 text-white"
+                    ? "bg-blue-600 text-white shadow-xs"
                     : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
                 }`}
               >
@@ -124,9 +124,9 @@ export const KnowledgePanel = ({
               <button
                 type="button"
                 onClick={() => setActiveTab("text")}
-                className={`px-2 py-0.5 rounded-md text-[11px] font-medium transition-colors ${
+                className={`px-2 py-0.5 rounded-md text-[11px] font-medium transition-all duration-150 active:scale-95 cursor-pointer ${
                   activeTab === "text"
-                    ? "bg-blue-600 text-white"
+                    ? "bg-blue-600 text-white shadow-xs"
                     : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
                 }`}
               >

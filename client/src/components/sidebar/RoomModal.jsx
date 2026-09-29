@@ -165,76 +165,109 @@ const RoomModal = ({ isOpen, onClose, rooms, setRooms }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-[fadeIn_0.2s_ease] p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-[modalBackdrop_0.2s_ease-out] p-4">
       
       {/* Crop Modal Overlay */}
       {imgSrc && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-[fadeIn_0.2s_ease-out]">
-          <div className="bg-[var(--bg)] p-6 rounded-3xl shadow-2xl max-w-lg w-full flex flex-col items-center">
-            <h2 className="text-xl font-bold mb-4 text-[var(--text)]">Crop Group Picture</h2>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-[modalBackdrop_0.2s_ease-out]">
+          <div className="bg-[var(--card)] p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-[0_16px_40px_rgba(0,0,0,0.2)] max-w-lg w-full flex flex-col items-center animate-[modalContent_0.25s_cubic-bezier(0.16,1,0.3,1)]">
+            <h2 className="text-lg font-bold mb-4 text-[var(--text)]">Crop Group Picture</h2>
             <div className="max-h-[60vh] overflow-hidden w-full bg-black rounded-xl flex items-center justify-center">
               <ReactCrop crop={crop} onChange={(_, percentCrop) => setCrop(percentCrop)} onComplete={(c) => setCompletedCrop(c)} aspect={1} circularCrop>
                 <img ref={imgRef} alt="Crop preview" src={imgSrc} onLoad={onImageLoad} className="max-h-[60vh] object-contain block" />
               </ReactCrop>
             </div>
-            <div className="flex gap-4 mt-6 w-full">
-              <button onClick={() => setImgSrc("")} className="flex-1 py-3 rounded-xl bg-gray-200 text-gray-700 font-bold shadow-[4px_4px_8px_var(--shadow-dark),-4px_-4px_8px_var(--shadow-light)] hover:shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)] transition-all flex items-center justify-center gap-2">
-                <X size={18} /> Cancel
+            <div className="flex gap-3 mt-6 w-full">
+              <button 
+                onClick={() => setImgSrc("")} 
+                className="flex-1 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-xs border border-slate-200/80 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 hover:-translate-y-[1px] active:scale-[0.98] transition-all duration-150 flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <X size={16} /> Cancel
               </button>
-              <button onClick={handleUploadCrop} disabled={isUploadingCrop || !completedCrop} className="flex-1 py-3 rounded-xl bg-blue-500 text-white font-bold shadow-[4px_4px_10px_rgba(37,99,235,0.3),-4px_-4px_10px_var(--shadow-light)] hover:bg-blue-600 hover:scale-[1.02] transition-all flex items-center justify-center gap-2 disabled:opacity-50">
-                {isUploadingCrop ? "Processing..." : <><Check size={18} /> Apply</>}
+              <button 
+                onClick={handleUploadCrop} 
+                disabled={isUploadingCrop || !completedCrop} 
+                className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-[0_2px_8px_rgba(37,99,235,0.25)] hover:shadow-[0_4px_14px_rgba(37,99,235,0.35)] hover:-translate-y-[1px] active:scale-[0.98] transition-all duration-150 flex items-center justify-center gap-1.5 disabled:opacity-50 cursor-pointer"
+              >
+                {isUploadingCrop ? "Processing..." : <><Check size={16} /> Apply</>}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      <div className="bg-[var(--card)] w-full max-w-md p-6 rounded-3xl shadow-[10px_10px_20px_rgba(0,0,0,0.2)] flex flex-col gap-4 max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-2">
-          <h2 className="text-xl font-bold text-[var(--text)]">Create Room</h2>
-          <button onClick={onClose} className="text-red-500 font-bold text-xl hover:scale-110 transition-transform cursor-pointer">✕</button>
+      <div className="bg-[var(--card)] w-full max-w-md p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-[0_16px_40px_rgba(0,0,0,0.2)] flex flex-col gap-4 max-h-[90vh] overflow-y-auto scrollbar-hide animate-[modalContent_0.25s_cubic-bezier(0.16,1,0.3,1)]">
+        <div className="flex justify-between items-center mb-1">
+          <h2 className="text-lg font-bold text-[var(--text)]">Create Room</h2>
+          <button 
+            onClick={onClose} 
+            className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+          >
+            <X size={18} />
+          </button>
         </div>
 
-        <div className="flex flex-col items-center gap-2 mb-2">
+        <div className="flex flex-col items-center gap-2 mb-1">
           <div className="relative group cursor-pointer" onClick={() => document.getElementById("group-pic-upload").click()}>
-            <div className="w-20 h-20 rounded-full shadow-[6px_6px_12px_var(--shadow-dark),-6px_-6px_12px_var(--shadow-light)] p-1 bg-[var(--bg)]">
+            <div className="w-20 h-20 rounded-full border border-slate-200/80 dark:border-slate-700 p-1 bg-slate-100/50 dark:bg-slate-800/50 transition-transform duration-200 group-hover:scale-105">
               <Avatar src={profilePic} text={roomName ? roomName.charAt(0).toUpperCase() : "G"} size="w-full h-full" />
             </div>
             <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-              <Camera size={24} className="text-white" />
+              <Camera size={22} className="text-white" />
             </div>
             <input type="file" id="group-pic-upload" className="hidden" accept="image/*" onChange={onSelectFile} />
           </div>
-          <span className="text-xs text-gray-500 font-medium">Group Picture (Optional)</span>
+          <span className="text-xs text-slate-500 font-medium">Group Picture (Optional)</span>
         </div>
 
-        <input type="text" placeholder="Group Name" value={roomName} onChange={(e) => setRoomName(e.target.value)} className="w-full p-3 rounded-xl border-none outline-none bg-[var(--card)] text-[var(--text)] shadow-[inset_4px_4px_8px_var(--shadow-dark),inset_-4px_-4px_8px_var(--shadow-light)] focus:shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)] transition-all" />
+        <input 
+          type="text" 
+          placeholder="Group Name" 
+          value={roomName} 
+          onChange={(e) => setRoomName(e.target.value)} 
+          className="w-full p-2.5 px-3 rounded-xl border border-slate-200/80 dark:border-slate-700/80 outline-none bg-slate-50/70 dark:bg-slate-800/60 text-[var(--text)] text-sm focus:border-blue-500/70 focus:ring-2 focus:ring-blue-500/10 transition-all" 
+        />
 
-        <input type="text" placeholder="Add Users (e.g. John, Jane)" onChange={(e) => handleSearch(e.target.value)} className="w-full p-3 rounded-xl border-none outline-none bg-[var(--card)] text-[var(--text)] shadow-[inset_4px_4px_8px_var(--shadow-dark),inset_-4px_-4px_8px_var(--shadow-light)] focus:shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)] transition-all" />
+        <input 
+          type="text" 
+          placeholder="Add Users (e.g. John, Jane)" 
+          onChange={(e) => handleSearch(e.target.value)} 
+          className="w-full p-2.5 px-3 rounded-xl border border-slate-200/80 dark:border-slate-700/80 outline-none bg-slate-50/70 dark:bg-slate-800/60 text-[var(--text)] text-sm focus:border-blue-500/70 focus:ring-2 focus:ring-blue-500/10 transition-all" 
+        />
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1.5">
           {selectedUsers.map((u) => (
-            <span key={u._id} className="px-3 py-1 bg-[var(--bg)] text-blue-800 text-xs rounded-full flex items-center gap-1 shadow-[2px_2px_4px_var(--shadow-dark),-2px_-2px_4px_var(--shadow-light)] font-medium">
+            <span key={u._id} className="px-2.5 py-1 bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 text-xs rounded-lg border border-blue-200/70 dark:border-blue-800/70 flex items-center gap-1.5 font-medium animate-[fadeIn_0.15s_ease]">
               {u.username}
-              <button onClick={() => handleDelete(u)} className="font-bold text-gray-400 ml-1 hover:text-red-500 transition-colors">x</button>
+              <button onClick={() => handleDelete(u)} className="text-slate-400 hover:text-red-500 transition-colors cursor-pointer">
+                <X size={12} />
+              </button>
             </span>
           ))}
         </div>
 
-        <div className="max-h-32 overflow-y-auto flex flex-col gap-2">
+        <div className="max-h-32 overflow-y-auto flex flex-col gap-1 pr-1">
           {loading ? (
-            <p className="text-xs text-gray-500 text-center animate-pulse">Searching...</p>
+            <p className="text-xs text-slate-400 text-center py-2 animate-pulse">Searching users...</p>
           ) : (
             searchResult?.slice(0, 4).map((user) => (
-              <div key={user._id} onClick={() => handleAddUser(user)} className="flex items-center gap-3 p-2 rounded-xl cursor-pointer hover:bg-[var(--bg)] hover:shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)] transition-all">
-                <Avatar src={user.profilePic} text={user.username.charAt(0).toUpperCase()} size="w-8 h-8" />
-                <span className="text-sm font-medium text-gray-700">{user.username}</span>
+              <div 
+                key={user._id} 
+                onClick={() => handleAddUser(user)} 
+                className="flex items-center gap-2.5 p-2 rounded-xl cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/70 active:scale-[0.99] border border-transparent hover:border-slate-200/60 dark:hover:border-slate-700/60 transition-all duration-150"
+              >
+                <Avatar src={user.profilePic} text={user.username.charAt(0).toUpperCase()} size="w-7 h-7" />
+                <span className="text-xs font-medium text-[var(--text)] truncate">{user.username}</span>
               </div>
             ))
           )}
         </div>
 
-        <button onClick={handleSubmit} disabled={isSubmitting} className="mt-2 w-full py-3 rounded-xl font-bold text-white bg-blue-500 shadow-[4px_4px_10px_rgba(37,99,235,0.3),-4px_-4px_10px_var(--shadow-light)] hover:bg-blue-600 hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+        <button 
+          onClick={handleSubmit} 
+          disabled={isSubmitting} 
+          className="mt-1 w-full py-2.5 rounded-xl font-semibold text-xs text-white bg-blue-600 hover:bg-blue-700 shadow-[0_2px_8px_rgba(37,99,235,0.25)] hover:shadow-[0_4px_14px_rgba(37,99,235,0.35)] hover:-translate-y-[1px] active:scale-[0.98] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+        >
           {isSubmitting ? "Creating..." : "Create Room"}
         </button>
       </div>

@@ -22,7 +22,7 @@ const RoomCard = ({
       onClick={() => setSelectedChat(room)}
       className={`
         flex items-center justify-between gap-2.5 p-2 rounded-xl cursor-pointer
-        transition-colors duration-150 ease-out
+        hover:translate-x-0.5 active:scale-[0.99] transition-all duration-150 ease-out
         w-full mb-1
         ${
           isSelected

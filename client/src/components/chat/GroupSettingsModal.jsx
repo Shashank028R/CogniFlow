@@ -217,48 +217,53 @@ const GroupSettingsModal = ({ isOpen, onClose, selectedChat, setSelectedChat }) 
         </div>
       )}
 
-      <div className="bg-[var(--card)] w-full max-w-md p-6 rounded-3xl shadow-[10px_10px_20px_rgba(0,0,0,0.2)] flex flex-col gap-5 max-h-[90vh] overflow-y-auto scrollbar-hide">
+      <div className="bg-[var(--card)] w-full max-w-md p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-[0_16px_40px_rgba(0,0,0,0.2)] flex flex-col gap-4 max-h-[90vh] overflow-y-auto scrollbar-hide animate-[modalContent_0.25s_cubic-bezier(0.16,1,0.3,1)]">
         <div className="flex justify-between items-center mb-1">
-          <h2 className="text-xl font-bold text-[var(--text)]">Group Settings</h2>
-          <button onClick={onClose} className="text-red-500 font-bold text-xl hover:scale-110 transition-transform cursor-pointer">✕</button>
+          <h2 className="text-lg font-bold text-[var(--text)]">Group Settings</h2>
+          <button 
+            onClick={onClose} 
+            className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+          >
+            <X size={18} />
+          </button>
         </div>
 
         {/* Group Picture */}
         <div className="flex flex-col items-center gap-2">
           <div className={`relative ${isAdmin ? 'group cursor-pointer' : ''}`} onClick={() => isAdmin && document.getElementById("edit-group-pic").click()}>
-            <div className="w-24 h-24 rounded-full shadow-[6px_6px_12px_var(--shadow-dark),-6px_-6px_12px_var(--shadow-light)] p-1 bg-[var(--bg)]">
+            <div className="w-22 h-22 rounded-full border border-slate-200/80 dark:border-slate-700 p-1 bg-slate-100/50 dark:bg-slate-800/50 transition-transform duration-200 group-hover:scale-105">
               <Avatar src={profilePic} text={roomName ? roomName.charAt(0).toUpperCase() : "G"} size="w-full h-full" />
             </div>
             {isAdmin && (
               <>
                 <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Camera size={28} className="text-white" />
+                  <Camera size={24} className="text-white" />
                 </div>
                 <input type="file" id="edit-group-pic" className="hidden" accept="image/*" onChange={onSelectFile} disabled={updating} />
               </>
             )}
           </div>
-          <span className="text-xs text-gray-500 font-medium">
+          <span className="text-xs text-slate-500 font-medium">
             {isAdmin ? "Click to update picture" : "Group Picture"}
           </span>
         </div>
 
         {/* Rename Group */}
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-semibold text-gray-600 px-1">Group Name</label>
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-semibold text-slate-500 px-1">Group Name</label>
           <div className="flex gap-2">
             <input
               type="text"
               value={roomName}
               onChange={(e) => setRoomName(e.target.value)}
               disabled={!isAdmin || updating}
-              className="flex-1 p-3 rounded-xl border-none outline-none bg-[var(--card)] text-[var(--text)] shadow-[inset_4px_4px_8px_var(--shadow-dark),inset_-4px_-4px_8px_var(--shadow-light)] disabled:opacity-70 disabled:cursor-not-allowed transition-all focus:shadow-[inset_2px_2px_4px_var(--shadow-dark),inset_-2px_-2px_4px_var(--shadow-light)]"
+              className="flex-1 p-2.5 px-3 rounded-xl border border-slate-200/80 dark:border-slate-700/80 outline-none bg-slate-50/70 dark:bg-slate-800/60 text-[var(--text)] text-sm focus:border-blue-500/70 focus:ring-2 focus:ring-blue-500/10 disabled:opacity-70 disabled:cursor-not-allowed transition-all"
             />
             {isAdmin && (
               <button
                 onClick={handleRename}
                 disabled={updating || roomName === selectedChat.name}
-                className="px-4 rounded-xl bg-blue-500 text-white font-bold shadow-[4px_4px_10px_rgba(37,99,235,0.3),-4px_-4px_10px_var(--shadow-light)] hover:bg-blue-600 hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-[0_2px_8px_rgba(37,99,235,0.25)] hover:shadow-[0_4px_14px_rgba(37,99,235,0.35)] hover:-translate-y-[1px] active:scale-[0.98] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 Update
               </button>

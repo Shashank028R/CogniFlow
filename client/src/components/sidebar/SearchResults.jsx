@@ -25,7 +25,8 @@ const SearchResults = ({ loadingSearch, searchResult, accessChat, onSelectChat }
         }
       }}
       className="flex items-center gap-2.5 p-2 rounded-xl cursor-pointer
-      transition-colors duration-150 ease-out hover:bg-slate-100/70 dark:hover:bg-slate-800/50
+      hover:translate-x-0.5 active:scale-[0.99] transition-all duration-150 ease-out
+      hover:bg-slate-100/70 dark:hover:bg-slate-800/50
       w-full border border-transparent hover:border-slate-200/60 dark:hover:border-slate-700/50"
     >
       <Avatar

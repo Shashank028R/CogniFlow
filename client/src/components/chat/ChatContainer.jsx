@@ -545,7 +545,7 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
           {readySourcesCount > 0 && (
             <button
               onClick={() => generateQuiz()}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-violet-200/90 dark:border-violet-800/80 bg-violet-50/80 dark:bg-violet-950/40 text-violet-600 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-900/40 text-xs font-semibold shadow-xs active:scale-95 transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-violet-200/90 dark:border-violet-800/80 bg-violet-50/80 dark:bg-violet-950/40 text-violet-600 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-900/40 text-xs font-semibold shadow-xs hover:-translate-y-[1px] active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.25,1,0.5,1)] cursor-pointer"
               title="Take an interactive quiz on uploaded documents"
             >
               <Sparkles size={14} className="text-violet-500 animate-pulse" />
@@ -556,13 +556,13 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
           {/* CogniFlow AI Knowledge Hub Button */}
           <button
             onClick={() => setIsKnowledgePanelOpen(true)}
-            className="group relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-blue-200/80 dark:border-blue-800/80 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/40 text-blue-600 dark:text-blue-400 text-xs font-semibold shadow-xs hover:shadow-[0_4px_16px_rgba(37,99,235,0.25)] hover:border-blue-400/80 transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] hover:scale-105 active:scale-95 cursor-pointer"
+            className="group relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-blue-200/80 dark:border-blue-800/80 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/40 text-blue-600 dark:text-blue-400 text-xs font-semibold shadow-xs hover:shadow-[0_4px_16px_rgba(37,99,235,0.2)] hover:border-blue-400/80 hover:-translate-y-[1px] active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.25,1,0.5,1)] cursor-pointer"
             title="CogniFlow AI Knowledge & Study Hub"
           >
             <img
               src="/images/ai-button-logo.png"
               alt="CogniFlow AI"
-              className="w-4 h-4 object-contain transition-transform duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-120 group-hover:rotate-12"
+              className="w-4 h-4 object-contain transition-transform duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-110 group-hover:rotate-6"
             />
             <span className="hidden sm:inline font-semibold tracking-tight">Cogni AI</span>
             {readySourcesCount > 0 && (
@@ -575,27 +575,27 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
           <div className="relative">
             <button 
               onClick={() => setShowMenu(!showMenu)}
-              className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 bg-slate-100/70 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/80 shadow-xs active:scale-95 transition-colors cursor-pointer text-sm"
+              className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 bg-slate-100/70 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/80 shadow-xs hover:-translate-y-[1px] active:scale-95 transition-all duration-200 cursor-pointer text-sm"
             >
               ⋮
             </button>
             
             {showMenu && (
-              <div className="absolute right-0 mt-2 w-44 bg-[var(--card)] rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.12)] z-50 overflow-hidden border border-slate-200 dark:border-slate-800">
+              <div className="absolute right-0 mt-2 w-44 bg-[var(--card)] rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.12)] z-50 overflow-hidden border border-slate-200 dark:border-slate-800 animate-[dropdownSlide_0.15s_cubic-bezier(0.16,1,0.3,1)] origin-top-right">
                 {selectedChat.isGroupChat && (
                   <button
                     onClick={() => {
                       setIsGroupSettingsOpen(true);
                       setShowMenu(false);
                     }}
-                    className="w-full text-left px-3.5 py-2.5 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-b border-slate-200 dark:border-slate-800"
+                    className="w-full text-left px-3.5 py-2.5 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-b border-slate-200 dark:border-slate-800 cursor-pointer"
                   >
                     Group Settings
                   </button>
                 )}
                 <button
                   onClick={handleClearChat}
-                  className="w-full text-left px-3.5 py-2.5 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
+                  className="w-full text-left px-3.5 py-2.5 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors cursor-pointer"
                 >
                   Clear Chat
                 </button>
@@ -766,17 +766,17 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
                     )}
 
                     {isMyMessage && !isDeleted && (
-                      <div className="absolute -left-16 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+                      <div className="absolute -left-16 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 flex gap-1.5">
                         <button 
                           onClick={() => initiateEdit(m)}
-                          className="p-1.5 text-gray-400 hover:text-blue-500 bg-white rounded-full shadow-sm hover:shadow-md transition-all cursor-pointer"
+                          className="p-1.5 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 bg-white dark:bg-slate-800 rounded-full shadow-xs hover:shadow-md hover:-translate-y-[1px] active:scale-95 transition-all duration-150 cursor-pointer border border-slate-100 dark:border-slate-700"
                           title="Edit Message"
                         >
                           <Pencil size={14} />
                         </button>
                         <button 
                           onClick={() => openDeleteModal(m._id, senderId)}
-                          className="p-1.5 text-gray-400 hover:text-red-500 bg-white rounded-full shadow-sm hover:shadow-md transition-all cursor-pointer"
+                          className="p-1.5 text-slate-400 hover:text-red-600 dark:hover:text-red-400 bg-white dark:bg-slate-800 rounded-full shadow-xs hover:shadow-md hover:-translate-y-[1px] active:scale-95 transition-all duration-150 cursor-pointer border border-slate-100 dark:border-slate-700"
                           title="Delete Message"
                         >
                           <Trash2 size={14} />
@@ -785,10 +785,10 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
                     )}
 
                     {!isMyMessage && !isDeleted && (
-                      <div className="absolute -right-8 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+                      <div className="absolute -right-8 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 flex gap-1.5">
                         <button 
                           onClick={() => openDeleteModal(m._id, senderId)}
-                          className="p-1.5 text-gray-400 hover:text-red-500 bg-white rounded-full shadow-sm hover:shadow-md transition-all cursor-pointer"
+                          className="p-1.5 text-slate-400 hover:text-red-600 dark:hover:text-red-400 bg-white dark:bg-slate-800 rounded-full shadow-xs hover:shadow-md hover:-translate-y-[1px] active:scale-95 transition-all duration-150 cursor-pointer border border-slate-100 dark:border-slate-700"
                           title="Delete Message"
                         >
                           <Trash2 size={14} />
@@ -964,7 +964,7 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
           <button
             type="button"
             onClick={() => scrollToBottom("smooth")}
-            className="sticky bottom-2 ml-auto mr-1 z-30 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--card)]/95 hover:bg-[var(--card)] text-blue-600 dark:text-blue-400 border border-slate-200/80 dark:border-slate-700/80 shadow-[0_4px_16px_rgba(0,0,0,0.15)] backdrop-blur-md transition-all active:scale-95 animate-[fadeIn_0.2s_ease] text-xs font-semibold cursor-pointer"
+            className="sticky bottom-2 ml-auto mr-1 z-30 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--card)]/95 hover:bg-[var(--card)] text-blue-600 dark:text-blue-400 border border-slate-200/80 dark:border-slate-700/80 shadow-[0_4px_16px_rgba(0,0,0,0.15)] backdrop-blur-md hover:-translate-y-[1px] active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.25,1,0.5,1)] animate-[fadeIn_0.2s_ease] text-xs font-semibold cursor-pointer"
             title="Scroll to latest messages"
           >
             <ChevronDown size={14} className="animate-bounce" />
@@ -1067,7 +1067,7 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
         />
         <button 
           onClick={() => document.getElementById("file-upload").click()}
-          className="w-9 h-9 mb-0.5 flex-shrink-0 flex items-center justify-center rounded-xl text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 bg-slate-100/70 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/80 shadow-xs hover:bg-slate-200/70 dark:hover:bg-slate-700/70 active:scale-95 transition-all cursor-pointer"
+          className="w-9 h-9 mb-0.5 flex-shrink-0 flex items-center justify-center rounded-xl text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 bg-slate-100/70 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/80 shadow-xs hover:bg-slate-200/70 dark:hover:bg-slate-700/70 hover:-translate-y-[1px] active:scale-95 transition-all duration-200 cursor-pointer"
           title="Attach File"
         >
           <Paperclip size={16} />
@@ -1079,20 +1079,20 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
             setNewMessage((prev) => (prev.includes("@cogni") ? prev : (prev ? `@cogni ${prev}` : "@cogni ")));
             document.getElementById("chat-textarea")?.focus();
           }}
-          className="group h-9 mb-0.5 flex-shrink-0 flex items-center justify-start rounded-xl bg-gradient-to-r from-blue-50 via-indigo-50/60 to-blue-50 dark:from-blue-950/40 dark:via-indigo-950/40 dark:to-blue-950/40 border border-blue-200/70 dark:border-blue-800/70 p-1.5 shadow-xs hover:border-blue-400/80 hover:shadow-[0_4px_16px_rgba(37,99,235,0.25)] transition-all duration-400 ease-[cubic-bezier(0.25,1,0.5,1)] w-9 hover:w-32 overflow-hidden cursor-pointer active:scale-95 z-20"
+          className="group h-9 mb-0.5 flex-shrink-0 flex items-center justify-start rounded-xl bg-gradient-to-r from-blue-50 via-indigo-50/60 to-blue-50 dark:from-blue-950/40 dark:via-indigo-950/40 dark:to-blue-950/40 border border-blue-200/70 dark:border-blue-800/70 p-1.5 shadow-xs hover:border-blue-400/80 hover:shadow-[0_4px_16px_rgba(37,99,235,0.2)] hover:-translate-y-[1px] transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] w-9 hover:w-32 overflow-hidden cursor-pointer active:scale-95 z-20"
           title="Ask CogniBot (@cogni)"
         >
           <img
             src="/images/ai-button-logo.png"
             alt="CogniAI"
-            className="w-6 h-6 object-contain flex-shrink-0 transition-transform duration-400 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-110 group-hover:rotate-6"
+            className="w-6 h-6 object-contain flex-shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-110 group-hover:rotate-6"
           />
-          <span className="whitespace-nowrap opacity-0 group-hover:opacity-100 font-bold text-xs text-blue-600 dark:text-blue-400 transition-all duration-400 delay-75 ease-[cubic-bezier(0.25,1,0.5,1)] ml-1.5 overflow-hidden transform -translate-x-2 group-hover:translate-x-0 select-none">
+          <span className="whitespace-nowrap opacity-0 group-hover:opacity-100 font-bold text-xs text-blue-600 dark:text-blue-400 transition-all duration-300 delay-75 ease-[cubic-bezier(0.25,1,0.5,1)] ml-1.5 overflow-hidden transform -translate-x-2 group-hover:translate-x-0 select-none">
             Ask Cogni
           </span>
         </button>
 
-        <div className={`relative flex-1 rounded-xl transition-all overflow-hidden shadow-xs flex items-center ${
+        <div className={`relative flex-1 rounded-xl transition-all duration-200 overflow-hidden shadow-xs flex items-center ${
           newMessage.toLowerCase().includes("@cogni")
             ? "border border-blue-500/90 ring-2 ring-blue-500/25 bg-blue-50/20 dark:bg-blue-950/20 shadow-[0_0_15px_rgba(59,130,246,0.18)]"
             : "border border-slate-200/80 dark:border-slate-700/80 bg-slate-50/70 dark:bg-slate-800/60 focus-within:border-blue-500/70 focus-within:ring-2 focus-within:ring-blue-500/10"
@@ -1140,12 +1140,12 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
         <button
           onClick={handleSubmit}
           disabled={isSending || (!newMessage.trim() && !attachedFile)}
-          className={`w-9 h-9 mb-0.5 flex-shrink-0 flex items-center justify-center rounded-xl font-bold shadow-[0_2px_8px_rgba(37,99,235,0.25)] transition-all text-sm ${
+          className={`w-9 h-9 mb-0.5 flex-shrink-0 flex items-center justify-center rounded-xl font-bold shadow-[0_2px_8px_rgba(37,99,235,0.25)] transition-all duration-200 text-sm ${
             isSending
               ? "bg-blue-400 cursor-not-allowed opacity-80 text-white"
               : (!newMessage.trim() && !attachedFile)
               ? "bg-slate-300 dark:bg-slate-700 text-slate-500 cursor-not-allowed opacity-60"
-              : "bg-blue-600 hover:bg-blue-700 text-white active:scale-95 cursor-pointer"
+              : "bg-blue-600 hover:bg-blue-700 text-white hover:-translate-y-[1px] active:scale-95 cursor-pointer"
           }`}
           title={isSending ? "Sending..." : "Send message (Enter)"}
         >

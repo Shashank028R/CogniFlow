@@ -237,7 +237,7 @@ const Sidebar = ({ selectedChat, setSelectedChat, onlineUsers, setOnlineUsers })
           bg-slate-100/70 dark:bg-slate-800/70 hover:bg-slate-200/70 dark:hover:bg-slate-700/70
           border border-slate-200/80 dark:border-slate-700/80
           flex items-center justify-center shadow-xs
-          transition-colors duration-150 active:scale-95 cursor-pointer"
+          hover:-translate-y-[1px] active:scale-95 transition-all duration-200 cursor-pointer"
         >
           {document.documentElement.classList.contains("dark") ? <Sun size={17} className="text-amber-500" /> : <Moon size={17} className="text-indigo-500" />}
         </button>
@@ -262,14 +262,14 @@ const Sidebar = ({ selectedChat, setSelectedChat, onlineUsers, setOnlineUsers })
               }
             }}
             title="Chat with CogniAi"
-            className="group absolute -top-16 right-0 h-12 flex items-center justify-start rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_4px_15px_rgba(37,99,235,0.35)] hover:shadow-[0_6px_25px_rgba(37,99,235,0.5)] transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] w-12 hover:w-32 overflow-hidden cursor-pointer z-50 p-2"
+            className="group absolute -top-16 right-0 h-12 flex items-center justify-start rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-[0_4px_15px_rgba(37,99,235,0.35)] hover:shadow-[0_6px_22px_rgba(37,99,235,0.45)] hover:-translate-y-[1px] transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] w-12 hover:w-32 overflow-hidden cursor-pointer z-50 p-2 active:scale-95"
           >
             <img
               src="/images/ai-button-logo.png"
               alt="CogniAi"
-              className="w-8 h-8 object-contain flex-shrink-0 rounded-full transition-transform duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-105"
+              className="w-8 h-8 object-contain flex-shrink-0 rounded-full transition-transform duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-105"
             />
-            <span className="whitespace-nowrap opacity-0 group-hover:opacity-100 font-bold transition-all duration-500 delay-100 ease-[cubic-bezier(0.25,1,0.5,1)] ml-2 overflow-hidden text-sm transform -translate-x-2 group-hover:translate-x-0 select-none">
+            <span className="whitespace-nowrap opacity-0 group-hover:opacity-100 font-bold transition-all duration-300 delay-50 ease-[cubic-bezier(0.25,1,0.5,1)] ml-2 overflow-hidden text-sm transform -translate-x-2 group-hover:translate-x-0 select-none">
               CogniAi
             </span>
           </button>
@@ -281,8 +281,8 @@ const Sidebar = ({ selectedChat, setSelectedChat, onlineUsers, setOnlineUsers })
             bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40
             border border-blue-200/60 dark:border-blue-800/60
             flex items-center justify-center text-lg
-            shadow-xs transition-colors duration-150
-            active:scale-95 cursor-pointer relative z-40"
+            shadow-xs hover:-translate-y-[1px] active:scale-95 transition-all duration-200
+            cursor-pointer relative z-40"
           >
             +
           </button>
