@@ -1,31 +1,37 @@
-import Input from "../ui/Input";
+import React from "react";
+import { Search, ArrowLeft } from "lucide-react";
 
 const SearchBar = ({ search, setSearch, setSearchResult, handleSearch }) => {
   return (
-    <div className="mb-3 px-1 flex items-center w-full relative">
-      {search ? (
-        <button
-          onClick={() => {
-            setSearch("");
-            setSearchResult([]);
-          }}
-          className="absolute left-3.5 text-blue-500 hover:text-blue-700 font-bold transition-colors z-10 text-sm"
-        >
-          ←
-        </button>
-      ) : (
-        <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-3.5 w-4 h-4 text-slate-400 z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-      )}
+    <div className="px-3 py-2 border-b border-[var(--border)] bg-[var(--bg-panel)] flex items-center">
+      <div className="relative flex items-center w-full">
+        {search ? (
+          <button
+            type="button"
+            onClick={() => {
+              setSearch("");
+              setSearchResult([]);
+            }}
+            className="absolute left-2.5 text-[var(--accent)] hover:text-[var(--accent-hover)] transition-colors z-10 cursor-pointer"
+            aria-label="Clear search"
+          >
+            <ArrowLeft size={18} />
+          </button>
+        ) : (
+          <Search
+            size={18}
+            className="absolute left-2.5 text-[var(--text-tertiary)] pointer-events-none"
+          />
+        )}
 
-      <Input
-        type="text"
-        placeholder="Search chats & users..."
-        value={search}
-        onChange={handleSearch}
-        className="pl-9 py-2 rounded-xl w-full text-xs font-normal"
-      />
+        <input
+          type="text"
+          placeholder="Search or start a new chat"
+          value={search}
+          onChange={handleSearch}
+          className="w-full h-9 pl-9 pr-3 rounded-[8px] bg-[var(--bg-input)] text-[14px] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] outline-none border border-transparent focus:border-[var(--border-strong)] focus:bg-[var(--bg-panel)] transition-all duration-150"
+        />
+      </div>
     </div>
   );
 };

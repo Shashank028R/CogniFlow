@@ -3,7 +3,21 @@ import Avatar from "../ui/Avatar";
 import toast from "react-hot-toast";
 import axios from "axios";
 import io from "socket.io-client";
-import { Pencil, Trash2, X, Paperclip, FileText, Download, MoreVertical, Check, CheckCheck, BookOpen, Sparkles, ChevronDown } from "lucide-react";
+import {
+  Pencil,
+  Trash2,
+  X,
+  Paperclip,
+  FileText,
+  Download,
+  MoreVertical,
+  Check,
+  CheckCheck,
+  Sparkles,
+  Bot,
+  Send,
+  ChevronDown
+} from "lucide-react";
 import DeleteMessageModal from "./DeleteMessageModal";
 import GroupSettingsModal from "./GroupSettingsModal";
 import ReactMarkdown from "react-markdown";
@@ -19,7 +33,24 @@ import QuizCard from "../rag/QuizCard";
 import { getBackendUrl, createResilientSocket } from "../../utils/apiConfig";
 import { getAuthToken, getAuthUserId, clearAuthSession } from "../../utils/authStorage";
 
-const EndPoint = getBackendUrl();
+const SENDER_COLORS = [
+  "#5B7083",
+  "#00A884",
+  "#2563EB",
+  "#7C3AED",
+  "#DB2777",
+  "#D97706",
+  "#059669",
+];
+
+const getSenderColor = (id = "") => {
+  if (!id) return SENDER_COLORS[0];
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = id.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return SENDER_COLORS[Math.abs(hash) % SENDER_COLORS.length];
+};
 
 const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
   const BackendUrl = getBackendUrl();
@@ -39,369 +70,282 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
   const [isTypingIndicatorVisible, setIsTypingIndicatorVisible] = useState(false);
   const typingTimeoutRef = useRef(null);
 
+  const [attachedFile, setAttachedFile] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [messageToDelete, setMessageToDelete] = useState(null);
 
-  const [attachedFile, setAttachedFile] = useState(null);
-  const [isUploading, setIsUploading] = useState(false);
-
-  // RAG State
-  const [isKnowledgePanelOpen, setIsKnowledgePanelOpen] = useState(false);
-  const [learnModalMessage, setLearnModalMessage] = useState(null);
-  const [perMessageRagMode, setPerMessageRagMode] = useState(null);
-
   const socketRef = useRef(null);
-  const [socketInstance, setSocketInstance] = useState(null);
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
   const isAtBottomRef = useRef(true);
-  const prevMessagesCountRef = useRef(0);
   const [showScrollBottom, setShowScrollBottom] = useState(false);
   const [unreadWhileScrolled, setUnreadWhileScrolled] = useState(0);
+
+  // RAG Knowledge Integration
+  const [isKnowledgePanelOpen, setIsKnowledgePanelOpen] = useState(false);
+  const [learnModalMessage, setLearnModalMessage] = useState(null);
 
   const {
     sources,
     ragMode,
     isUploading: isKnowledgeUploading,
     uploadProgress,
-    readySourcesCount,
     uploadSource,
     uploadText,
     toggleSource,
     deleteSource,
     updateMode,
+    generateQuiz,
     answerGeneral,
     learnFromAnswer,
-    generateQuiz,
-  } = useKnowledge(selectedChat?._id, socketInstance);
+  } = useKnowledge({
+    roomId: selectedChat?._id,
+    token,
+    backendUrl: BackendUrl,
+    onQuizGenerated: (quiz) => {
+      // Quiz generated callback
+    },
+  });
+
+  const readySourcesCount = sources.filter((s) => s.status === "ready" && s.enabled).length;
 
   useEffect(() => {
     selectedChatRef.current = selectedChat;
-    if (socketRef.current?.connected && selectedChat?._id) {
-      socketRef.current.emit("join chat", selectedChat._id);
-    }
+    setIsKnowledgePanelOpen(false);
+    setUnreadWhileScrolled(0);
+    setShowScrollBottom(false);
+    isAtBottomRef.current = true;
   }, [selectedChat]);
 
-  useEffect(() => {
-    const s = createResilientSocket();
-    socketRef.current = s;
-    setSocketInstance(s);
-
-    s.on("connect", () => {
-      console.log("Socket connected");
-      s.emit("setup", currentUserId);
-      if (selectedChatRef.current?._id) {
-        s.emit("join chat", selectedChatRef.current._id);
-      }
-    });
-
-    s.on("message received", (msg) => {
-      const roomId = msg.room?._id || msg.room;
-
-      if (selectedChatRef.current && String(selectedChatRef.current._id) === String(roomId)) {
-        setMessages((prev) => {
-          if (prev.some((m) => String(m._id) === String(msg._id))) return prev;
-          return [...prev, msg];
-        });
-      }
-    });
-
-    s.on("message edited", (editedMsg) => {
-      setMessages((prev) => prev.map((m) => (m._id === editedMsg._id ? editedMsg : m)));
-    });
-
-    s.on("message deleted", (deletedMsg) => {
-      setMessages((prev) => prev.map((m) => (m._id === deletedMsg._id ? deletedMsg : m)));
-    });
-
-    s.on("chat cleared", (roomId) => {
-      if (selectedChatRef.current && String(selectedChatRef.current._id) === String(roomId)) {
-        setMessages([]);
-      }
-    });
-
-    s.on("messages delivered", ({ messageIds, userId }) => {
-      setMessages((prev) => prev.map((m) => {
-        if (messageIds.includes(m._id) && !m.deliveredTo?.includes(userId)) {
-          return { ...m, deliveredTo: [...(m.deliveredTo || []), userId] };
-        }
-        return m;
-      }));
-    });
-
-    s.on("messages read", ({ messageIds, userId }) => {
-      setMessages((prev) => prev.map((m) => {
-        if (messageIds.includes(m._id) && !m.readBy?.includes(userId)) {
-          return { ...m, readBy: [...(m.readBy || []), userId] };
-        }
-        return m;
-      }));
-    });
-
-    s.on("typing", () => setIsTypingIndicatorVisible(true));
-    s.on("stop typing", () => setIsTypingIndicatorVisible(false));
-
-    return () => socketRef.current?.disconnect();
-  }, [BackendUrl, currentUserId]);
-
-  useEffect(() => {
-    if (!messages.length || !selectedChat) return;
-
-    const undeliveredIds = [];
-    const unreadIds = [];
-
-    messages.forEach((m) => {
-      const senderId = m.sender?._id || m.sender?.id || m.sender;
-      if (String(senderId) !== String(currentUserId)) {
-        if (!m.deliveredTo?.includes(currentUserId)) {
-          undeliveredIds.push(m._id);
-        }
-        if (!m.readBy?.includes(currentUserId)) {
-          unreadIds.push(m._id);
-        }
-      }
-    });
-
-    if (undeliveredIds.length > 0) {
-      socketRef.current?.emit("mark delivered", { messageIds: undeliveredIds, userId: currentUserId, roomId: selectedChat._id });
-    }
-    
-    if (unreadIds.length > 0) {
-      socketRef.current?.emit("mark read", { messageIds: unreadIds, userId: currentUserId, roomId: selectedChat._id });
-    }
-  }, [messages, selectedChat, currentUserId]);
-
-  useEffect(() => {
-    if (!selectedChat?._id) return;
-
-    let isMounted = true;
-    const fetchMessages = async () => {
-      try {
-        setLoadingMessages(true);
-
-        const { data } = await axios.get(
-          `${BackendUrl}/api/messages/${selectedChat._id}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          },
-        );
-
-        if (isMounted) {
-          setMessages(data);
-        }
-      } catch (error) {
-        console.log(error);
-        if (error.response?.status === 401) {
-          clearAuthSession();
-          window.location.href = "/";
-        } else if (isMounted) {
-          toast.error("Failed to load messages");
-        }
-      } finally {
-        if (isMounted) {
-          setLoadingMessages(false);
-        }
-      }
-    };
-
-    fetchMessages();
-    return () => {
-      isMounted = false;
-    };
-  }, [selectedChat?._id, BackendUrl, token]);
-
   const scrollToBottom = (behavior = "smooth") => {
-    if (!messagesContainerRef.current) return;
-    messagesContainerRef.current.scrollTo({
-      top: messagesContainerRef.current.scrollHeight,
-      behavior,
-    });
-    isAtBottomRef.current = true;
-    setShowScrollBottom(false);
-    setUnreadWhileScrolled(0);
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior });
+      isAtBottomRef.current = true;
+      setShowScrollBottom(false);
+      setUnreadWhileScrolled(0);
+    }
   };
 
   const handleScroll = () => {
-    if (!messagesContainerRef.current) return;
-    const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
-    // User is near bottom if within 120px of bottom edge
-    const isNearBottom = scrollHeight - scrollTop - clientHeight <= 120;
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    const threshold = 120;
+    const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
+    const isNearBottom = distanceFromBottom <= threshold;
+
     isAtBottomRef.current = isNearBottom;
     setShowScrollBottom(!isNearBottom);
+
     if (isNearBottom) {
       setUnreadWhileScrolled(0);
     }
   };
 
-  // Scroll to bottom on initial message load or room change
   useEffect(() => {
-    if (!loadingMessages && messages.length > 0) {
-      const timer = setTimeout(() => {
-        scrollToBottom("auto");
-      }, 50);
-      return () => clearTimeout(timer);
-    }
-  }, [selectedChat?._id, loadingMessages]);
+    socketRef.current = createResilientSocket();
 
-  // Smart scroll when messages change
-  useEffect(() => {
-    if (loadingMessages) return;
+    socketRef.current.on("connect", () => {
+      socketRef.current.emit("setup", currentUserId);
+    });
 
-    const prevCount = prevMessagesCountRef.current;
-    const currentCount = messages.length;
-    prevMessagesCountRef.current = currentCount;
+    socketRef.current.on("typing", (room) => {
+      if (selectedChatRef.current && String(selectedChatRef.current._id) === String(room)) {
+        setIsTypingIndicatorVisible(true);
+      }
+    });
 
-    // Only scroll if new message was actually added
-    if (currentCount > prevCount) {
-      const latestMsg = messages[currentCount - 1];
-      const isMyMsg = latestMsg && (
-        String(latestMsg.sender?._id || latestMsg.sender?.id || latestMsg.sender) === String(currentUserId) ||
-        latestMsg.isOptimistic
-      );
+    socketRef.current.on("stop typing", (room) => {
+      if (selectedChatRef.current && String(selectedChatRef.current._id) === String(room)) {
+        setIsTypingIndicatorVisible(false);
+      }
+    });
 
-      if (isMyMsg) {
-        // User sent a message -> scroll to bottom
-        setTimeout(() => scrollToBottom("smooth"), 20);
-      } else {
-        // Incoming message
+    socketRef.current.on("message received", (newMessage) => {
+      const activeId = selectedChatRef.current?._id;
+      const targetRoomId = newMessage.room?._id || newMessage.room;
+
+      if (activeId && String(activeId) === String(targetRoomId)) {
+        setMessages((prev) => {
+          if (prev.some((m) => m._id === newMessage._id)) return prev;
+          const filtered = prev.filter(
+            (m) => !(m.isOptimistic && m.senderId === newMessage.sender?._id && m.content === newMessage.content)
+          );
+          return [...filtered, newMessage];
+        });
+
         if (isAtBottomRef.current) {
-          setTimeout(() => scrollToBottom("smooth"), 20);
+          setTimeout(() => scrollToBottom("smooth"), 50);
         } else {
-          // User scrolled up to read past history -> DO NOT FORCE SCROLL!
           setUnreadWhileScrolled((prev) => prev + 1);
         }
       }
-    }
-  }, [messages, currentUserId, loadingMessages]);
+    });
 
-  // Scroll when typing indicator shows only if user is already at the bottom
+    socketRef.current.on("message deleted", (deletedMessage) => {
+      const activeId = selectedChatRef.current?._id;
+      const targetRoomId = deletedMessage.room?._id || deletedMessage.room;
+      if (activeId && String(activeId) === String(targetRoomId)) {
+        setMessages((prev) =>
+          prev.map((m) => (m._id === deletedMessage._id ? deletedMessage : m))
+        );
+      }
+    });
+
+    socketRef.current.on("message edited", (editedMessage) => {
+      const activeId = selectedChatRef.current?._id;
+      const targetRoomId = editedMessage.room?._id || editedMessage.room;
+      if (activeId && String(activeId) === String(targetRoomId)) {
+        setMessages((prev) =>
+          prev.map((m) => (m._id === editedMessage._id ? editedMessage : m))
+        );
+      }
+    });
+
+    socketRef.current.on("chat cleared", ({ roomId }) => {
+      const activeId = selectedChatRef.current?._id;
+      if (activeId && String(activeId) === String(roomId)) {
+        setMessages([]);
+      }
+    });
+
+    return () => socketRef.current?.disconnect();
+  }, [BackendUrl, currentUserId]);
+
   useEffect(() => {
-    if (isTypingIndicatorVisible && isAtBottomRef.current) {
-      scrollToBottom("smooth");
-    }
-  }, [isTypingIndicatorVisible]);
+    const fetchMessages = async () => {
+      if (!selectedChat) return;
+
+      try {
+        setLoadingMessages(true);
+        const { data } = await axios.get(
+          `${BackendUrl}/api/messages/${selectedChat._id}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setMessages(data);
+        socketRef.current?.emit("join chat", selectedChat._id);
+        setTimeout(() => scrollToBottom("auto"), 50);
+      } catch (err) {
+        toast.error("Failed to load messages");
+      } finally {
+        setLoadingMessages(false);
+      }
+    };
+
+    fetchMessages();
+    setNewMessage("");
+    setAttachedFile(null);
+    setEditingMessageId(null);
+  }, [selectedChat, BackendUrl, token]);
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
+    if (file.size > 25 * 1024 * 1024) {
+      toast.error("File size cannot exceed 25MB");
+      return;
+    }
+
     const previewUrl = URL.createObjectURL(file);
-    setAttachedFile({ 
-      file, 
-      previewUrl, 
-      type: file.type.startsWith('image/') ? 'image' : 'file' 
-    });
-    
-    e.target.value = null; // Reset input so same file can be selected again
+    const isImage = file.type.startsWith("image/");
+    setAttachedFile({ file, previewUrl, type: isImage ? "image" : "document" });
+    e.target.value = "";
   };
 
   const handleSubmit = async () => {
-    if (isSendingRef.current) return;
-    const contentToSend = newMessage.trim();
-    const fileToSend = attachedFile;
-    if (!contentToSend && !fileToSend) return;
+    if ((!newMessage.trim() && !attachedFile) || isSendingRef.current) return;
 
     if (editingMessageId) {
       try {
         const { data } = await axios.put(
           `${BackendUrl}/api/messages/${editingMessageId}`,
-          { content: contentToSend },
+          { content: newMessage },
           { headers: { Authorization: `Bearer ${token}` } }
         );
-
-        setMessages((prev) => prev.map((m) => (m._id === data._id ? data : m)));
+        setMessages((prev) =>
+          prev.map((m) => (m._id === editingMessageId ? data : m))
+        );
         socketRef.current?.emit("message edited", data);
         setEditingMessageId(null);
         setNewMessage("");
-        const textarea = document.getElementById("chat-textarea");
-        if (textarea) textarea.style.height = "auto";
-      } catch (error) {
+      } catch {
         toast.error("Failed to edit message");
       }
       return;
     }
 
-    // Lock sending to prevent double submission
+    const contentToSend = newMessage;
+    const fileToSend = attachedFile;
+
     isSendingRef.current = true;
     setIsSending(true);
 
-    // INSTANTLY clear the input and reset height (0ms latency, zero confusion)
-    setNewMessage("");
-    setAttachedFile(null);
-    const textarea = document.getElementById("chat-textarea");
-    if (textarea) textarea.style.height = "auto";
-
-    if (selectedChatRef.current) {
-      socketRef.current?.emit("stop typing", selectedChatRef.current._id);
-    }
-
-    // Instant optimistic message
-    const tempId = `temp-${Date.now()}`;
+    const tempId = `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const optimisticMessage = {
       _id: tempId,
-      sender: {
-        _id: currentUserId,
-        username: "You",
-      },
-      room: selectedChat,
-      content: contentToSend || (fileToSend ? fileToSend.file.name : ""),
-      messageType: fileToSend ? (fileToSend.type === "image" ? "image" : "file") : "text",
-      fileUrl: fileToSend ? fileToSend.previewUrl : "",
-      fileName: fileToSend ? fileToSend.file.name : "",
+      content: contentToSend,
+      sender: { _id: currentUserId, username: "You" },
+      senderId: currentUserId,
+      room: selectedChat._id,
+      fileUrl: fileToSend ? fileToSend.previewUrl : null,
+      fileType: fileToSend ? fileToSend.type : null,
       createdAt: new Date().toISOString(),
-      deliveredTo: [currentUserId],
-      readBy: [currentUserId],
+      readBy: [],
+      deliveredTo: [],
       isOptimistic: true,
     };
 
     setMessages((prev) => [...prev, optimisticMessage]);
+    setNewMessage("");
+    setAttachedFile(null);
+
+    const textarea = document.getElementById("chat-textarea");
+    if (textarea) {
+      textarea.style.height = "auto";
+    }
+
+    scrollToBottom("smooth");
 
     try {
-      let uploadData = null;
-      
+      socketRef.current?.emit("stop typing", selectedChat._id);
+      let uploadedFileUrl = null;
+      let uploadedFileType = null;
+
       if (fileToSend) {
         setIsUploading(true);
-        const toastId = toast.loading("Uploading attachment...");
-        try {
-          const formData = new FormData();
-          formData.append("file", fileToSend.file);
+        const formData = new FormData();
+        formData.append("file", fileToSend.file);
 
-          const response = await axios.post(`${BackendUrl}/api/upload`, formData, {
-            headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
-          });
-          uploadData = response.data;
-          toast.success("Attachment uploaded!", { id: toastId });
-        } catch (error) {
-          toast.error("Failed to upload attachment", { id: toastId });
-          setIsUploading(false);
-          setMessages((prev) => prev.filter((m) => m._id !== tempId));
-          setNewMessage(contentToSend);
-          setAttachedFile(fileToSend);
-          return;
-        }
+        const uploadRes = await axios.post(
+          `${BackendUrl}/api/messages/upload`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        uploadedFileUrl = uploadRes.data.url;
+        uploadedFileType = uploadRes.data.fileType;
         setIsUploading(false);
       }
 
       const messagePayload = {
-        content: contentToSend,
         roomId: selectedChat._id,
+        content: contentToSend,
       };
 
-      if (perMessageRagMode) {
-        messagePayload.ragMode = perMessageRagMode;
-      }
-
-      if (fileToSend && uploadData) {
-        messagePayload.messageType = uploadData.resourceType === "image" ? "image" : "file";
-        messagePayload.fileUrl = uploadData.fileUrl;
-        messagePayload.filePublicId = uploadData.publicId;
-        messagePayload.fileName = fileToSend.file.name;
-
+      if (uploadedFileUrl) {
+        messagePayload.fileUrl = uploadedFileUrl;
+        messagePayload.fileType = uploadedFileType;
         if (!messagePayload.content) {
           messagePayload.content = fileToSend.file.name;
         }
 
-        // Auto-ingest document into Room Knowledge Base if PDF or text
         const fileName = fileToSend.file.name.toLowerCase();
         if (fileName.endsWith(".pdf") || fileName.endsWith(".txt") || fileToSend.file.type === "application/pdf") {
           try {
@@ -415,16 +359,12 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
       const { data } = await axios.post(
         `${BackendUrl}/api/messages`,
         messagePayload,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // Replace optimistic message with actual persisted server message
       setMessages((prev) => prev.map((m) => (m._id === tempId ? data : m)));
       socketRef.current?.emit("new message", data);
-    } catch (error) {
-      console.log(error);
+    } catch {
       toast.error("Failed to send message");
       setMessages((prev) => prev.filter((m) => m._id !== tempId));
       setNewMessage(contentToSend);
@@ -461,22 +401,21 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
 
   const confirmDelete = async (type) => {
     if (!messageToDelete) return;
-    
     const { id: msgId } = messageToDelete;
-    
+
     try {
       const { data } = await axios.delete(
         `${BackendUrl}/api/messages/${msgId}?type=${type}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      
+
       if (type === "everyone") {
         setMessages((prev) => prev.map((m) => (m._id === data._id ? data : m)));
         socketRef.current?.emit("message deleted", data);
       } else {
         setMessages((prev) => prev.filter((m) => m._id !== msgId));
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to delete message");
     } finally {
       setDeleteModalOpen(false);
@@ -493,62 +432,66 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
       setMessages([]);
       socketRef.current?.emit("chat cleared", { roomId: selectedChat._id, userId: currentUserId });
       setShowMenu(false);
-    } catch (error) {
+    } catch {
       toast.error("Failed to clear chat");
     }
   };
 
   const getChatName = () => {
     if (selectedChat.isGroupChat) return selectedChat.name;
-    const otherUser = selectedChat.members.find((m) => m._id !== currentUserId);
+    const otherUser = selectedChat.members?.find((m) => String(m._id) !== String(currentUserId));
     return otherUser ? otherUser.username : "Unknown User";
   };
 
   return (
-    <div className="flex flex-col w-full h-full max-w-5xl bg-[var(--card)]/80 backdrop-blur-2xl rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.04)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.25)] overflow-hidden animate-[fadeIn_0.2s_ease] border border-slate-200/80 dark:border-slate-800/80">
-      <div className="flex items-center justify-between p-3 px-4 bg-[var(--card)]/60 border-b border-slate-200/80 dark:border-slate-800/80 shadow-xs z-10">
-        <div className="flex items-center gap-3">
+    <div className="flex flex-col w-full h-full bg-[var(--bg-chat)] overflow-hidden">
+      {/* CONVERSATION HEADER (Height 60px, solid --bg-panel, 1px border) */}
+      <div className="h-[60px] px-4 bg-[var(--bg-panel)] border-b border-[var(--border)] flex items-center justify-between z-10 select-none flex-shrink-0">
+        <div className="flex items-center gap-3 min-w-0">
           <button
-            className="md:hidden text-blue-600 font-bold hover:opacity-80 transition-opacity cursor-pointer text-sm"
+            className="md:hidden text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer p-1 -ml-1 mr-1"
             onClick={() => setSelectedChat(null)}
+            aria-label="Back to chat list"
           >
             ←
           </button>
 
           <Avatar
-            size="w-9 h-9"
-            src={selectedChat.isGroupChat ? (selectedChat.profilePic || "/images/RoomChat.png") : (!selectedChat.isGroupChat ? selectedChat.members.find(m => m._id !== currentUserId)?.profilePic : null)}
-            text={
-              !selectedChat.isGroupChat
-                ? getChatName().charAt(0).toUpperCase()
-                : ""
+            size="w-10 h-10"
+            src={
+              selectedChat.isGroupChat
+                ? (selectedChat.profilePic || "/images/RoomChat.png")
+                : selectedChat.members?.find((m) => String(m._id) !== String(currentUserId))?.profilePic
             }
+            text={!selectedChat.isGroupChat ? getChatName().charAt(0).toUpperCase() : ""}
           />
 
-          <div className="flex flex-col">
-            <h2 className="text-base font-semibold text-[var(--text)] leading-tight">
+          <div className="flex flex-col min-w-0">
+            <h2 className="text-[16px] font-[500] text-[var(--text-primary)] leading-tight truncate">
               {getChatName()}
             </h2>
-            {!selectedChat.isGroupChat && (() => {
-              const otherUser = selectedChat.members.find((m) => m._id !== currentUserId);
-              const isOnline = otherUser && onlineUsers.includes(otherUser._id);
-              if (isOnline) {
-                return <span className="text-[11px] text-emerald-500 font-medium leading-none mt-0.5">Online</span>;
-              }
-              return null;
-            })()}
+            <span className="text-[13px] text-[var(--text-secondary)] leading-none mt-0.5 truncate">
+              {isTypingIndicatorVisible
+                ? "typing..."
+                : selectedChat.isGroupChat
+                ? `${selectedChat.members?.length || 0} participants`
+                : (() => {
+                    const otherUser = selectedChat.members?.find((m) => String(m._id) !== String(currentUserId));
+                    return otherUser && onlineUsers.includes(otherUser._id) ? "online" : "";
+                  })()}
+            </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           {/* Quiz Me Button */}
           {readySourcesCount > 0 && (
             <button
               onClick={() => generateQuiz()}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-violet-200/90 dark:border-violet-800/80 bg-violet-50/80 dark:bg-violet-950/40 text-violet-600 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-900/40 text-xs font-semibold shadow-xs hover:-translate-y-[1px] active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.25,1,0.5,1)] cursor-pointer"
+              className="h-8 px-3 rounded-[8px] border border-[var(--border-strong)] bg-transparent hover:bg-[var(--bg-hover)] text-[13px] font-[500] text-[var(--text-primary)] flex items-center gap-1.5 transition-colors cursor-pointer"
               title="Take an interactive quiz on uploaded documents"
             >
-              <Sparkles size={14} className="text-violet-500 animate-pulse" />
+              <Sparkles size={16} className="text-[var(--accent)]" />
               <span className="hidden sm:inline">Quiz Me</span>
             </button>
           )}
@@ -556,17 +499,13 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
           {/* CogniFlow AI Knowledge Hub Button */}
           <button
             onClick={() => setIsKnowledgePanelOpen(true)}
-            className="group relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-blue-200/80 dark:border-blue-800/80 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/40 text-blue-600 dark:text-blue-400 text-xs font-semibold shadow-xs hover:shadow-[0_4px_16px_rgba(37,99,235,0.2)] hover:border-blue-400/80 hover:-translate-y-[1px] active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.25,1,0.5,1)] cursor-pointer"
+            className="h-8 px-3 rounded-[8px] border border-[var(--border-strong)] bg-transparent hover:bg-[var(--bg-hover)] text-[13px] font-[500] text-[var(--text-primary)] flex items-center gap-1.5 transition-colors cursor-pointer"
             title="CogniFlow AI Knowledge & Study Hub"
           >
-            <img
-              src="/images/ai-button-logo.png"
-              alt="CogniFlow AI"
-              className="w-4 h-4 object-contain transition-transform duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-110 group-hover:rotate-6"
-            />
-            <span className="hidden sm:inline font-semibold tracking-tight">Cogni AI</span>
+            <Bot size={16} className="text-[var(--accent)]" />
+            <span className="hidden sm:inline">Cogni AI</span>
             {readySourcesCount > 0 && (
-              <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-blue-600 text-white shadow-xs">
+              <span className="w-4 h-4 rounded-full bg-[var(--accent)] text-white text-[10px] font-semibold flex items-center justify-center">
                 {readySourcesCount}
               </span>
             )}
@@ -575,27 +514,28 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
           <div className="relative">
             <button 
               onClick={() => setShowMenu(!showMenu)}
-              className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 bg-slate-100/70 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/80 shadow-xs hover:-translate-y-[1px] active:scale-95 transition-all duration-200 cursor-pointer text-sm"
+              className="w-10 h-10 rounded-full flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer text-sm outline-none"
+              title="Menu"
             >
-              ⋮
+              <MoreVertical size={18} strokeWidth={1.75} />
             </button>
             
             {showMenu && (
-              <div className="absolute right-0 mt-2 w-44 bg-[var(--card)] rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.12)] z-50 overflow-hidden border border-slate-200 dark:border-slate-800 animate-[dropdownSlide_0.15s_cubic-bezier(0.16,1,0.3,1)] origin-top-right">
+              <div className="absolute right-0 mt-1 w-44 py-1.5 bg-[var(--bg-panel)] rounded-[12px] shadow-[var(--shadow-md)] z-50 border border-[var(--border)] animate-[dropdownSlide_0.15s_cubic-bezier(0.2,0,0,1)]">
                 {selectedChat.isGroupChat && (
                   <button
                     onClick={() => {
                       setIsGroupSettingsOpen(true);
                       setShowMenu(false);
                     }}
-                    className="w-full text-left px-3.5 py-2.5 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-b border-slate-200 dark:border-slate-800 cursor-pointer"
+                    className="w-full text-left px-3.5 py-2 text-[14px] text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
                   >
                     Group Settings
                   </button>
                 )}
                 <button
                   onClick={handleClearChat}
-                  className="w-full text-left px-3.5 py-2.5 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors cursor-pointer"
+                  className="w-full text-left px-3.5 py-2 text-[14px] text-[var(--danger)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
                 >
                   Clear Chat
                 </button>
@@ -612,404 +552,356 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
         setSelectedChat={setSelectedChat}
       />
 
-      {/* MESSAGES */}
+      {/* MESSAGES AREA */}
       <div 
         ref={messagesContainerRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto scrollbar-hide p-4 flex flex-col gap-3 relative" 
+        className="flex-1 overflow-y-auto p-4 md:px-8 flex flex-col relative bg-[var(--bg-chat)]" 
         onClick={() => setShowMenu(false)}
       >
-        {loadingMessages ? (
-          <p className="text-center text-gray-400 mt-10 animate-pulse text-sm">
-            Loading chat history...
-          </p>
-        ) : messages.length === 0 ? (
-          (() => {
-            const otherUser = !selectedChat.isGroupChat ? selectedChat.members?.find((m) => String(m._id) !== String(currentUserId)) : null;
-            const isCogniBot = otherUser && (otherUser.username === "CogniBot" || otherUser.email === "cognibot@system.local");
+        <div className="max-w-[860px] w-full mx-auto flex flex-col flex-1">
+          {loadingMessages ? (
+            <p className="text-center text-[var(--text-secondary)] mt-10 text-[13px]">
+              Loading chat history...
+            </p>
+          ) : messages.length === 0 ? (
+            (() => {
+              const otherUser = !selectedChat.isGroupChat ? selectedChat.members?.find((m) => String(m._id) !== String(currentUserId)) : null;
+              const isCogniBot = otherUser && (otherUser.username === "CogniBot" || otherUser.email === "cognibot@system.local");
 
-            if (isCogniBot) {
-              return (
-                <div className="flex-1 flex flex-col items-center justify-center p-6 text-center max-w-lg mx-auto animate-[fadeIn_0.3s_ease]">
-                  <div className="relative w-20 h-20 mb-4 rounded-3xl bg-gradient-to-tr from-blue-600 to-indigo-600 p-0.5 shadow-xl shadow-blue-500/20">
-                    <div className="w-full h-full bg-[var(--card)] rounded-[22px] flex items-center justify-center p-3">
-                      <img src="/images/ai-button-logo.png" alt="CogniAi" className="w-full h-full object-contain" />
+              if (isCogniBot) {
+                return (
+                  <div className="flex-1 flex flex-col items-center justify-center p-6 text-center max-w-md mx-auto">
+                    <div className="w-12 h-12 mb-3 rounded-full bg-[var(--bg-panel)] border border-[var(--border)] flex items-center justify-center p-2.5">
+                      <img src="/images/CogniFlow.png" alt="CogniBot" className="w-full h-full object-contain" />
+                    </div>
+                    <h3 className="text-[18px] font-semibold text-[var(--text-primary)]">
+                      CogniBot Knowledge Assistant
+                    </h3>
+                    <p className="text-[13px] text-[var(--text-secondary)] max-w-sm mt-1 mb-5">
+                      Upload PDFs or documents to ask questions with citations, or test your comprehension with interactive quizzes.
+                    </p>
+
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setIsKnowledgePanelOpen(true)}
+                        className="px-3.5 py-1.5 rounded-[8px] border border-[var(--border-strong)] bg-[var(--bg-panel)] text-[13px] font-medium text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
+                      >
+                        Knowledge Base
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (readySourcesCount > 0) generateQuiz();
+                          else setIsKnowledgePanelOpen(true);
+                        }}
+                        className="px-3.5 py-1.5 rounded-[8px] bg-[var(--accent)] text-white text-[13px] font-medium hover:bg-[var(--accent-hover)] transition-colors cursor-pointer"
+                      >
+                        Quiz Me
+                      </button>
                     </div>
                   </div>
+                );
+              }
 
-                  <h3 className="text-xl font-bold text-[var(--text)] tracking-tight">
-                    CogniAi Study & Knowledge Hub
-                  </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mt-1 mb-5">
-                    Upload any PDF, slides, or documents. Ask questions with verified citations or test your comprehension with interactive quizzes!
-                  </p>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full mb-4">
-                    <button
-                      onClick={() => setIsKnowledgePanelOpen(true)}
-                      className="p-3 rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 hover:bg-slate-100/90 dark:hover:bg-slate-800/80 text-left flex items-start gap-2.5 transition-all shadow-xs active:scale-[0.99] cursor-pointer"
-                    >
-                      <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center flex-shrink-0">
-                        <BookOpen size={16} />
-                      </div>
-                      <div>
-                        <div className="text-xs font-bold text-[var(--text)]">Knowledge Base</div>
-                        <div className="text-[11px] text-slate-400">
-                          {readySourcesCount > 0 ? `${readySourcesCount} documents loaded` : "Upload PDFs or notes"}
-                        </div>
-                      </div>
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        if (readySourcesCount > 0) {
-                          generateQuiz();
-                        } else {
-                          setIsKnowledgePanelOpen(true);
-                        }
-                      }}
-                      className="p-3 rounded-2xl border border-violet-200/80 dark:border-violet-900/60 bg-violet-50/60 dark:bg-violet-950/30 hover:bg-violet-100/70 text-left flex items-start gap-2.5 transition-all shadow-xs active:scale-[0.99] cursor-pointer"
-                    >
-                      <div className="w-8 h-8 rounded-xl bg-violet-100/80 dark:bg-violet-900/50 text-violet-600 dark:text-violet-400 flex items-center justify-center flex-shrink-0">
-                        <Sparkles size={16} />
-                      </div>
-                      <div>
-                        <div className="text-xs font-bold text-violet-900 dark:text-violet-200">Take a Quiz</div>
-                        <div className="text-[11px] text-violet-600/70 dark:text-violet-400/70">
-                          {readySourcesCount > 0 ? "Generate 5 MCQs" : "Upload doc to quiz"}
-                        </div>
-                      </div>
-                    </button>
-                  </div>
-
-                  <div className="flex flex-wrap items-center justify-center gap-1.5">
-                    <span className="text-[11px] text-slate-400 mr-1">Suggestions:</span>
-                    {[
-                      "Quiz me on key facts",
-                      "Summarize main takeaways",
-                      "Explain core concepts",
-                    ].map((sug, i) => (
-                      <button
-                        key={i}
-                        onClick={() => {
-                          setNewMessage(`@cogni ${sug}`);
-                          document.getElementById("chat-textarea")?.focus();
-                        }}
-                        className="text-[11px] px-2.5 py-1 rounded-full bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 border border-slate-200/60 dark:border-slate-700/60 transition-colors cursor-pointer"
-                      >
-                        {sug}
-                      </button>
-                    ))}
-                  </div>
+              return (
+                <div className="flex-1 flex flex-col items-center justify-center text-center text-[var(--text-secondary)] select-none">
+                  <p className="text-[14px]">No messages yet. Send a message to start chatting.</p>
                 </div>
               );
-            }
+            })()
+          ) : (
+            messages.map((m, index) => {
+              const senderId = m.sender?._id || m.sender?.id || m.sender;
+              const isMyMessage = String(senderId) === String(currentUserId);
+              const isDeleted = m.isDeleted;
 
-            return (
-              <div className="flex-1 flex flex-col items-center justify-center text-center opacity-70">
-                <div className="w-20 h-20 mb-4 rounded-full bg-[var(--card)] shadow-[inset_4px_4px_8px_var(--shadow-dark),inset_-4px_-4px_8px_var(--shadow-light)] flex items-center justify-center">
-                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                  </svg>
-                </div>
-                <h3 className="text-[var(--text)] font-semibold text-lg">No messages yet</h3>
-                <p className="text-gray-500 text-sm max-w-[250px] mt-1">
-                  Send a message to start the conversation!
-                </p>
-              </div>
-            );
-          })()
-        ) : (
-          messages.map((m, index) => {
-            const senderId = m.sender?._id || m.sender?.id;
-            const isMyMessage = String(senderId) === String(currentUserId);
-            const isDeleted = m.isDeleted;
+              // Date Divider Logic
+              const messageDate = new Date(m.createdAt);
+              const isToday = messageDate.toDateString() === new Date().toDateString();
+              const isYesterday = messageDate.toDateString() === new Date(Date.now() - 86400000).toDateString();
+              
+              let dateLabel = messageDate.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" });
+              if (isToday) dateLabel = "Today";
+              else if (isYesterday) dateLabel = "Yesterday";
 
-            // Date Divider Logic
-            const messageDate = new Date(m.createdAt);
-            const isToday = messageDate.toDateString() === new Date().toDateString();
-            const isYesterday = messageDate.toDateString() === new Date(Date.now() - 86400000).toDateString();
-            
-            let dateLabel = messageDate.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
-            if (isToday) dateLabel = "Today";
-            else if (isYesterday) dateLabel = "Yesterday";
-
-            let showDateDivider = false;
-            if (index === 0) {
-              showDateDivider = true;
-            } else {
-              const prevDate = new Date(messages[index - 1].createdAt);
-              if (prevDate.toDateString() !== messageDate.toDateString()) {
+              let showDateDivider = false;
+              if (index === 0) {
                 showDateDivider = true;
+              } else {
+                const prevDate = new Date(messages[index - 1].createdAt);
+                if (prevDate.toDateString() !== messageDate.toDateString()) {
+                  showDateDivider = true;
+                }
               }
-            }
 
-            const timeString = messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+              const prevMessage = index > 0 ? messages[index - 1] : null;
+              const isFirstInGroup = !prevMessage || String(prevMessage.sender?._id || prevMessage.sender?.id || prevMessage.sender) !== String(senderId) || showDateDivider;
 
-            return (
-              <React.Fragment key={m._id}>
-                {showDateDivider && (
-                  <div className="flex justify-center my-4">
-                    <div className="bg-[var(--card)]/50 backdrop-blur-md px-4 py-1 rounded-full text-xs font-semibold text-[var(--text)] shadow-[2px_2px_4px_var(--shadow-dark),-2px_-2px_4px_var(--shadow-light)] border border-white/10">
-                      {dateLabel}
+              const timeString = messageDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+              return (
+                <React.Fragment key={m._id}>
+                  {showDateDivider && (
+                    <div className="flex justify-center my-3 select-none">
+                      <div className="bg-[var(--bg-panel)] px-3 py-1 rounded-[8px] text-[12px] font-[500] text-[var(--text-secondary)] shadow-[var(--shadow-sm)] border border-[var(--border)]">
+                        {dateLabel}
+                      </div>
                     </div>
-                  </div>
-                )}
-                <div
-                  className={`flex w-full group ${isMyMessage ? "justify-end" : "justify-start"}`}
-                >
-                  <div className="max-w-[75%] flex flex-col relative">
-                    {!isMyMessage && selectedChat.isGroupChat && (
-                      <span className="text-xs text-gray-500 ml-2 mb-1">
-                        {m.sender.username}
-                      </span>
-                    )}
+                  )}
 
-                    {isMyMessage && !isDeleted && (
-                      <div className="absolute -left-16 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 flex gap-1.5">
-                        <button 
-                          onClick={() => initiateEdit(m)}
-                          className="p-1.5 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 bg-white dark:bg-slate-800 rounded-full shadow-xs hover:shadow-md hover:-translate-y-[1px] active:scale-95 transition-all duration-150 cursor-pointer border border-slate-100 dark:border-slate-700"
-                          title="Edit Message"
+                  <div className={`flex w-full group ${isMyMessage ? "justify-end" : "justify-start"} ${isFirstInGroup ? "mt-2.5" : "mt-0.5"}`}>
+                    <div className="relative max-w-[85%] sm:max-w-[65%] flex flex-col">
+                      {/* Sender name in group chats if incoming and first in group */}
+                      {!isMyMessage && selectedChat.isGroupChat && isFirstInGroup && (
+                        <span
+                          className="text-[12.5px] font-[500] mb-0.5 ml-2 leading-none"
+                          style={{ color: getSenderColor(String(senderId)) }}
                         >
-                          <Pencil size={14} />
-                        </button>
-                        <button 
-                          onClick={() => openDeleteModal(m._id, senderId)}
-                          className="p-1.5 text-slate-400 hover:text-red-600 dark:hover:text-red-400 bg-white dark:bg-slate-800 rounded-full shadow-xs hover:shadow-md hover:-translate-y-[1px] active:scale-95 transition-all duration-150 cursor-pointer border border-slate-100 dark:border-slate-700"
-                          title="Delete Message"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    )}
-
-                    {!isMyMessage && !isDeleted && (
-                      <div className="absolute -right-8 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 flex gap-1.5">
-                        <button 
-                          onClick={() => openDeleteModal(m._id, senderId)}
-                          className="p-1.5 text-slate-400 hover:text-red-600 dark:hover:text-red-400 bg-white dark:bg-slate-800 rounded-full shadow-xs hover:shadow-md hover:-translate-y-[1px] active:scale-95 transition-all duration-150 cursor-pointer border border-slate-100 dark:border-slate-700"
-                          title="Delete Message"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    )}
-
-                    <div
-                      className={`p-3 text-sm flex flex-col ${
-                        isDeleted 
-                          ? "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 italic rounded-2xl border border-slate-200 dark:border-slate-700"
-                          : isMyMessage
-                            ? "bg-blue-600 text-white rounded-2xl rounded-tr-xs shadow-[0_2px_8px_rgba(37,99,235,0.2)]"
-                            : "bg-slate-100/90 dark:bg-slate-800/90 text-slate-800 dark:text-slate-100 rounded-2xl rounded-tl-xs border border-slate-200/70 dark:border-slate-700/60 shadow-xs"
-                      }`}
-                    >
-                      {isDeleted ? (
-                        "This message was deleted"
-                      ) : m.messageType === "image" && m.fileUrl ? (
-                        <div className="flex flex-col gap-2">
-                          <img src={m.fileUrl} alt="attachment" className="max-w-[250px] max-h-[250px] rounded-xl object-cover cursor-pointer hover:opacity-90 transition-opacity" onClick={() => window.open(m.fileUrl, '_blank')} />
-                          {m.content && m.content !== "Attachment" && !m.content.startsWith("http") && (
-                            <div className={`markdown-body text-sm break-words pt-1 px-0.5 ${isMyMessage ? 'text-white' : 'text-[var(--text)]'}`}>
-                              <ReactMarkdown remarkPlugins={[remarkGfm]}>{m.content}</ReactMarkdown>
-                            </div>
-                          )}
-                        </div>
-                      ) : m.messageType === "file" && m.fileUrl ? (
-                        (() => {
-                          const docName = m.fileName || (m.fileUrl ? decodeURIComponent(m.fileUrl.split("/").pop().split("?")[0]) : "Document.pdf");
-                          const hasPromptText = Boolean(
-                            m.content && 
-                            m.content !== docName && 
-                            m.content !== "Attachment" &&
-                            !m.content.toLowerCase().endsWith(".pdf") &&
-                            !m.content.toLowerCase().endsWith(".txt")
-                          );
-
-                          return (
-                            <div className="flex flex-col gap-2">
-                              {/* Document Card */}
-                              <a
-                                href={m.fileUrl.replace('/upload/', '/upload/fl_attachment/')}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className={`flex items-center gap-3 p-2.5 px-3 rounded-xl transition-all border ${
-                                  isMyMessage
-                                    ? 'bg-blue-700/60 border-blue-400/30 hover:bg-blue-700/90 text-white'
-                                    : 'bg-[var(--card)]/90 border-slate-200/80 dark:border-slate-700 hover:bg-slate-200/60 dark:hover:bg-slate-700/50 text-[var(--text)]'
-                                } shadow-xs group/file`}
-                              >
-                                <div className={`p-2 rounded-lg flex-shrink-0 ${
-                                  isMyMessage 
-                                    ? 'bg-blue-500/40 text-white' 
-                                    : 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400'
-                                }`}>
-                                  <FileText size={20} />
-                                </div>
-                                <div className="flex-1 min-w-0 flex flex-col pr-1">
-                                  <span className="font-semibold text-xs truncate" title={docName}>
-                                    {docName}
-                                  </span>
-                                  <span className={`text-[10px] ${isMyMessage ? 'text-blue-200' : 'text-slate-400'}`}>
-                                    Document • Click to download
-                                  </span>
-                                </div>
-                                <Download size={16} className={`flex-shrink-0 ${isMyMessage ? "text-blue-200 group-hover/file:text-white" : "text-gray-400 group-hover/file:text-blue-500"}`} />
-                              </a>
-
-                              {/* Prompt / Message written below the document card */}
-                              {hasPromptText && (
-                                <div className={`markdown-body text-sm break-words pt-1 px-0.5 ${isMyMessage ? 'text-white' : 'text-[var(--text)]'}`}>
-                                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                    {m.content}
-                                  </ReactMarkdown>
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })()
-                      ) : m.messageType === "quiz" && m.quizData ? (
-                        <div className="flex flex-col gap-2">
-                          <QuizCard quiz={m.quizData} messageId={m._id} />
-                        </div>
-                      ) : (
-                        <>
-                          {m.isAiResponse && <AnswerBadge answerMode={m.answerMode} />}
-                          <div className="markdown-body text-sm [&>p]:mb-2 last:[&>p]:mb-0 [&>ul]:list-disc [&>ul]:ml-4 [&>ul]:mb-2 [&>ol]:list-decimal [&>ol]:ml-4 [&>ol]:mb-2 [&>h1]:text-lg [&>h1]:font-bold [&>h1]:mb-2 [&>h2]:text-base [&>h2]:font-bold [&>h2]:mb-2 [&>strong]:font-bold [&_a]:text-blue-300 [&_a]:underline break-words">
-                            <ReactMarkdown
-                              remarkPlugins={[remarkGfm]}
-                              components={{
-                                p({ children }) {
-                                  return (
-                                    <p className="mb-2 last:mb-0">
-                                      {React.Children.map(children, (child) => {
-                                        if (typeof child === "string" && /@cogni\b/i.test(child)) {
-                                          const parts = child.split(/(@cogni\b)/gi);
-                                          return parts.map((part, i) =>
-                                            part.toLowerCase() === "@cogni" ? (
-                                              <span
-                                                key={i}
-                                                className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 mx-0.5 rounded-md font-bold text-xs shadow-xs ${
-                                                  isMyMessage
-                                                    ? "bg-white/25 text-white border border-white/40"
-                                                    : "bg-blue-600/15 text-blue-600 dark:text-blue-400 border border-blue-500/30"
-                                                }`}
-                                              >
-                                                🤖 @cogni
-                                              </span>
-                                            ) : (
-                                              part
-                                            )
-                                          );
-                                        }
-                                        return child;
-                                      })}
-                                    </p>
-                                  );
-                                },
-                              }}
-                            >
-                              {m.content}
-                            </ReactMarkdown>
-                          </div>
-                          {m.isAiResponse && m.ragSources && m.ragSources.length > 0 && (
-                            <CitationChips sources={m.ragSources} />
-                          )}
-                          {m.isAiResponse && (
-                            <FallbackActions
-                              message={m}
-                              onAnswerGeneral={answerGeneral}
-                              onOpenLearnModal={(targetMsg) => setLearnModalMessage(targetMsg)}
-                            />
-                          )}
-                        </>
+                          {m.sender?.username || "Member"}
+                        </span>
                       )}
-                      
-                      <div className={`flex items-center justify-end gap-1 mt-1 ${isMyMessage ? "text-blue-100" : "text-gray-400"} text-[10px]`}>
-                        {m.isEdited && !isDeleted && <span>(edited)</span>}
-                        <span>{timeString}</span>
-                        {isMyMessage && !isDeleted && (
-                          <span className="ml-1 flex items-center">
-                            {m.isOptimistic ? (
-                              <span className="text-blue-200/90 text-[10px] animate-pulse">sending...</span>
-                            ) : m.readBy?.length > 0 ? (
-                              <CheckCheck size={14} className="text-cyan-300 drop-shadow-[0_0_2px_rgba(0,255,255,0.8)]" />
-                            ) : m.deliveredTo?.length > 0 ? (
-                              <CheckCheck size={14} className="text-blue-200/80" />
-                            ) : (
-                              <Check size={14} className="text-blue-200/80" />
+
+                      {/* Edit/Delete message hover menu */}
+                      {isMyMessage && !isDeleted && (
+                        <div className="absolute -left-14 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 z-20">
+                          <button 
+                            onClick={() => initiateEdit(m)}
+                            className="p-1 rounded-full bg-[var(--bg-panel)] border border-[var(--border)] shadow-[var(--shadow-sm)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
+                            title="Edit"
+                          >
+                            <Pencil size={12} />
+                          </button>
+                          <button 
+                            onClick={() => openDeleteModal(m._id, senderId)}
+                            className="p-1 rounded-full bg-[var(--bg-panel)] border border-[var(--border)] shadow-[var(--shadow-sm)] text-[var(--text-secondary)] hover:text-[var(--danger)] cursor-pointer"
+                            title="Delete"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Message Bubble Container */}
+                      <div
+                        className={`
+                          relative p-2 px-3 text-[14.5px] leading-relaxed break-words
+                          ${
+                            isDeleted
+                              ? "bg-[var(--bg-panel)] text-[var(--text-tertiary)] italic rounded-[8px] border border-[var(--border)]"
+                              : isMyMessage
+                              ? `bg-[var(--bubble-out)] text-[var(--bubble-out-text)] ${isFirstInGroup ? "bubble-tail-out rounded-[8px]" : "rounded-[8px]"}`
+                              : `bg-[var(--bubble-in)] text-[var(--bubble-in-text)] shadow-[var(--shadow-sm)] ${isFirstInGroup ? "bubble-tail-in rounded-[8px]" : "rounded-[8px]"}`
+                          }
+                        `}
+                      >
+                        {isDeleted ? (
+                          <span>This message was deleted</span>
+                        ) : m.fileUrl && m.fileType === "image" ? (
+                          <div className="flex flex-col gap-1.5">
+                            <a href={m.fileUrl} target="_blank" rel="noopener noreferrer">
+                              <img
+                                src={m.fileUrl}
+                                alt="Attachment"
+                                className="max-w-full max-h-[320px] rounded-[6px] object-cover"
+                              />
+                            </a>
+                            {m.content && m.content !== "image" && (
+                              <p className="text-[14.5px] leading-normal">{m.content}</p>
                             )}
-                          </span>
+                          </div>
+                        ) : m.fileUrl ? (
+                          (() => {
+                            const isAutoGeneratedName = m.content && (
+                              m.content === m.fileUrl.split('/').pop() ||
+                              m.content.endsWith('.pdf') ||
+                              m.content.endsWith('.doc') ||
+                              m.content.endsWith('.docx') ||
+                              m.content.endsWith('.txt')
+                            );
+                            const hasPromptText = m.content && !isAutoGeneratedName;
+                            const docName = isAutoGeneratedName ? m.content : (m.fileUrl.split('/').pop() || "Document");
+
+                            return (
+                              <div className="flex flex-col gap-2">
+                                <div className="flex items-center gap-3 p-2 rounded-[8px] bg-[var(--bg-input)] border border-[var(--border)]">
+                                  <div className="w-10 h-10 rounded-[6px] bg-[var(--bg-panel)] text-[var(--text-secondary)] flex items-center justify-center flex-shrink-0">
+                                    <FileText size={20} strokeWidth={1.75} />
+                                  </div>
+                                  <div className="flex-1 min-w-0 pr-1">
+                                    <div className="text-[14px] font-[500] truncate text-[var(--text-primary)]" title={docName}>
+                                      {docName}
+                                    </div>
+                                    <div className="text-[12px] text-[var(--text-secondary)]">
+                                      Document · Click to view
+                                    </div>
+                                  </div>
+                                  <a
+                                    href={m.fileUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-1 flex-shrink-0"
+                                    title="Download"
+                                  >
+                                    <Download size={18} strokeWidth={1.75} />
+                                  </a>
+                                </div>
+
+                                {hasPromptText && (
+                                  <div className="text-[14.5px] leading-normal">
+                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                      {m.content}
+                                    </ReactMarkdown>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })()
+                        ) : m.messageType === "quiz" && m.quizData ? (
+                          <div className="flex flex-col gap-2">
+                            <QuizCard quiz={m.quizData} messageId={m._id} />
+                          </div>
+                        ) : (
+                          <>
+                            {m.isAiResponse && (
+                              <div className="text-[12.5px] font-[500] text-[var(--accent)] mb-1">
+                                CogniBot
+                              </div>
+                            )}
+                            {m.isAiResponse && <AnswerBadge answerMode={m.answerMode} />}
+                            <div className="markdown-body text-[14.5px] leading-relaxed [&>p]:mb-1.5 last:[&>p]:mb-0 [&>ul]:list-disc [&>ul]:ml-4 [&>ul]:mb-2 [&>ol]:list-decimal [&>ol]:ml-4 [&>ol]:mb-2 [&>h1]:text-[15px] [&>h1]:font-semibold [&>h2]:text-[15px] [&>h2]:font-semibold [&_code]:bg-[var(--bg-input)] [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded-[4px] [&_code]:text-[13px] break-words">
+                              <ReactMarkdown
+                                remarkPlugins={[remarkGfm]}
+                                components={{
+                                  p({ children }) {
+                                    return (
+                                      <p className="mb-1.5 last:mb-0">
+                                        {React.Children.map(children, (child) => {
+                                          if (typeof child === "string" && /@cogni\b/i.test(child)) {
+                                            const parts = child.split(/(@cogni\b)/gi);
+                                            return parts.map((part, i) =>
+                                              part.toLowerCase() === "@cogni" ? (
+                                                <span
+                                                  key={i}
+                                                  className="inline-flex items-center gap-0.5 px-1 rounded-[4px] font-medium text-[13px] text-[var(--accent)] bg-[var(--accent-soft)]"
+                                                >
+                                                  @cogni
+                                                </span>
+                                              ) : (
+                                                part
+                                              )
+                                            );
+                                          }
+                                          return child;
+                                        })}
+                                      </p>
+                                    );
+                                  },
+                                }}
+                              >
+                                {m.content}
+                              </ReactMarkdown>
+                            </div>
+                            {m.isAiResponse && m.ragSources && m.ragSources.length > 0 && (
+                              <CitationChips sources={m.ragSources} />
+                            )}
+                            {m.isAiResponse && (
+                              <FallbackActions
+                                message={m}
+                                onAnswerGeneral={answerGeneral}
+                                onOpenLearnModal={(targetMsg) => setLearnModalMessage(targetMsg)}
+                              />
+                            )}
+                          </>
                         )}
+
+                        {/* Timestamp & Receipts */}
+                        <div className="flex items-center justify-end gap-1 mt-1 text-[11px] text-[var(--text-tertiary)] select-none">
+                          {m.isEdited && !isDeleted && <span>(edited)</span>}
+                          <span>{timeString}</span>
+                          {isMyMessage && !isDeleted && (
+                            <span className="ml-0.5 flex items-center">
+                              {m.isOptimistic ? (
+                                <span className="text-[10px]">sending...</span>
+                              ) : m.readBy?.length > 0 ? (
+                                <CheckCheck size={15} strokeWidth={2} className="text-[var(--tick-seen)]" />
+                              ) : m.deliveredTo?.length > 0 ? (
+                                <CheckCheck size={15} strokeWidth={2} className="text-[var(--tick-sent)]" />
+                              ) : (
+                                <Check size={15} strokeWidth={2} className="text-[var(--tick-sent)]" />
+                              )}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </React.Fragment>
-            );
-          })
-        )}
-        {isTypingIndicatorVisible && (
-          <div className="flex justify-start w-full mt-2 mb-2 animate-[fadeIn_0.3s_ease]">
-            <div className="bg-[var(--card)] px-4 py-3 rounded-2xl rounded-tl-none shadow-sm border border-gray-200/50 dark:border-gray-800/50 flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-blue-400 animate-bounce [animation-delay:-0.3s]"></div>
-              <div className="w-2 h-2 rounded-full bg-blue-400 animate-bounce [animation-delay:-0.15s]"></div>
-              <div className="w-2 h-2 rounded-full bg-blue-400 animate-bounce"></div>
+                </React.Fragment>
+              );
+            })
+          )}
+
+          {/* Typing Indicator (§4.8 neutral 3-dot bubble) */}
+          {isTypingIndicatorVisible && (
+            <div className="flex justify-start w-full mt-2 mb-2">
+              <div className="bg-[var(--bubble-in)] px-3.5 py-2.5 rounded-[8px] shadow-[var(--shadow-sm)] border border-[var(--border)] flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-[var(--text-tertiary)] animate-bounce [animation-delay:-0.3s]" />
+                <div className="w-1.5 h-1.5 rounded-full bg-[var(--text-tertiary)] animate-bounce [animation-delay:-0.15s]" />
+                <div className="w-1.5 h-1.5 rounded-full bg-[var(--text-tertiary)] animate-bounce" />
+              </div>
             </div>
-          </div>
-        )}
-        {/* Floating Scroll to Bottom Button */}
-        {showScrollBottom && (
-          <button
-            type="button"
-            onClick={() => scrollToBottom("smooth")}
-            className="sticky bottom-2 ml-auto mr-1 z-30 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--card)]/95 hover:bg-[var(--card)] text-blue-600 dark:text-blue-400 border border-slate-200/80 dark:border-slate-700/80 shadow-[0_4px_16px_rgba(0,0,0,0.15)] backdrop-blur-md hover:-translate-y-[1px] active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.25,1,0.5,1)] animate-[fadeIn_0.2s_ease] text-xs font-semibold cursor-pointer"
-            title="Scroll to latest messages"
-          >
-            <ChevronDown size={14} className="animate-bounce" />
-            {unreadWhileScrolled > 0 ? (
-              <span className="flex items-center gap-1">
+          )}
+
+          {/* Floating Scroll to Bottom Button */}
+          {showScrollBottom && (
+            <button
+              type="button"
+              onClick={() => scrollToBottom("smooth")}
+              className="sticky bottom-3 ml-auto mr-1 z-30 flex items-center gap-1 px-3 py-1.5 rounded-full bg-[var(--bg-panel)] text-[var(--text-primary)] border border-[var(--border)] shadow-[var(--shadow-md)] text-[12px] font-medium cursor-pointer transition-all"
+              title="Scroll to latest messages"
+            >
+              <ChevronDown size={14} />
+              {unreadWhileScrolled > 0 ? (
                 <span>{unreadWhileScrolled} new</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
-              </span>
-            ) : (
-              <span>Latest</span>
-            )}
-          </button>
-        )}
-        <div ref={messagesEndRef} />
+              ) : (
+                <span>Latest</span>
+              )}
+            </button>
+          )}
+
+          <div ref={messagesEndRef} />
+        </div>
       </div>
 
-      {/* INPUT AREA */}
+      {/* EDITING BANNER */}
       {editingMessageId && (
-        <div className="bg-blue-50 px-4 py-2 border-t border-blue-100 flex justify-between items-center z-10 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]">
+        <div className="bg-[var(--bg-panel)] px-4 py-2 border-t border-[var(--border)] flex justify-between items-center z-10">
           <div className="flex flex-col">
-            <span className="text-xs font-semibold text-blue-600">Editing Message</span>
-            <span className="text-xs text-gray-500 truncate max-w-sm">Esc to cancel</span>
+            <span className="text-[12px] font-semibold text-[var(--accent)]">Editing Message</span>
+            <span className="text-[12px] text-[var(--text-secondary)]">Press Esc to cancel</span>
           </div>
           <button 
             onClick={cancelEdit}
-            className="text-gray-400 hover:text-gray-600 cursor-pointer p-1 rounded-full hover:bg-blue-100 transition-colors"
+            className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] p-1 rounded-full cursor-pointer"
           >
             <X size={16} />
           </button>
         </div>
       )}
-      {/* File Preview Container */}
+
+      {/* ATTACHMENT PREVIEW TRAY */}
       {attachedFile && (
-        <div className="mx-4 mb-2 p-3 bg-[var(--bg)] rounded-xl border border-blue-500/30 flex items-center justify-between shadow-[4px_4px_8px_var(--shadow-dark),-4px_-4px_8px_var(--shadow-light)] relative animate-[fadeIn_0.2s_ease]">
+        <div className="px-4 py-2 bg-[var(--bg-panel)] border-t border-[var(--border)] flex items-center justify-between z-10">
           <div className="flex items-center gap-3 overflow-hidden">
-            {attachedFile.type === 'image' ? (
-              <img src={attachedFile.previewUrl} alt="Preview" className="w-12 h-12 object-cover rounded-md" />
+            {attachedFile.type === "image" ? (
+              <img src={attachedFile.previewUrl} alt="Preview" className="w-12 h-12 object-cover rounded-[8px] border border-[var(--border)]" />
             ) : (
-              <div className="w-12 h-12 bg-[var(--card)] text-blue-500 rounded-md flex items-center justify-center shadow-inner">
-                <FileText size={24} />
+              <div className="w-12 h-12 bg-[var(--bg-input)] rounded-[8px] flex items-center justify-center text-[var(--text-secondary)] border border-[var(--border)]">
+                <FileText size={22} />
               </div>
             )}
             <div className="flex flex-col overflow-hidden">
-              <span className="text-sm font-semibold text-[var(--text)] truncate">{attachedFile.file.name}</span>
-              <span className="text-xs text-gray-500">{(attachedFile.file.size / 1024).toFixed(1)} KB</span>
+              <span className="text-[14px] font-medium text-[var(--text-primary)] truncate">{attachedFile.file.name}</span>
+              <span className="text-[12px] text-[var(--text-secondary)]">{(attachedFile.file.size / 1024).toFixed(1)} KB</span>
             </div>
           </div>
           <button 
@@ -1017,47 +909,16 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
               setAttachedFile(null);
               URL.revokeObjectURL(attachedFile.previewUrl);
             }}
-            className="p-1 text-gray-400 hover:text-red-500 transition-colors cursor-pointer"
+            className="w-6 h-6 rounded-full bg-[var(--bg-input)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center justify-center cursor-pointer"
+            aria-label="Remove attachment"
           >
-            <X size={20} />
-          </button>
-          
-          {isUploading && (
-            <div className="absolute inset-0 bg-[var(--bg)]/80 backdrop-blur-sm flex items-center justify-center rounded-xl z-10">
-              <span className="text-sm font-bold text-blue-500 animate-pulse">Uploading...</span>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* MENTION TOP INDICATOR BANNER */}
-      {newMessage.toLowerCase().includes("@cogni") && (
-        <div className="mx-3 -mb-1 px-3 py-1.5 rounded-t-xl bg-gradient-to-r from-blue-600/15 via-indigo-600/15 to-violet-600/15 border border-b-0 border-blue-500/40 backdrop-blur-md flex items-center justify-between text-xs font-medium text-blue-600 dark:text-blue-300 animate-[fadeIn_0.2s_ease]">
-          <div className="flex items-center gap-2">
-            <span className="flex h-2 w-2 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-            </span>
-            <span className="inline-flex items-center gap-1 font-bold text-blue-600 dark:text-blue-300">
-              <Sparkles size={13} className="text-blue-500" />
-              CogniBot Mentioned
-            </span>
-            <span className="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:inline">
-              • AI assistant will automatically reply to this message
-            </span>
-          </div>
-          <button
-            type="button"
-            onClick={() => setNewMessage((prev) => prev.replace(/@cogni/gi, "").trim())}
-            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 rounded-full hover:bg-slate-200/50 dark:hover:bg-slate-700/50 transition-colors"
-            title="Remove @cogni mention"
-          >
-            <X size={12} />
+            <X size={14} />
           </button>
         </div>
       )}
 
-      <div className="p-3 bg-[var(--card)]/60 flex items-end gap-2 z-10 border-t border-slate-200/80 dark:border-slate-800/80">
+      {/* INPUT BAR (Height 62px min, --bg-input background, 1px top border) */}
+      <div className="min-h-[62px] px-4 py-2 bg-[var(--bg-input)] border-t border-[var(--border)] flex items-end gap-2 z-10 flex-shrink-0">
         <input
           type="file"
           id="file-upload"
@@ -1065,48 +926,36 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
           onChange={handleFileUpload}
           accept="image/*,application/pdf,.doc,.docx,.txt"
         />
+
+        {/* Attach File Button */}
         <button 
           onClick={() => document.getElementById("file-upload").click()}
-          className="w-9 h-9 mb-0.5 flex-shrink-0 flex items-center justify-center rounded-xl text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 bg-slate-100/70 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/80 shadow-xs hover:bg-slate-200/70 dark:hover:bg-slate-700/70 hover:-translate-y-[1px] active:scale-95 transition-all duration-200 cursor-pointer"
-          title="Attach File"
+          className="w-10 h-10 rounded-full flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer flex-shrink-0 mb-0.5"
+          title="Attach file"
         >
-          <Paperclip size={16} />
+          <Paperclip size={20} strokeWidth={1.75} />
         </button>
 
+        {/* CogniBot Quick Mention Button */}
         <button
           type="button"
           onClick={() => {
             setNewMessage((prev) => (prev.includes("@cogni") ? prev : (prev ? `@cogni ${prev}` : "@cogni ")));
             document.getElementById("chat-textarea")?.focus();
           }}
-          className="group h-9 mb-0.5 flex-shrink-0 flex items-center justify-start rounded-xl bg-gradient-to-r from-blue-50 via-indigo-50/60 to-blue-50 dark:from-blue-950/40 dark:via-indigo-950/40 dark:to-blue-950/40 border border-blue-200/70 dark:border-blue-800/70 p-1.5 shadow-xs hover:border-blue-400/80 hover:shadow-[0_4px_16px_rgba(37,99,235,0.2)] hover:-translate-y-[1px] transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] w-9 hover:w-32 overflow-hidden cursor-pointer active:scale-95 z-20"
+          className="w-10 h-10 rounded-full flex items-center justify-center text-[var(--accent)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer flex-shrink-0 mb-0.5"
           title="Ask CogniBot (@cogni)"
         >
-          <img
-            src="/images/ai-button-logo.png"
-            alt="CogniAI"
-            className="w-6 h-6 object-contain flex-shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-110 group-hover:rotate-6"
-          />
-          <span className="whitespace-nowrap opacity-0 group-hover:opacity-100 font-bold text-xs text-blue-600 dark:text-blue-400 transition-all duration-300 delay-75 ease-[cubic-bezier(0.25,1,0.5,1)] ml-1.5 overflow-hidden transform -translate-x-2 group-hover:translate-x-0 select-none">
-            Ask Cogni
-          </span>
+          <Sparkles size={20} strokeWidth={1.75} />
         </button>
 
-        <div className={`relative flex-1 rounded-xl transition-all duration-200 overflow-hidden shadow-xs flex items-center ${
-          newMessage.toLowerCase().includes("@cogni")
-            ? "border border-blue-500/90 ring-2 ring-blue-500/25 bg-blue-50/20 dark:bg-blue-950/20 shadow-[0_0_15px_rgba(59,130,246,0.18)]"
-            : "border border-slate-200/80 dark:border-slate-700/80 bg-slate-50/70 dark:bg-slate-800/60 focus-within:border-blue-500/70 focus-within:ring-2 focus-within:ring-blue-500/10"
-        }`}>
-          {newMessage.toLowerCase().includes("@cogni") && (
-            <span className="ml-2.5 px-2 py-0.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-xs shadow-xs flex-shrink-0 animate-[scaleIn_0.15s_ease] flex items-center gap-1 select-none">
-              🤖 @cogni
-            </span>
-          )}
+        {/* Text Area Pill Container (rounded-full 20px pill, --bg-panel background) */}
+        <div className="flex-1 min-h-[40px] bg-[var(--bg-panel)] rounded-[20px] px-4 py-2 border border-transparent focus-within:border-[var(--border-strong)] flex items-center transition-colors mb-0.5">
           <textarea
             id="chat-textarea"
             rows={1}
             value={newMessage}
-            placeholder={newMessage.toLowerCase().includes("@cogni") ? "Ask CogniBot anything..." : "Type a message or use @cogni..."}
+            placeholder="Type a message"
             onChange={(e) => {
               setNewMessage(e.target.value);
               if (selectedChatRef.current) {
@@ -1132,27 +981,26 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
               e.target.style.height = "auto";
               e.target.style.height = Math.min(e.target.scrollHeight, 120) + "px";
             }}
-            className="w-full p-2.5 px-3 bg-transparent border-none outline-none resize-none overflow-y-auto text-[var(--text)] placeholder-slate-400 text-sm leading-relaxed"
+            className="w-full bg-transparent border-none outline-none resize-none overflow-y-auto text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] text-[15px] leading-normal"
             spellCheck="false"
           />
         </div>
 
+        {/* Send Button (40px circle) */}
         <button
           onClick={handleSubmit}
           disabled={isSending || (!newMessage.trim() && !attachedFile)}
-          className={`w-9 h-9 mb-0.5 flex-shrink-0 flex items-center justify-center rounded-xl font-bold shadow-[0_2px_8px_rgba(37,99,235,0.25)] transition-all duration-200 text-sm ${
-            isSending
-              ? "bg-blue-400 cursor-not-allowed opacity-80 text-white"
-              : (!newMessage.trim() && !attachedFile)
-              ? "bg-slate-300 dark:bg-slate-700 text-slate-500 cursor-not-allowed opacity-60"
-              : "bg-blue-600 hover:bg-blue-700 text-white hover:-translate-y-[1px] active:scale-95 cursor-pointer"
+          className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors flex-shrink-0 mb-0.5 cursor-pointer ${
+            !newMessage.trim() && !attachedFile
+              ? "text-[var(--text-tertiary)] cursor-default"
+              : "bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)]"
           }`}
-          title={isSending ? "Sending..." : "Send message (Enter)"}
+          title={isSending ? "Sending..." : "Send message"}
         >
           {isSending ? (
-            <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
           ) : (
-            "➤"
+            <Send size={18} strokeWidth={2} className="ml-0.5" />
           )}
         </button>
       </div>

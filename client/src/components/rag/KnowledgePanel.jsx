@@ -52,15 +52,15 @@ export const KnowledgePanel = ({
   const readyCount = sources.filter((s) => s.status === "ready" && s.enabled).length;
 
   return (
-    <div className="fixed inset-y-0 right-0 w-full sm:w-[420px] bg-[var(--card)]/95 backdrop-blur-2xl shadow-2xl border-l border-slate-200/80 dark:border-slate-800 z-50 flex flex-col animate-[slideInRight_0.25s_cubic-bezier(0.16,1,0.3,1)]">
+    <div className="fixed inset-y-0 right-0 w-full sm:w-[420px] bg-[var(--bg-panel)] shadow-2xl border-l border-[var(--border)] z-50 flex flex-col animate-[slideInRight_0.25s_cubic-bezier(0.16,1,0.3,1)]">
       
       {/* Header */}
-      <div className="p-4 px-5 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between">
-        <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+      <div className="h-[60px] px-5 border-b border-[var(--border)] flex items-center justify-between flex-shrink-0">
+        <div className="flex items-center gap-2.5 text-[var(--accent)]">
           <BookOpen size={20} />
           <div>
-            <h3 className="font-bold text-base text-[var(--text)] leading-tight">Chat Knowledge</h3>
-            <p className="text-[11px] text-slate-400">
+            <h3 className="font-semibold text-base text-[var(--text)] leading-tight">Chat Knowledge</h3>
+            <p className="text-[11px] text-[var(--text-muted)]">
               {readyCount} ready {readyCount === 1 ? "source" : "sources"} in this room
             </p>
           </div>
@@ -69,26 +69,26 @@ export const KnowledgePanel = ({
         <button
           type="button"
           onClick={onClose}
-          className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:-translate-y-[1px] active:scale-95 transition-all duration-150 cursor-pointer"
+          className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--icon-default)] hover:text-[var(--text)] hover:bg-[var(--bg-input)] transition-all cursor-pointer"
         >
           <X size={18} />
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-5 scrollbar-hide">
+      <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-5">
         
         {/* Mode Selector */}
         <ModeSelector mode={ragMode} onSelectMode={onUpdateMode} />
 
         {/* Quick Quiz on Documents Action */}
         {readyCount > 0 && onGenerateQuiz && (
-          <div className="p-3.5 rounded-2xl bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-violet-600/10 border border-blue-500/25 flex items-center justify-between shadow-xs">
+          <div className="p-3.5 rounded-xl bg-[var(--accent-soft)] border border-[var(--accent)]/30 flex items-center justify-between shadow-xs">
             <div className="flex flex-col">
-              <span className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                <Sparkles size={14} className="text-blue-500" />
+              <span className="text-xs font-semibold text-[var(--text)] flex items-center gap-1.5">
+                <Sparkles size={14} className="text-[var(--accent)]" />
                 Test Your Knowledge
               </span>
-              <span className="text-[11px] text-slate-500 dark:text-slate-400">
+              <span className="text-[11px] text-[var(--text-muted)]">
                 Generate an interactive quiz from your docs
               </span>
             </div>
@@ -98,7 +98,7 @@ export const KnowledgePanel = ({
                 onGenerateQuiz();
                 onClose();
               }}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-xs hover:-translate-y-[1px] active:scale-95 transition-all duration-200 ease-[cubic-bezier(0.25,1,0.5,1)] cursor-pointer flex-shrink-0"
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white shadow-xs transition-colors cursor-pointer flex-shrink-0"
             >
               <span>Take Quiz</span>
             </button>
@@ -107,16 +107,16 @@ export const KnowledgePanel = ({
 
         {/* Upload Tabs */}
         <div className="flex flex-col gap-2.5">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-600 dark:text-slate-400">
+          <div className="flex items-center justify-between text-xs font-medium text-[var(--text-muted)]">
             <span>Add Knowledge</span>
-            <div className="flex gap-1">
+            <div className="flex gap-1 bg-[var(--bg-input)] p-0.5 rounded-lg border border-[var(--border)]">
               <button
                 type="button"
                 onClick={() => setActiveTab("file")}
-                className={`px-2 py-0.5 rounded-md text-[11px] font-medium transition-all duration-150 active:scale-95 cursor-pointer ${
+                className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all duration-150 cursor-pointer ${
                   activeTab === "file"
-                    ? "bg-blue-600 text-white shadow-xs"
-                    : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                    ? "bg-[var(--bg-panel)] text-[var(--accent)] shadow-xs font-semibold"
+                    : "text-[var(--text-muted)] hover:text-[var(--text)]"
                 }`}
               >
                 Upload File
@@ -124,10 +124,10 @@ export const KnowledgePanel = ({
               <button
                 type="button"
                 onClick={() => setActiveTab("text")}
-                className={`px-2 py-0.5 rounded-md text-[11px] font-medium transition-all duration-150 active:scale-95 cursor-pointer ${
+                className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all duration-150 cursor-pointer ${
                   activeTab === "text"
-                    ? "bg-blue-600 text-white shadow-xs"
-                    : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                    ? "bg-[var(--bg-panel)] text-[var(--accent)] shadow-xs font-semibold"
+                    : "text-[var(--text-muted)] hover:text-[var(--text)]"
                 }`}
               >
                 Paste Text
@@ -144,10 +144,10 @@ export const KnowledgePanel = ({
               onDragLeave={() => setIsDragging(false)}
               onDrop={handleFileDrop}
               onClick={() => fileInputRef.current?.click()}
-              className={`p-6 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center text-center cursor-pointer transition-all ${
+              className={`p-6 rounded-xl border-2 border-dashed flex flex-col items-center justify-center text-center cursor-pointer transition-all ${
                 isDragging
-                  ? "border-blue-500 bg-blue-50/50 dark:bg-blue-950/20 scale-[0.99]"
-                  : "border-slate-200 dark:border-slate-700/80 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-slate-100/60 dark:hover:bg-slate-800/70"
+                  ? "border-[var(--accent)] bg-[var(--accent-soft)] scale-[0.99]"
+                  : "border-[var(--border)] bg-[var(--bg-input)]/50 hover:bg-[var(--bg-input)]"
               }`}
             >
               <input
@@ -157,36 +157,36 @@ export const KnowledgePanel = ({
                 onChange={handleFileInputChange}
                 className="hidden"
               />
-              <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-2 shadow-xs">
-                <UploadCloud size={24} />
+              <div className="w-11 h-11 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center mb-2">
+                <UploadCloud size={22} />
               </div>
               <p className="text-xs font-semibold text-[var(--text)]">
                 Click to upload or drag & drop
               </p>
-              <p className="text-[10px] text-slate-400 mt-1">
+              <p className="text-[11px] text-[var(--text-muted)] mt-1">
                 PDF, PNG, JPG, WEBP (Max 10 MB, up to 200 pages)
               </p>
 
               {isUploading && (
                 <div className="w-full mt-3 flex flex-col gap-1">
-                  <div className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                  <div className="w-full h-1.5 bg-[var(--border)] rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-blue-600 transition-all duration-200"
+                      className="h-full bg-[var(--accent)] transition-all duration-200"
                       style={{ width: `${uploadProgress || 30}%` }}
                     ></div>
                   </div>
-                  <span className="text-[10px] text-blue-500 font-medium">Uploading & vectorizing...</span>
+                  <span className="text-[11px] text-[var(--accent)] font-medium">Uploading & vectorizing...</span>
                 </div>
               )}
             </div>
           ) : (
-            <form onSubmit={handleTextSubmit} className="flex flex-col gap-2 p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 bg-slate-50/50 dark:bg-slate-800/40">
+            <form onSubmit={handleTextSubmit} className="flex flex-col gap-2.5 p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-input)]/40">
               <input
                 type="text"
                 value={textTitle}
                 onChange={(e) => setTextTitle(e.target.value)}
                 placeholder="Note Title (e.g. Project Specifications)"
-                className="w-full py-1.5 px-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs text-[var(--text)] outline-none focus:border-blue-500"
+                className="w-full py-2 px-3 rounded-lg bg-[var(--bg-panel)] border border-[var(--border)] text-xs text-[var(--text)] outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]"
               />
               <textarea
                 rows={4}
@@ -194,12 +194,12 @@ export const KnowledgePanel = ({
                 onChange={(e) => setTextContent(e.target.value)}
                 placeholder="Paste key notes, FAQs, or raw facts here..."
                 required
-                className="w-full py-1.5 px-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs text-[var(--text)] outline-none focus:border-blue-500 resize-none"
+                className="w-full py-2 px-3 rounded-lg bg-[var(--bg-panel)] border border-[var(--border)] text-xs text-[var(--text)] outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] resize-none"
               />
               <button
                 type="submit"
                 disabled={isUploading || !textContent.trim()}
-                className="py-1.5 px-3 rounded-lg text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-xs transition-colors self-end disabled:opacity-50"
+                className="py-1.5 px-3 rounded-lg text-xs font-semibold text-white bg-[var(--accent)] hover:bg-[var(--accent-hover)] shadow-xs transition-colors self-end disabled:opacity-50 cursor-pointer"
               >
                 Add Note
               </button>
@@ -209,13 +209,13 @@ export const KnowledgePanel = ({
 
         {/* Sources List */}
         <div className="flex flex-col gap-2.5">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-600 dark:text-slate-400">
+          <div className="flex items-center justify-between text-xs font-medium text-[var(--text-muted)]">
             <span>Knowledge Sources ({sources.length})</span>
           </div>
 
           {sources.length === 0 ? (
-            <div className="p-8 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 text-center flex flex-col items-center justify-center text-slate-400">
-              <Layers size={28} className="mb-2 opacity-40 text-blue-500" />
+            <div className="p-8 rounded-xl border border-dashed border-[var(--border)] text-center flex flex-col items-center justify-center text-[var(--text-muted)]">
+              <Layers size={26} className="mb-2 opacity-40 text-[var(--accent)]" />
               <p className="text-xs font-medium">No documents uploaded yet</p>
               <p className="text-[11px] mt-1 max-w-[220px]">
                 Upload a PDF or image above to ground CogniBot's answers in your data.
@@ -242,3 +242,4 @@ export const KnowledgePanel = ({
 };
 
 export default KnowledgePanel;
+

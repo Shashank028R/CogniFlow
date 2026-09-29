@@ -19,21 +19,21 @@ export const SourceItem = ({ source, onToggle, onDelete }) => {
     <div
       className={`p-3 rounded-xl border transition-all flex items-center justify-between gap-3 ${
         source.enabled
-          ? "bg-white dark:bg-slate-800/80 border-slate-200/80 dark:border-slate-700/80 shadow-xs"
-          : "bg-slate-50/60 dark:bg-slate-900/40 border-slate-200/50 dark:border-slate-800/50 opacity-60"
+          ? "bg-[var(--bg-panel)] border-[var(--border)] shadow-xs"
+          : "bg-[var(--bg-input)]/60 border-[var(--border)] opacity-60"
       }`}
     >
       {/* Icon + Title */}
       <div className="flex items-center gap-2.5 overflow-hidden flex-1">
         <div
-          className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 border shadow-xs ${
+          className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 border ${
             isPdf
               ? "bg-rose-50 dark:bg-rose-950/40 text-rose-500 border-rose-200/60 dark:border-rose-800/60"
               : isImage
               ? "bg-purple-50 dark:bg-purple-950/40 text-purple-500 border-purple-200/60 dark:border-purple-800/60"
               : isLearned
               ? "bg-amber-50 dark:bg-amber-950/40 text-amber-500 border-amber-200/60 dark:border-amber-800/60"
-              : "bg-blue-50 dark:bg-blue-950/40 text-blue-500 border-blue-200/60 dark:border-blue-800/60"
+              : "bg-[var(--accent-soft)] text-[var(--accent)] border-[var(--accent)]/30"
           }`}
         >
           {isPdf ? (
@@ -52,23 +52,23 @@ export const SourceItem = ({ source, onToggle, onDelete }) => {
             {source.title}
           </p>
 
-          <div className="flex items-center gap-2 mt-0.5 text-[10px] text-slate-400">
+          <div className="flex items-center gap-2 mt-0.5 text-[10px] text-[var(--text-muted)]">
             {source.status === "ready" && (
-              <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+              <span className="text-[var(--accent)] font-medium">
                 {source.chunkCount} {source.chunkCount === 1 ? "chunk" : "chunks"}
                 {source.pageCount > 0 ? ` · ${source.pageCount} ${source.pageCount === 1 ? "page" : "pages"}` : ""}
               </span>
             )}
             {source.status === "processing" && (
-              <span className="text-blue-500 flex items-center gap-1 font-medium animate-pulse">
+              <span className="text-[var(--accent)] flex items-center gap-1 font-medium animate-pulse">
                 <Loader2 size={10} className="animate-spin" /> Ingesting...
               </span>
             )}
             {source.status === "pending" && (
-              <span className="text-slate-400">Queued</span>
+              <span>Queued</span>
             )}
             {source.status === "failed" && (
-              <span className="text-rose-500 flex items-center gap-1 font-medium" title={source.error || "Failed"}>
+              <span className="text-[var(--danger)] flex items-center gap-1 font-medium" title={source.error || "Failed"}>
                 <AlertCircle size={10} /> Ingestion failed
               </span>
             )}
@@ -88,7 +88,7 @@ export const SourceItem = ({ source, onToggle, onDelete }) => {
             disabled={source.status !== "ready"}
             className="sr-only peer"
           />
-          <div className="w-8 h-4 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-blue-600 disabled:opacity-40"></div>
+          <div className="w-8 h-4 bg-[var(--border)] peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-[var(--accent)] disabled:opacity-40"></div>
         </label>
 
         <button
@@ -98,7 +98,7 @@ export const SourceItem = ({ source, onToggle, onDelete }) => {
               onDelete(source._id);
             }
           }}
-          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
+          className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--danger)] hover:bg-[var(--danger)]/10 transition-colors cursor-pointer"
           title="Delete source"
         >
           <Trash2 size={14} />
@@ -109,3 +109,4 @@ export const SourceItem = ({ source, onToggle, onDelete }) => {
 };
 
 export default SourceItem;
+

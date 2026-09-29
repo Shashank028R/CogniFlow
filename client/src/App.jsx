@@ -8,7 +8,6 @@ import HomePage from "./pages/HomePage";
 import AboutPage from "./pages/AboutPage";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import ProfilePage from "./pages/ProfilePage";
-import ParticleBackground from "./components/ui/ParticleBackground";
 
 function App() {
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -19,44 +18,41 @@ function App() {
     const root = document.documentElement;
     if (isDarkMode) {
       root.classList.add("dark");
+      root.setAttribute("data-theme", "dark");
       localStorage.setItem("theme", "dark");
     } else {
       root.classList.remove("dark");
+      root.setAttribute("data-theme", "light");
       localStorage.setItem("theme", "light");
     }
   }, [isDarkMode]);
 
-  const toggleTheme = () => setIsDarkMode(!isDarkMode);
-
   return (
-    <div className="bg-[var(--bg)] min-h-screen relative overflow-hidden transition-colors duration-500">
-      <ParticleBackground />
-
+    <div className="bg-[var(--bg-app)] min-h-screen text-[var(--text-primary)] transition-colors duration-150">
       <Toaster
-        position="top-right"
+        position="bottom-center"
         toastOptions={{
           className:
-            "rounded-xl px-4 py-3 bg-[var(--bg)] text-[var(--text)] shadow-[6px_6px_12px_var(--shadow-dark),-6px_-6px_12px_var(--shadow-light)] border border-black/5",
-
+            "rounded-[10px] px-4 py-2.5 bg-[#111B21] text-white text-[14px] shadow-[var(--shadow-md)] border border-transparent font-normal",
+          duration: 3500,
           success: {
-            className:
-              "shadow-[6px_6px_12px_var(--shadow-dark),-6px_-6px_12px_var(--shadow-light),0_0_6px_rgba(37,99,235,0.3)]",
             iconTheme: {
-              primary: "#2563eb",
-              secondary: "#eef2f7",
+              primary: "#00A884",
+              secondary: "#FFFFFF",
             },
           },
-
           error: {
+            className:
+              "rounded-[10px] px-4 py-2.5 bg-[#111B21] text-white text-[14px] shadow-[var(--shadow-md)] border-l-[3px] border-l-[#D92D20] font-normal",
             iconTheme: {
-              primary: "#ef4444",
-              secondary: "#eef2f7",
+              primary: "#D92D20",
+              secondary: "#FFFFFF",
             },
           },
         }}
       />
 
-      <div className="relative z-10 min-h-screen">
+      <div className="min-h-screen">
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<AboutPage />} />

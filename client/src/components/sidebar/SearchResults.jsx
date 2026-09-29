@@ -1,17 +1,20 @@
+import React from "react";
 import Avatar from "../ui/Avatar";
 
 const SearchResults = ({ loadingSearch, searchResult, accessChat, onSelectChat }) => {
   if (loadingSearch) {
     return (
-      <p className="text-center text-xs text-slate-500 mt-4 animate-pulse">
+      <div className="p-6 text-center text-[13px] text-[var(--text-secondary)]">
         Searching users...
-      </p>
+      </div>
     );
   }
 
   if (searchResult.length === 0) {
     return (
-      <p className="text-center text-xs text-slate-500 mt-4">No users found.</p>
+      <div className="p-6 text-center text-[13px] text-[var(--text-secondary)]">
+        No users found
+      </div>
     );
   }
 
@@ -24,23 +27,26 @@ const SearchResults = ({ loadingSearch, searchResult, accessChat, onSelectChat }
           onSelectChat(room);
         }
       }}
-      className="flex items-center gap-2.5 p-2 rounded-xl cursor-pointer
-      hover:translate-x-0.5 active:scale-[0.99] transition-all duration-150 ease-out
-      hover:bg-slate-100/70 dark:hover:bg-slate-800/50
-      w-full border border-transparent hover:border-slate-200/60 dark:hover:border-slate-700/50"
+      className="relative flex items-center h-[68px] px-4 cursor-pointer select-none hover:bg-[var(--bg-hover)] transition-colors duration-150"
     >
-      <Avatar
-        size="w-9 h-9"
-        src={user.profilePic}
-        text={user.username.charAt(0).toUpperCase()}
-      />
+      <div className="mr-3 flex-shrink-0">
+        <Avatar
+          size="w-11 h-11"
+          src={user.profilePic}
+          text={user.username?.charAt(0).toUpperCase()}
+        />
+      </div>
 
-      <div className="flex flex-col overflow-hidden">
-        <p className="font-medium text-sm text-[var(--text)] truncate">
+      <div className="flex-1 min-w-0 flex flex-col justify-center">
+        <p className="text-[15px] font-[500] text-[var(--text-primary)] truncate">
           {user.username}
         </p>
-        <p className="text-xs text-slate-500 truncate">{user.bio || "Available"}</p>
+        <p className="text-[13px] text-[var(--text-secondary)] truncate">
+          {user.bio || "Available"}
+        </p>
       </div>
+
+      <div className="absolute bottom-0 right-0 left-[68px] border-b border-[var(--border)]"></div>
     </div>
   ));
 };

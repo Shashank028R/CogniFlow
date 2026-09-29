@@ -168,9 +168,9 @@ const AuthPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-transparent p-4 z-10 relative">
-      <div className="w-full max-w-md">
-        <Card>
+    <div className="min-h-screen flex items-center justify-center bg-[var(--bg-app)] p-4">
+      <div className="w-full max-w-[400px]">
+        <Card className="p-6 sm:p-8">
           <AuthForm
             isLogin={isLogin}
             isVerifying={isVerifying}

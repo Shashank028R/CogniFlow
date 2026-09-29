@@ -1,4 +1,28 @@
+import React from "react";
+import { Check, CheckCheck, HelpCircle } from "lucide-react";
 import Avatar from "../ui/Avatar";
+
+const cleanPreview = (message) => {
+  if (!message) return "No messages yet";
+  if (message.messageType === "quiz" || message.quizData) {
+    const topic = message.quizData?.topic || "Interactive Quiz";
+    return `Quiz: ${topic.replace(/[*#_`]/g, "").trim()}`;
+  }
+  let content = message.content || "";
+  content = content.replace(/[*#_`~>]/g, "").trim();
+  content = content.replace(/\s+/g, " ");
+  return content || (message.fileUrl ? "Document / Attachment" : "No messages yet");
+};
+
+const formatTime = (dateStr) => {
+  if (!dateStr) return "";
+  try {
+    const d = new Date(dateStr);
+    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  } catch {
+    return "";
+  }
+};
 
 const RoomCard = ({
   room,
@@ -6,71 +30,101 @@ const RoomCard = ({
   selectedChat,
   setSelectedChat,
   getUnreadCount,
-  onlineUsers = []
+  onlineUsers = [],
 }) => {
-  const getOtherUser = (members) =>
-    members.find((m) => m._id !== currentUserId);
+  const getOtherUser = (members = []) =>
+    members.find((m) => String(m._id) !== String(currentUserId));
 
   const otherUser = !room.isGroupChat ? getOtherUser(room.members) : null;
   const unreadCount = getUnreadCount ? getUnreadCount(room._id) : 0;
   
   const isOnline = !room.isGroupChat && otherUser && onlineUsers.includes(otherUser._id);
   const isSelected = selectedChat?._id === room._id;
+  const isCogniBot = otherUser && (otherUser.username === "CogniBot" || otherUser.email === "cognibot@system.local");
+
+  const displayName = room.isGroupChat ? room.name : otherUser?.username || "Unknown";
+  const timeString = formatTime(room.lastMessage?.createdAt);
+  const isOutgoing = room.lastMessage && String(room.lastMessage.sender?._id || room.lastMessage.sender) === String(currentUserId);
+  const isSeen = room.lastMessage?.readBy?.length > 0;
+  const isDelivered = room.lastMessage?.deliveredTo?.length > 0;
 
   return (
     <div
       onClick={() => setSelectedChat(room)}
       className={`
-        flex items-center justify-between gap-2.5 p-2 rounded-xl cursor-pointer
-        hover:translate-x-0.5 active:scale-[0.99] transition-all duration-150 ease-out
-        w-full mb-1
-        ${
-          isSelected
-            ? "bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/25 shadow-xs" 
-            : unreadCount > 0
-            ? "bg-slate-50 dark:bg-slate-800/40 border-l-2 border-blue-500 hover:bg-slate-100/80 dark:hover:bg-slate-800/70"
-            : "bg-transparent hover:bg-slate-100/70 dark:hover:bg-slate-800/50 border border-transparent"
-        }
+        relative flex items-center h-[72px] px-4 cursor-pointer select-none
+        transition-colors duration-150 ease-out
+        ${isSelected ? "bg-[var(--bg-selected)]" : "bg-transparent hover:bg-[var(--bg-hover)]"}
       `}
     >
-      <div className="flex items-center gap-2.5 overflow-hidden">
-        <div className="relative flex-shrink-0">
+      {/* Avatar 48px */}
+      <div className="relative flex-shrink-0 mr-4">
+        {isCogniBot ? (
+          <div className="w-12 h-12 rounded-full bg-[var(--bg-hover)] border border-[var(--border)] flex items-center justify-center p-2">
+            <img src="/images/CogniFlow.png" alt="CogniBot" className="w-full h-full object-contain" />
+          </div>
+        ) : (
           <Avatar
-            size="w-9 h-9"
+            size="w-12 h-12"
             src={room.isGroupChat ? (room.profilePic || "/images/RoomChat.png") : otherUser?.profilePic}
-            text={
-              !room.isGroupChat
-                ? otherUser?.username?.charAt(0).toUpperCase()
-                : ""
-            }
+            text={!room.isGroupChat ? displayName.charAt(0).toUpperCase() : ""}
           />
-          {isOnline && (
-            <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full"></div>
+        )}
+        {isOnline && (
+          <div className="absolute bottom-0 right-0 w-3 h-3 bg-[var(--accent)] border-2 border-[var(--bg-panel)] rounded-full"></div>
+        )}
+      </div>
+
+      {/* Info Rows */}
+      <div className="flex-1 min-w-0 flex flex-col justify-center h-full">
+        {/* Row 1: Name + Time */}
+        <div className="flex items-center justify-between mb-1">
+          <div className="flex items-center gap-1.5 min-w-0 pr-2">
+            <span className="text-[16px] font-[500] text-[var(--text-primary)] truncate leading-tight">
+              {displayName}
+            </span>
+            {isCogniBot && (
+              <span className="px-1.5 py-0.5 rounded-[4px] text-[10px] font-semibold bg-[var(--accent-soft)] text-[var(--accent)] uppercase tracking-wide flex-shrink-0">
+                AI
+              </span>
+            )}
+          </div>
+          {timeString && (
+            <span className={`text-[12px] flex-shrink-0 ${unreadCount > 0 ? "text-[var(--accent)] font-medium" : "text-[var(--text-tertiary)]"}`}>
+              {timeString}
+            </span>
           )}
         </div>
 
-        <div className="flex flex-col overflow-hidden">
-          <p className={`truncate text-sm ${isSelected ? "font-semibold text-blue-600 dark:text-blue-400" : unreadCount > 0 ? "font-semibold text-[var(--text)]" : "font-medium text-[var(--text)]"}`}>
-            {room.isGroupChat ? room.name : otherUser?.username}
-          </p>
+        {/* Row 2: Preview + Unread Badge */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1 min-w-0 pr-2 text-[14px] text-[var(--text-secondary)]">
+            {isOutgoing && (
+              <span className="flex-shrink-0">
+                {isSeen ? (
+                  <CheckCheck size={16} strokeWidth={2} className="text-[var(--tick-seen)]" />
+                ) : isDelivered ? (
+                  <CheckCheck size={16} strokeWidth={2} className="text-[var(--tick-sent)]" />
+                ) : (
+                  <Check size={16} strokeWidth={2} className="text-[var(--tick-sent)]" />
+                )}
+              </span>
+            )}
+            <span className="truncate leading-normal">
+              {cleanPreview(room.lastMessage)}
+            </span>
+          </div>
 
-          <p
-            className={`text-xs truncate ${
-              unreadCount > 0
-                ? "text-blue-600 font-medium"
-                : "text-slate-500"
-            }`}
-          >
-            {room.lastMessage?.content || "No messages yet"}
-          </p>
+          {unreadCount > 0 && (
+            <div className="min-w-[20px] h-5 px-1.5 rounded-full bg-[var(--accent)] text-white text-[12px] font-semibold flex items-center justify-center flex-shrink-0">
+              {unreadCount}
+            </div>
+          )}
         </div>
       </div>
 
-      {unreadCount > 0 && (
-        <div className="bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded-full min-w-[20px] text-center font-bold shadow-xs">
-          {unreadCount}
-        </div>
-      )}
+      {/* Inset Divider (start line at x = 80px: avatar 48px + px-4 16px + mr-4 16px) */}
+      <div className="absolute bottom-0 right-0 left-[80px] border-b border-[var(--border)]"></div>
     </div>
   );
 };
