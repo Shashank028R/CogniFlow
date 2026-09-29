@@ -17,13 +17,15 @@ import FallbackActions from "../rag/FallbackActions";
 import LearnModal from "../rag/LearnModal";
 import QuizCard from "../rag/QuizCard";
 import { getBackendUrl, createResilientSocket } from "../../utils/apiConfig";
+import { getAuthToken, getAuthUserId, clearAuthSession } from "../../utils/authStorage";
 
 const EndPoint = getBackendUrl();
 
 const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
   const BackendUrl = getBackendUrl();
-  const currentUserId = localStorage.getItem("userid");
-  const token = localStorage.getItem("token");
+  const [currentUserId] = useState(() => getAuthUserId());
+  const [token] = useState(() => getAuthToken());
+  const selectedChatRef = useRef(selectedChat);
 
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
@@ -67,6 +69,13 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
   } = useKnowledge(selectedChat?._id, socketInstance);
 
   useEffect(() => {
+    selectedChatRef.current = selectedChat;
+    if (socketRef.current?.connected && selectedChat?._id) {
+      socketRef.current.emit("join chat", selectedChat._id);
+    }
+  }, [selectedChat]);
+
+  useEffect(() => {
     const s = createResilientSocket();
     socketRef.current = s;
     setSocketInstance(s);
@@ -74,37 +83,37 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
     s.on("connect", () => {
       console.log("Socket connected");
       s.emit("setup", currentUserId);
-      if (selectedChat) {
-        s.emit("join chat", selectedChat._id);
+      if (selectedChatRef.current?._id) {
+        s.emit("join chat", selectedChatRef.current._id);
       }
     });
 
-    socketRef.current.on("message received", (msg) => {
+    s.on("message received", (msg) => {
       const roomId = msg.room?._id || msg.room;
 
-      if (selectedChat && selectedChat._id === roomId) {
+      if (selectedChatRef.current && String(selectedChatRef.current._id) === String(roomId)) {
         setMessages((prev) => {
-          if (prev.some((m) => m._id === msg._id)) return prev;
+          if (prev.some((m) => String(m._id) === String(msg._id))) return prev;
           return [...prev, msg];
         });
       }
     });
 
-    socketRef.current.on("message edited", (editedMsg) => {
+    s.on("message edited", (editedMsg) => {
       setMessages((prev) => prev.map((m) => (m._id === editedMsg._id ? editedMsg : m)));
     });
 
-    socketRef.current.on("message deleted", (deletedMsg) => {
+    s.on("message deleted", (deletedMsg) => {
       setMessages((prev) => prev.map((m) => (m._id === deletedMsg._id ? deletedMsg : m)));
     });
 
-    socketRef.current.on("chat cleared", (roomId) => {
-      if (selectedChat && selectedChat._id === roomId) {
+    s.on("chat cleared", (roomId) => {
+      if (selectedChatRef.current && String(selectedChatRef.current._id) === String(roomId)) {
         setMessages([]);
       }
     });
 
-    socketRef.current.on("messages delivered", ({ messageIds, userId }) => {
+    s.on("messages delivered", ({ messageIds, userId }) => {
       setMessages((prev) => prev.map((m) => {
         if (messageIds.includes(m._id) && !m.deliveredTo?.includes(userId)) {
           return { ...m, deliveredTo: [...(m.deliveredTo || []), userId] };
@@ -113,7 +122,7 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
       }));
     });
 
-    socketRef.current.on("messages read", ({ messageIds, userId }) => {
+    s.on("messages read", ({ messageIds, userId }) => {
       setMessages((prev) => prev.map((m) => {
         if (messageIds.includes(m._id) && !m.readBy?.includes(userId)) {
           return { ...m, readBy: [...(m.readBy || []), userId] };
@@ -122,11 +131,11 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
       }));
     });
 
-    socketRef.current.on("typing", () => setIsTypingIndicatorVisible(true));
-    socketRef.current.on("stop typing", () => setIsTypingIndicatorVisible(false));
+    s.on("typing", () => setIsTypingIndicatorVisible(true));
+    s.on("stop typing", () => setIsTypingIndicatorVisible(false));
 
-    return () => socketRef.current.disconnect();
-  }, [selectedChat]);
+    return () => socketRef.current?.disconnect();
+  }, [BackendUrl, currentUserId]);
 
   useEffect(() => {
     if (!messages.length || !selectedChat) return;
@@ -156,8 +165,9 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
   }, [messages, selectedChat, currentUserId]);
 
   useEffect(() => {
-    if (!selectedChat) return;
+    if (!selectedChat?._id) return;
 
+    let isMounted = true;
     const fetchMessages = async () => {
       try {
         setLoadingMessages(true);
@@ -169,22 +179,29 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
           },
         );
 
-        setMessages(data);
+        if (isMounted) {
+          setMessages(data);
+        }
       } catch (error) {
         console.log(error);
         if (error.response?.status === 401) {
-          localStorage.clear();
+          clearAuthSession();
           window.location.href = "/";
-        } else {
+        } else if (isMounted) {
           toast.error("Failed to load messages");
         }
       } finally {
-        setLoadingMessages(false);
+        if (isMounted) {
+          setLoadingMessages(false);
+        }
       }
     };
 
     fetchMessages();
-  }, [selectedChat, BackendUrl, token]);
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedChat?._id, BackendUrl, token]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -297,7 +314,10 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
       const textarea = document.getElementById("chat-textarea");
       if (textarea) textarea.style.height = "auto";
 
-      setMessages((prev) => [...prev, data]);
+      setMessages((prev) => {
+        if (prev.some((m) => String(m._id) === String(data._id))) return prev;
+        return [...prev, data];
+      });
       socketRef.current?.emit("new message", data);
     } catch (error) {
       console.log(error);
@@ -874,35 +894,19 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
           </span>
         </button>
 
-        <div className="relative flex-1 rounded-xl border border-slate-200/80 dark:border-slate-700/80 bg-slate-50/70 dark:bg-slate-800/60 focus-within:border-blue-500/70 focus-within:ring-2 focus-within:ring-blue-500/10 transition-all overflow-hidden shadow-xs">
-          <div 
-            className="absolute inset-0 p-2.5 px-3 pointer-events-none whitespace-pre-wrap break-words text-[var(--text)] text-sm"
-            style={{ 
-              fontFamily: "inherit", 
-              fontSize: "inherit", 
-              lineHeight: "inherit",
-              zIndex: 5
-            }}
-          >
-            {!newMessage ? (
-              <span className="text-slate-400">Type a message...</span>
-            ) : (
-              newMessage.split(/(@cogni)/i).map((part, i) => 
-                part.toLowerCase() === '@cogni' ? <span key={i} className="text-blue-500 font-medium">{part}</span> : part
-              )
-            )}
-          </div>
+        <div className="relative flex-1 rounded-xl border border-slate-200/80 dark:border-slate-700/80 bg-slate-50/70 dark:bg-slate-800/60 focus-within:border-blue-500/70 focus-within:ring-2 focus-within:ring-blue-500/10 transition-all overflow-hidden shadow-xs flex items-center">
           <textarea
             id="chat-textarea"
             rows={1}
             value={newMessage}
+            placeholder="Type a message or use @cogni..."
             onChange={(e) => {
               setNewMessage(e.target.value);
-              if (selectedChat) {
-                socketRef.current.emit("typing", selectedChat._id);
+              if (selectedChatRef.current) {
+                socketRef.current?.emit("typing", selectedChatRef.current._id);
                 if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
                 typingTimeoutRef.current = setTimeout(() => {
-                  socketRef.current.emit("stop typing", selectedChat._id);
+                  socketRef.current?.emit("stop typing", selectedChatRef.current._id);
                 }, 3000);
               }
             }}
@@ -919,7 +923,7 @@ const ChatContainer = ({ selectedChat, setSelectedChat, onlineUsers = [] }) => {
               e.target.style.height = "auto";
               e.target.style.height = Math.min(e.target.scrollHeight, 120) + "px";
             }}
-            className="w-full h-full p-2.5 px-3 bg-transparent border-none outline-none resize-none overflow-hidden text-transparent caret-[var(--text)] text-sm relative z-10"
+            className="w-full p-2.5 px-3 bg-transparent border-none outline-none resize-none overflow-y-auto text-[var(--text)] placeholder-slate-400 text-sm leading-relaxed"
             spellCheck="false"
           />
         </div>

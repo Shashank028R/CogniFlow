@@ -6,13 +6,14 @@ import ReactCrop, { centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { Camera, X, Check } from "lucide-react";
 import { getBackendUrl } from "../../utils/apiConfig";
+import { getAuthToken, getAuthUserId } from "../../utils/authStorage";
 
 const GroupSettingsModal = ({ isOpen, onClose, selectedChat, setSelectedChat }) => {
   if (!isOpen || !selectedChat) return null;
 
   const BackendUrl = getBackendUrl();
-  const token = localStorage.getItem("token");
-  const currentUserId = localStorage.getItem("userid");
+  const token = getAuthToken();
+  const currentUserId = getAuthUserId();
 
   const [roomName, setRoomName] = useState(selectedChat.name || "");
   const [profilePic, setProfilePic] = useState(selectedChat.profilePic || "");

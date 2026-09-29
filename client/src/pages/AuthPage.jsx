@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import Card from "../components/ui/Card";
 import AuthForm from "../components/auth/AuthForm";
 import { getBackendUrl } from "../utils/apiConfig";
+import { setAuthSession } from "../utils/authStorage";
 
 export const DEMO_CREDENTIALS = {
   Demo1: {
@@ -75,8 +76,7 @@ const AuthPage = () => {
         password: creds.password,
       });
 
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("userid", data.user.id);
+      setAuthSession(data.token, data.user.id);
 
       toast.success(`Logged in as ${data.user.username}!`, { id: toastId });
       navigate("/dashboard", { replace: true });
@@ -124,8 +124,7 @@ const AuthPage = () => {
       const { data } = await axios.post(url, form);
 
       if (isLogin) {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("userid", data.user.id);
+        setAuthSession(data.token, data.user.id);
 
         toast.success("Login Successful!", { id: toastId });
         navigate("/dashboard", { replace: true });

@@ -1,5 +1,6 @@
 import Message from "../../models/Message.js";
 import Room from "../../models/Room.js";
+import User from "../../models/User.js";
 import { generateAIResponse } from "../../utils/aiClient.js";
 import { answerWithRag } from "../../services/rag/index.js";
 import { generateDocumentQuiz } from "../../services/rag/quizGenerator.js";
@@ -55,10 +56,21 @@ const sendMessage = async (req, res) => {
     res.status(201).json(populatedMessage);
 
     // --- AI & RAG INTEGRATION ---
-    const isDirectAI = !room.isGroupChat && room.members.some((m) => m.toString() === global.cogniBotId);
+    let botId = global.cogniBotId;
+    if (!botId) {
+      const bot = await User.findOne({
+        $or: [{ username: "CogniBot" }, { email: "cognibot@cogniflow.ai" }],
+      });
+      if (bot) {
+        botId = bot._id.toString();
+        global.cogniBotId = botId;
+      }
+    }
+
+    const isDirectAI = !room.isGroupChat && botId && room.members.some((m) => m.toString() === botId.toString());
     const isMentionedAI = Boolean(content && /@cogni\b/i.test(content));
 
-    if ((isDirectAI || isMentionedAI) && req.user._id.toString() !== global.cogniBotId) {
+    if ((isDirectAI || isMentionedAI) && botId && req.user._id.toString() !== botId.toString()) {
       (async () => {
         try {
           let prompt = content || "";
@@ -77,7 +89,7 @@ const sendMessage = async (req, res) => {
             .populate("sender", "username");
 
           const history = recentMessages.reverse().map((msg) => ({
-            role: msg.sender?._id?.toString() === global.cogniBotId ? "model" : "user",
+            role: (msg.sender?._id?.toString() === botId || msg.sender?.toString() === botId) ? "model" : "user",
             content: `[${msg.sender?.username || "User"}]: ${msg.content}`,
           }));
 
@@ -141,9 +153,9 @@ const sendMessage = async (req, res) => {
           }
 
           const aiMessage = await Message.create({
-            sender: global.cogniBotId,
+            sender: botId,
             room: roomId,
-            content: aiResponseText,
+            content: aiResponseText || "I'm here to help! Ask me anything.",
             messageType: "text",
             fileUrl: "",
             filePublicId: "",
@@ -162,7 +174,7 @@ const sendMessage = async (req, res) => {
           room.lastMessage = aiMessage._id;
 
           room.members.forEach((memberId) => {
-            if (memberId.toString() !== global.cogniBotId) {
+            if (memberId.toString() !== botId.toString()) {
               const currentCount = room.unreadCounts.get(memberId.toString()) || 0;
               room.unreadCounts.set(memberId.toString(), currentCount + 1);
             }

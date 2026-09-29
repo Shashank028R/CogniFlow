@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { getBackendUrl } from "../utils/apiConfig";
+import { getAuthToken } from "../utils/authStorage";
 
 const BackendUrl = getBackendUrl();
 
@@ -12,7 +13,7 @@ export const useKnowledge = (roomId, socket) => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
-  const token = localStorage.getItem("token");
+  const token = getAuthToken();
   const authHeaders = {
     headers: { Authorization: `Bearer ${token}` },
   };

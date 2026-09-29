@@ -6,12 +6,13 @@ import ReactCrop, { centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { Camera, X, Check } from "lucide-react";
 import { getBackendUrl } from "../../utils/apiConfig";
+import { getAuthToken } from "../../utils/authStorage";
 
 const RoomModal = ({ isOpen, onClose, rooms, setRooms }) => {
   if (!isOpen) return null;
 
   const BackendUrl = getBackendUrl();
-  const token = localStorage.getItem("token");
+  const token = getAuthToken();
 
   const [roomName, setRoomName] = useState("");
   const [selectedUsers, setSelectedUsers] = useState([]);

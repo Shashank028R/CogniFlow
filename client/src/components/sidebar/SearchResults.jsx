@@ -1,6 +1,6 @@
 import Avatar from "../ui/Avatar";
 
-const SearchResults = ({ loadingSearch, searchResult, accessChat }) => {
+const SearchResults = ({ loadingSearch, searchResult, accessChat, onSelectChat }) => {
   if (loadingSearch) {
     return (
       <p className="text-center text-xs text-slate-500 mt-4 animate-pulse">
@@ -18,7 +18,12 @@ const SearchResults = ({ loadingSearch, searchResult, accessChat }) => {
   return searchResult.map((user) => (
     <div
       key={user._id}
-      onClick={() => accessChat(user._id)}
+      onClick={async () => {
+        const room = await accessChat(user._id);
+        if (room && onSelectChat) {
+          onSelectChat(room);
+        }
+      }}
       className="flex items-center gap-2.5 p-2 rounded-xl cursor-pointer
       transition-colors duration-150 ease-out hover:bg-slate-100/70 dark:hover:bg-slate-800/50
       w-full border border-transparent hover:border-slate-200/60 dark:hover:border-slate-700/50"

@@ -12,6 +12,7 @@ import RoomList from "./RoomList";
 import LogoutButton from "../ui/LogoutButton";
 import RoomModal from "./RoomModal";
 import { getBackendUrl, createResilientSocket } from "../../utils/apiConfig";
+import { getAuthToken, getAuthUserId, clearAuthSession } from "../../utils/authStorage";
 
 const Sidebar = ({ selectedChat, setSelectedChat, onlineUsers, setOnlineUsers }) => {
   const navigate = useNavigate();
@@ -29,8 +30,13 @@ const Sidebar = ({ selectedChat, setSelectedChat, onlineUsers, setOnlineUsers })
 
   const [notifications, setNotifications] = useState([]);
 
-  const currentUserId = localStorage.getItem("userid");
-  const token = localStorage.getItem("token");
+  const currentUserId = getAuthUserId();
+  const token = getAuthToken();
+  const selectedChatRef = useRef(selectedChat);
+
+  useEffect(() => {
+    selectedChatRef.current = selectedChat;
+  }, [selectedChat]);
 
   useEffect(() => {
     socketRef.current = createResilientSocket();
@@ -45,9 +51,9 @@ const Sidebar = ({ selectedChat, setSelectedChat, onlineUsers, setOnlineUsers })
     });
 
     socketRef.current.on("message received", (newMessage) => {
-      const roomId = newMessage.room._id || newMessage.room;
+      const roomId = newMessage.room?._id || newMessage.room;
 
-      if (!selectedChat || selectedChat._id !== roomId) {
+      if (!selectedChatRef.current || String(selectedChatRef.current._id) !== String(roomId)) {
         setNotifications((prev) => {
           if (prev.some((n) => n._id === newMessage._id)) return prev;
           return [newMessage, ...prev];
@@ -55,7 +61,7 @@ const Sidebar = ({ selectedChat, setSelectedChat, onlineUsers, setOnlineUsers })
       }
 
       setRooms((prevRooms) => {
-        const roomIndex = prevRooms.findIndex((r) => r._id === roomId);
+        const roomIndex = prevRooms.findIndex((r) => String(r._id) === String(roomId));
         
         if (roomIndex > -1) {
           const updatedRooms = [...prevRooms];
@@ -65,14 +71,16 @@ const Sidebar = ({ selectedChat, setSelectedChat, onlineUsers, setOnlineUsers })
           updatedRooms.unshift(updatedRoom);
           
           return updatedRooms;
+        } else if (newMessage.room && typeof newMessage.room === "object") {
+          return [{ ...newMessage.room, lastMessage: newMessage }, ...prevRooms];
         }
         
         return prevRooms;
       });
     });
 
-    return () => socketRef.current.disconnect();
-  }, [BackendUrl, selectedChat]);
+    return () => socketRef.current?.disconnect();
+  }, [BackendUrl, currentUserId]);
 
   useEffect(() => {
     const fetchRooms = async () => {
@@ -163,7 +171,7 @@ const Sidebar = ({ selectedChat, setSelectedChat, onlineUsers, setOnlineUsers })
   };
 
   const handleLogout = () => {
-    localStorage.clear();
+    clearAuthSession();
     navigate("/");
   };
 
@@ -191,6 +199,7 @@ const Sidebar = ({ selectedChat, setSelectedChat, onlineUsers, setOnlineUsers })
             loadingSearch={loadingSearch}
             searchResult={searchResult}
             accessChat={accessChat}
+            onSelectChat={handleSelectChat}
           />
         ) : (
           <RoomList

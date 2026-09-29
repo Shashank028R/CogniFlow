@@ -7,11 +7,12 @@ import { ArrowLeft, Save, X, Check } from "lucide-react";
 import ReactCrop, { centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { getBackendUrl } from "../utils/apiConfig";
+import { getAuthToken } from "../utils/authStorage";
 
 const ProfilePage = () => {
   const navigate = useNavigate();
   const BackendUrl = getBackendUrl();
-  const token = localStorage.getItem("token");
+  const token = getAuthToken();
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);

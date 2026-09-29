@@ -3,11 +3,9 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const CANDIDATE_MODELS = [
-  "gemini-3-flash-preview",
-  "gemini-flash-lite-latest",
-  "gemini-3.1-flash-lite-preview",
   "gemini-2.5-flash",
   "gemini-flash-latest",
+  "gemini-2.0-flash",
 ];
 
 export const callGeminiWithFallback = async ({ systemInstruction, contents, generationConfig }) => {
@@ -107,12 +105,7 @@ export const generateAIResponse = async (prompt, history = [], fileUrl = null) =
       return responseText;
     }
 
-    const lines = text.split('\n').filter(line => line.trim().length > 0 && !line.trim().startsWith('*'));
-    if (lines.length > 0) {
-      return lines[lines.length - 1].replace(/^`+|`+$/g, '').replace(/<response>/i, '').trim();
-    }
-    
-    return text.replace(/^`+|`+$/g, '').replace(/<response>/i, '').trim();
+    return text.replace(/<\/?response>/gi, '').trim();
   } catch (error) {
     console.error("AI Error:", error);
     return "I'm sorry, I encountered an error while trying to process your request.";
